@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">BeChef</string>
+    <string name="title_activity_youtube_list">發現</string>
+    <string name="title_discover">發現</string>
+    <string name="title_bookmark">收藏</string>
+    <string name="title_receipt">食譜</string>
+    <string name="title_today">今日</string>
+    <string name="title_profile">我的</string>
+    <string name="signInGoogle">使用 Google 登入</string>
+</resources>

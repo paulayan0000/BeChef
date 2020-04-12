@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_discover"
+        android:icon="@drawable/ic_dashboard_black_24dp"
+        android:title="@string/title_discover" />
+
+    <item
+        android:id="@+id/navigation_bookmark"
+        android:icon="@drawable/ic_bookmark_border_black_24dp"
+        android:title="@string/title_bookmark" />
+
+    <item
+        android:id="@+id/navigation_receipt"
+        android:icon="@drawable/ic_receipt_black_24dp"
+        android:title="@string/title_receipt" />
+
+    <item
+        android:id="@+id/navigation_today"
+        android:icon="@drawable/ic_wb_sunny_black_24dp"
+        android:title="@string/title_today" />
+
+    <item
+        android:id="@+id/navigation_profile"
+        android:icon="@drawable/ic_person_outline_black_24dp"
+        android:title="@string/title_profile" />
+
+</menu>
