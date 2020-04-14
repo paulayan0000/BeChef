@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.paula.android.bechef.user.UserManager;
+
 public class BaseActivity extends AppCompatActivity {
 
     protected Context mContext;
@@ -35,5 +37,10 @@ public class BaseActivity extends AppCompatActivity {
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS); // 跟系統表示要渲染 system bar 背景。
             window.setStatusBarColor(Color.TRANSPARENT);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }

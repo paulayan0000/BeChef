@@ -96,6 +96,7 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/javac" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/jniLibs" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/linked_res_for_bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/lint_jar" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/merged_assets" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/merged_manifests" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/module_bundle" />
@@ -122,7 +123,6 @@
     <orderEntry type="library" scope="TEST" name="Gradle: com.squareup:javawriter:2.1.1@jar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.collection:collection:1.1.0@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-auth-18.0.0" level="project" />
-    <orderEntry type="library" name="Gradle: __local_aars__:/Users/paula/BeChef/libs/YouTubeAndroidPlayerApi.jar:unspecified@jar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.annotation:annotation-experimental-1.0.0" level="project" />
     <orderEntry type="library" name="Gradle: androidx.appcompat:appcompat-1.2.0-beta01" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: javax.inject:javax.inject:1@jar" level="project" />
@@ -139,6 +139,7 @@
     <orderEntry type="library" name="Gradle: androidx.drawerlayout:drawerlayout-1.0.0" level="project" />
     <orderEntry type="library" name="Gradle: androidx.lifecycle:lifecycle-livedata-core-2.0.0" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.material:material-1.2.0-alpha05" level="project" />
+    <orderEntry type="library" name="Gradle: __local_aars__:/Users/paula/BeChef/BeChef/libs/YouTubeAndroidPlayerApi.jar:unspecified@jar" level="project" />
     <orderEntry type="library" name="Gradle: androidx.versionedparcelable:versionedparcelable-1.1.0" level="project" />
     <orderEntry type="library" name="Gradle: androidx.fragment:fragment-1.1.0" level="project" />
     <orderEntry type="library" name="Gradle: androidx.transition:transition-1.2.0" level="project" />

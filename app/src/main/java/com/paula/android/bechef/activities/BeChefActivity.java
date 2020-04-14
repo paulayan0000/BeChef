@@ -42,6 +42,12 @@ public class BeChefActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
     private void init() {
         setContentView(R.layout.activity_bechef);
 

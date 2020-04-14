@@ -30,7 +30,7 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 Intent signInIntent = UserManager.getInstance().getGoogleSignInClient(mContext);
-                startActivityForResult(signInIntent, Constants.LOGIN_SUCCESS);
+                startActivityForResult(signInIntent, Constants.SIGN_IN_REQUSET_CODE);
             }
         });
     }
@@ -44,7 +44,7 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Constants.LOGIN_SUCCESS) {
+        if (requestCode == Constants.SIGN_IN_REQUSET_CODE) {
             updateUI(UserManager.getInstance().checkSignedInAccountFromIntent(data, mContext));
         }
     }
@@ -64,9 +64,9 @@ public class LoginActivity extends BaseActivity {
     private void updateUI(GoogleSignInAccount account) {
         if (account != null) {
             mSignInButtonGoogle.setVisibility(View.GONE);
-            Toast.makeText(this, account.getEmail() + " 登入中", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, account.getDisplayName() + " 登入中...", Toast.LENGTH_SHORT).show();
             setResult(Constants.LOGIN_SUCCESS);
-            startActivity(new Intent(mContext, BeChefActivity.class));
+            finish();
         } else {
             mSignInButtonGoogle.setVisibility(View.VISIBLE);
         }

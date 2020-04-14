@@ -26,6 +26,7 @@ public class UserManager {
     }
 
     public Intent getGoogleSignInClient(Context context) {
+        Log.d(LOG_TAG, "get google sign-in client");
         GoogleSignInOptions gso = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -34,12 +35,14 @@ public class UserManager {
     }
 
     public GoogleSignInAccount checkLastSignedInAccount(Context context) {
+        Log.d(LOG_TAG, "check last signed-in account");
         if (mGoogleSignInAccount == null) mGoogleSignInAccount = GoogleSignIn.getLastSignedInAccount(context);
         logUserInfo((Activity) context);
         return mGoogleSignInAccount;
     }
 
     public GoogleSignInAccount checkSignedInAccountFromIntent(Intent data, Context context) {
+        Log.d(LOG_TAG,"check sign-in account from intent");
         if (mGoogleSignInAccount == null) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
@@ -69,6 +72,7 @@ public class UserManager {
 
     public void clearGoogleSignInAccount() {
         mGoogleSignInAccount = null;
+        Log.d(LOG_TAG, "Clear mGoogleSignInAccount!");
     }
 
     public boolean isLoginStatus() {
