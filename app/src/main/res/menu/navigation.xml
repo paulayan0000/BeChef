@@ -20,10 +20,4 @@
         android:id="@+id/navigation_today"
         android:icon="@drawable/ic_wb_sunny_black_24dp"
         android:title="@string/title_today" />
-
-    <item
-        android:id="@+id/navigation_profile"
-        android:icon="@drawable/ic_person_outline_black_24dp"
-        android:title="@string/title_profile" />
-
 </menu>

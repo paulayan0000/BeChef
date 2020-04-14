@@ -7,17 +7,24 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.paula.android.bechef.BeChefContract;
+import com.paula.android.bechef.BeChefPresenter;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.user.UserManager;
 import com.paula.android.bechef.utils.Constants;
 
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
-public class BeChefActivity extends BaseActivity {
+import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
+
+public class BeChefActivity extends BaseActivity implements BeChefContract.View {
 
     private static final String LOG_TAG = BeChefActivity.class.getSimpleName();
+
+    private BeChefContract.Presenter mPresenter;
     private TextView mToolbarTitle;
 
     @Override
@@ -53,6 +60,10 @@ public class BeChefActivity extends BaseActivity {
 
         mToolbarTitle = findViewById(R.id.textview_toolbar_title);
         setToolbar();
+
+        mPresenter = new BeChefPresenter(this, getSupportFragmentManager());
+        mPresenter.start();
+
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
@@ -65,7 +76,7 @@ public class BeChefActivity extends BaseActivity {
     private void setToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setPadding(16, 16 + getStatusBarHeight(), 16, 16);
-        mToolbarTitle.setText(getResources().getString(R.string.title_discover));
+        setToolbarTitle(getResources().getString(R.string.title_discover));
     }
 
     public int getStatusBarHeight() {
@@ -78,29 +89,57 @@ public class BeChefActivity extends BaseActivity {
     }
 
 
+
+    @Override
+    public void showDiscoverUi() {
+        setToolbarTitle(getResources().getString(R.string.title_discover));
+    }
+
+    @Override
+    public void showBookmarkUi() {
+        setToolbarTitle(getResources().getString(R.string.title_bookmark));
+    }
+
+    @Override
+    public void showReceiptUi() {
+        setToolbarTitle(getResources().getString(R.string.title_receipt));
+    }
+
+    @Override
+    public void showTodayUi() {
+        setToolbarTitle(getResources().getString(R.string.title_today));
+    }
+
+    @Override
+    public void setPresenter(BeChefContract.Presenter presenter) {
+        mPresenter = checkNotNull(presenter);
+    }
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_discover:
-                    mToolbarTitle.setText(R.string.title_discover);
+                    mPresenter.transToDiscover();
                     return true;
                 case R.id.navigation_bookmark:
-                    mToolbarTitle.setText(R.string.title_bookmark);
+                    mPresenter.transToBookmark();
                     return true;
                 case R.id.navigation_receipt:
-                    mToolbarTitle.setText(R.string.title_receipt);
+                    mPresenter.transToReceipt();
                     return true;
                 case R.id.navigation_today:
-                    mToolbarTitle.setText(R.string.title_today);
+                    mPresenter.transToToday();
                     return true;
-                case R.id.navigation_profile:
-                    mToolbarTitle.setText(R.string.title_profile);
-                    return true;
+                default:
             }
             return false;
         }
     };
+
+    private void setToolbarTitle(String title) {
+        mToolbarTitle.setText(title);
+    }
 
 }
