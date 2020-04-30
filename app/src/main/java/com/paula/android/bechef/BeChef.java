@@ -7,8 +7,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.util.LruCache;
 
-import com.paula.android.bechef.user.UserManager;
-
 public class BeChef extends Application {
 
     private static LruCache mLruCache;

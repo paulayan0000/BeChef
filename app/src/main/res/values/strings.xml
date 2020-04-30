@@ -5,7 +5,11 @@
     <string name="title_bookmark">收藏</string>
     <string name="title_receipt">食譜</string>
     <string name="title_today">今日</string>
-    <string name="title_profile">我的</string>
+    <string name="title_menu_list">菜單列表</string>
+    <string name="title_buy_list">採買列表</string>
     <string name="signInGoogle">使用 Google 登入</string>
+    <string name="channel_one">頻道1</string>
+    <string name="channel_two">頻道2</string>
+    <string name="channel_three">頻道3</string>
 
 </resources>
