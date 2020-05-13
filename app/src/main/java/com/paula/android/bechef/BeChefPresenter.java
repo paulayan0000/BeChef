@@ -2,6 +2,7 @@ package com.paula.android.bechef;
 
 import android.net.Uri;
 import android.util.Log;
+
 import java.util.ArrayList;
 import androidx.fragment.app.FragmentManager;
 
@@ -11,6 +12,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
 
     private static final String LOG_TAG = BeChefPresenter.class.getSimpleName();
     private final BeChefContract.View mMainView;
+
     private ArrayList<String> mTabtitles = new ArrayList<>();
     private ArrayList<String> mRecyclerViewContents = new ArrayList<>();
 
@@ -34,6 +36,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         mRecyclerViewContents.add("discover content 4");
         mRecyclerViewContents.add("discover content 5");
         mRecyclerViewContents.add("discover content 6");
+
         mMainView.showDiscoverUi(mTabtitles, mRecyclerViewContents);
     }
 
@@ -96,7 +99,6 @@ public class BeChefPresenter implements BeChefContract.Presenter {
 
         mMainView.showBuyListUi(mTabtitles, mRecyclerViewContents);
     }
-
 
     @Override
     public void start() {
