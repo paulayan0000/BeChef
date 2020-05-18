@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.appbar.AppBarLayout;
@@ -97,10 +95,8 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     }
 
     private void setToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        CoordinatorLayout coordinatorLayout = findViewById(R.id.container);
-        coordinatorLayout.setPadding(0, getStatusBarHeight(), 0, 0);
-//        toolbar.setPadding(16, 16 + getStatusBarHeight(), 16, 16);
+        TextView statusbarTextView = findViewById(R.id.textview_statusbar);
+        statusbarTextView.setHeight(getStatusBarHeight());
         setToolbarTitle(getResources().getString(R.string.title_discover));
     }
 
@@ -163,9 +159,6 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            // Set tablayout and recyclerview initially
-//            TabLayout.Tab firstTab = mTabLayout.getTabAt(0);
-//            if (firstTab != null) firstTab.select();
 
             // Show toolbar in AppBarLayout
             AppBarLayout appBarLayout = findViewById(R.id.appbar);
