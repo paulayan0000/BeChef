@@ -3,8 +3,18 @@ package com.paula.android.bechef;
 import android.net.Uri;
 import android.util.Log;
 
+import com.paula.android.bechef.api.GetChannelIdTask;
+import com.paula.android.bechef.api.beans.GetSearchList;
+import com.paula.android.bechef.api.callbacks.GetChannelIdCallback;
+import com.paula.android.bechef.objects.SearchItem;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
@@ -14,7 +24,10 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     private final BeChefContract.View mMainView;
 
     private ArrayList<String> mTabtitles = new ArrayList<>();
-    private ArrayList<String> mRecyclerViewContents = new ArrayList<>();
+    private GetSearchList mDiscoverItems = new GetSearchList();
+    private boolean mLoading = false;
+    private String mNextPagingId = "";
+    private int mlastVisibleItemPosition;
 
     public BeChefPresenter(BeChefContract.View mainView, FragmentManager fragmentManager) {
         mMainView = checkNotNull(mainView, "mainView cannot be null!");
@@ -24,46 +37,65 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     @Override
     public void transToDiscover() {
         mTabtitles.clear();
-        mTabtitles.add("discover one");
-        mTabtitles.add("discover two");
-        mTabtitles.add("discover three");
-        mTabtitles.add("discover four");
+        mTabtitles.add("Wecook123 料理123");
+        mTabtitles.add("MASAの料理ABC"); //UCr90FXGOO8nAE9B6FAUeTNA
+        mTabtitles.add("iCook 愛料理"); //UCReIdTavsve16EJlilnTPNg
+        mTabtitles.add("楊桃美食網"); //UCctVKh07hVAyQtqpl75pxYA
+        mTabtitles.add("乾杯與小菜的日常"); //UCOJDuGX9SqzPkureXZfS60w
 
-        mRecyclerViewContents.clear();
-        mRecyclerViewContents.add("discover content 1");
-        mRecyclerViewContents.add("discover content 2");
-        mRecyclerViewContents.add("discover content 3");
-        mRecyclerViewContents.add("discover content 4");
-        mRecyclerViewContents.add("discover content 5");
-        mRecyclerViewContents.add("discover content 6");
+        mMainView.showDiscoverUi(mTabtitles, mDiscoverItems);
 
-        mMainView.showDiscoverUi(mTabtitles, mRecyclerViewContents);
+        // TODO: Use String constants and objects, modify onCompleted function
+        Map<String, String> queryParameters = new HashMap<>();
+
+//        queryParameters.put("q", "wecook123");
+//        queryParameters.put("type", "channel");
+
+        queryParameters.put("pageToken", "");
+        queryParameters.put("channelId", "UCQGVzUNv0UTn-t0Xzd06E4Q");
+
+        loadDiscoverItems(queryParameters);
+    }
+
+    private void loadDiscoverItems(Map<String, String> queryParameters) {
+        if (!mLoading) {
+            mLoading = true;
+            Log.d(LOG_TAG, "Loading...");
+            queryParameters.put("part", "snippet");
+            queryParameters.put("maxResults", "10");
+
+            new GetChannelIdTask(queryParameters, new GetChannelIdCallback() {
+                @Override
+                public void onCompleted(GetSearchList bean) {
+                    Log.d(LOG_TAG, "size: " + bean.getSearchItems().size());
+                    mMainView.updateSearchItems(bean);
+                    mNextPagingId = bean.getNextPageToken();
+                    mLoading = false;
+                    Log.d(LOG_TAG, "loading done: " + mNextPagingId);
+                }
+
+                @Override
+                public void onError(String errorMessage) {
+                    Log.d(LOG_TAG, "Error: " + errorMessage);
+                    mLoading = false;
+                }
+            }).execute();
+        }
     }
 
     @Override
     public void transToBookmark() {
         mTabtitles.clear();
         mTabtitles.add("bookmark one");
-        mTabtitles.add("bookmark two");
 
-        mRecyclerViewContents.clear();
-        mRecyclerViewContents.add("bookmark content 1");
-        mRecyclerViewContents.add("bookmark content 2");
-        mRecyclerViewContents.add("bookmark content 3");
-
-        mMainView.showBookmarkUi(mTabtitles, mRecyclerViewContents);
+        mMainView.showBookmarkUi(mTabtitles, new ArrayList<String>());
     }
 
     @Override
     public void transToReceipt() {
         mTabtitles.clear();
-        mTabtitles.add("Receipt one");
-        mTabtitles.add("Receipt two");
-        mTabtitles.add("Receipt three");
-
-        mRecyclerViewContents.clear();
-
-        mMainView.showReceiptUi(mTabtitles, mRecyclerViewContents);
+        mTabtitles.add("receipt one");
+        mMainView.showReceiptUi(mTabtitles, new ArrayList<String>());
     }
 
     @Override
@@ -80,24 +112,34 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     @Override
     public void transToMenuList() {
         mTabtitles.clear();
-        mTabtitles.add("Menu one");
-        mTabtitles.add("Menu two");
-
-        mRecyclerViewContents.clear();
-
-        mMainView.showMenuListUi(mTabtitles, mRecyclerViewContents);
+        mTabtitles.add("menu one");
+        mMainView.showMenuListUi(mTabtitles, new ArrayList<String>());
     }
 
     @Override
     public void transToBuyList() {
         mTabtitles.clear();
-        mTabtitles.add("Buy one");
-        mTabtitles.add("Buy two");
-        mTabtitles.add("Buy three");
+        mTabtitles.add("buylist one");
+        mMainView.showBuyListUi(mTabtitles, new ArrayList<String>());
+    }
 
-        mRecyclerViewContents.clear();
+    @Override
+    public void onScrollStateChanged(int visibleItemCount, int totalItemCount, int newState) {
+        if (newState == RecyclerView.SCROLL_STATE_IDLE && visibleItemCount > 0) {
 
-        mMainView.showBuyListUi(mTabtitles, mRecyclerViewContents);
+            if (!mLoading && mlastVisibleItemPosition == totalItemCount - 1 && !"".equals(mNextPagingId)) {
+                Map<String, String> queryParameters = new HashMap<>();
+                queryParameters.put("pageToken", mNextPagingId);
+                queryParameters.put("channelId", "UCQGVzUNv0UTn-t0Xzd06E4Q");
+
+                loadDiscoverItems(queryParameters);
+            }
+        }
+    }
+
+    @Override
+    public void onScrolled(RecyclerView.LayoutManager layoutManager) {
+        mlastVisibleItemPosition = ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
     }
 
     @Override

@@ -14,6 +14,7 @@ import com.paula.android.bechef.BeChefContract;
 import com.paula.android.bechef.BeChefPresenter;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.adapters.MainAdapter;
+import com.paula.android.bechef.api.beans.GetSearchList;
 import com.paula.android.bechef.user.UserManager;
 import com.paula.android.bechef.utils.Constants;
 
@@ -36,7 +37,9 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     private MainAdapter mMainAdapter;
 
     private ArrayList<String> mTabTitles = new ArrayList<>();
-    private ArrayList<String> mRecyclerViewContents = new ArrayList<>();
+    private GetSearchList mMainContents = new GetSearchList();
+
+    private int mCurrentPagerId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,14 +72,17 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     private void init() {
         setContentView(R.layout.activity_bechef);
 
+        mPresenter = new BeChefPresenter(this, getSupportFragmentManager());
+
         mToolbarTitle = findViewById(R.id.textview_toolbar_title);
         setToolbar();
+
 
         mTabLayout = findViewById(R.id.tabLayout);
         new TabLayoutMediator(mTabLayout, getViewPager(), true, mTabConfigurationStrategy).attach();
 
-        mPresenter = new BeChefPresenter(this, getSupportFragmentManager());
         mPresenter.start();
+
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -84,7 +90,7 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
 
     private ViewPager2 getViewPager() {
         ViewPager2 viewPager = findViewById(R.id.viewpager_main_container);
-        mMainAdapter = new MainAdapter(mTabTitles, mRecyclerViewContents);
+        mMainAdapter = new MainAdapter(mTabTitles, mMainContents, mPresenter);
         viewPager.setAdapter(mMainAdapter);
         viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         return viewPager;
@@ -117,37 +123,49 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     };
 
     @Override
-    public void showDiscoverUi(ArrayList<String> tabTitles, ArrayList<String> contents) {
+    public void showDiscoverUi(ArrayList<String> tabTitles, GetSearchList contents) {
         setToolbarTitle(getResources().getString(R.string.title_discover));
         mMainAdapter.updateData(tabTitles, contents);
+        setInfoBarVisibility(false);
     }
-
 
     @Override
     public void showBookmarkUi(ArrayList<String> tabTitles, ArrayList<String> contents) {
         setToolbarTitle(getResources().getString(R.string.title_bookmark));
-        mMainAdapter.updateData(tabTitles, contents);
+        mMainAdapter.updateData(tabTitles, new GetSearchList());
+        setInfoBarVisibility(true);
     }
 
     @Override
     public void showReceiptUi(ArrayList<String> tabTitles, ArrayList<String> contents) {
         setToolbarTitle(getResources().getString(R.string.title_receipt));
-        mMainAdapter.updateData(tabTitles, contents);
+        mMainAdapter.updateData(tabTitles, new GetSearchList());
+        setInfoBarVisibility(true);
     }
 
     @Override
     public void showTodayUi() {
         setToolbarTitle(getResources().getString(R.string.title_menu_list));
+        setInfoBarVisibility(true);
     }
 
     @Override
     public void showMenuListUi(ArrayList<String> tabTitles, ArrayList<String> contents) {
-        mMainAdapter.updateData(tabTitles, contents);
+        mMainAdapter.updateData(tabTitles, new GetSearchList());
     }
 
     @Override
     public void showBuyListUi(ArrayList<String> tabTitles, ArrayList<String> contents) {
-        mMainAdapter.updateData(tabTitles, contents);
+        mMainAdapter.updateData(tabTitles, new GetSearchList());
+    }
+
+    private void setInfoBarVisibility(boolean visibility) {
+        findViewById(R.id.constraintlayout_info).setVisibility(visibility ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void updateSearchItems(GetSearchList searchItems) {
+        mMainAdapter.updateData(null, searchItems);
     }
 
     @Override
@@ -163,22 +181,29 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
             // Show toolbar in AppBarLayout
             AppBarLayout appBarLayout = findViewById(R.id.appbar);
             appBarLayout.setExpanded(true, true);
-            switch (item.getItemId()) {
-                case R.id.navigation_discover:
-                    mPresenter.transToDiscover();
-                    return true;
-                case R.id.navigation_bookmark:
-                    mPresenter.transToBookmark();
-                    return true;
-                case R.id.navigation_receipt:
-                    mPresenter.transToReceipt();
-                    return true;
-                case R.id.navigation_today:
-                    mPresenter.transToToday();
-                    return true;
-                default:
+
+            if (mCurrentPagerId != item.getItemId()) {
+                switch (item.getItemId()) {
+                    case R.id.navigation_discover:
+                        mPresenter.transToDiscover();
+                        break;
+                    case R.id.navigation_bookmark:
+                        mPresenter.transToBookmark();
+                        break;
+                    case R.id.navigation_receipt:
+                        mPresenter.transToReceipt();
+                        break;
+                    case R.id.navigation_today:
+                        mPresenter.transToToday();
+                        break;
+                    default:
+                        return false;
+                }
+                mCurrentPagerId = item.getItemId();
+                return true;
             }
             return false;
+
         }
     };
 
@@ -205,6 +230,8 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
                 }
             });
         } else {
+            mToolbarTitle.setTextColor(getResources().getColor(R.color.white));
+            toolbarTitleAnother.setTextColor(getResources().getColor(R.color.colorPrimaryLight));
             mToolbarTitle.setOnClickListener(null);
             toolbarTitleAnother.setOnClickListener(null);
             toolbarTitleAnother.setVisibility(View.GONE);

@@ -47,7 +47,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="24dp"
                     android:text="發現"
                     android:textColor="@color/white"
                     android:textSize="@dimen/title_text_size" />
@@ -131,8 +131,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:background="@color/colorPrimaryLight"/>
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
