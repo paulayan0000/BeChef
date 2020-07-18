@@ -5,15 +5,11 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-
-import com.paula.android.bechef.R;
-import com.paula.android.bechef.user.UserManager;
 
 public class BaseActivity extends AppCompatActivity {
 

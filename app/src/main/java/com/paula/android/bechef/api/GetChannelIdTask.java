@@ -2,11 +2,8 @@ package com.paula.android.bechef.api;
 
 import android.os.AsyncTask;
 import android.util.Log;
-
 import com.paula.android.bechef.api.beans.GetSearchList;
 import com.paula.android.bechef.api.callbacks.GetChannelIdCallback;
-
-import java.util.ArrayList;
 import java.util.Map;
 
 public class GetChannelIdTask extends AsyncTask<Void, Void, GetSearchList> {

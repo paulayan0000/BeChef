@@ -1,8 +1,6 @@
 package com.paula.android.bechef.api.beans;
 
 import com.paula.android.bechef.objects.SearchItem;
-import com.paula.android.bechef.utils.Constants;
-
 import java.util.ArrayList;
 
 public class GetSearchList {

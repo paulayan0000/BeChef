@@ -8,9 +8,9 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.Map;
 
-public class BeChefApiHelper {
+class BeChefApiHelper {
 
-    public static GetSearchList GetVideoListInChannel(Map<String, String> queryParameters) throws IOException, JSONException, YoutubeException {
+    static GetSearchList GetVideoListInChannel(Map<String, String> queryParameters) throws IOException, JSONException, YoutubeException {
 
         return BeChefParser.parseGetSearchList(new BeChefClient().get("search", queryParameters));
     }

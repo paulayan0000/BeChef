@@ -45,13 +45,13 @@
             app:layout_constraintTop_toTopOf="@id/textview_video_title"
             app:layout_constraintBottom_toBottomOf="@id/textview_video_time"
             app:layout_constraintEnd_toEndOf="@id/imageview_thumbnail"
-            android:background="@drawable/ic_bookmark_border_black_24dp"/>
+            android:background="@drawable/ic_bookmark"/>
 
         <ImageView
             android:id="@+id/imageview_thumbnail"
             android:layout_width="match_parent"
             android:layout_height="230dp"
-            android:scaleType="centerCrop"
+            android:background="@color/black"
             app:layout_constraintStart_toStartOf="@id/textview_video_description"
             app:layout_constraintEnd_toEndOf="@id/textview_video_description"
             app:layout_constraintTop_toBottomOf="@id/textview_video_time"/>
@@ -59,7 +59,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_play_circle_filled_black_24dp"
+            android:src="@drawable/ic_play_circle_filled"
             app:layout_constraintStart_toStartOf="@id/imageview_thumbnail"
             app:layout_constraintEnd_toEndOf="@id/imageview_thumbnail"
             app:layout_constraintTop_toTopOf="@id/imageview_thumbnail"

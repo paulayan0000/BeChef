@@ -1,20 +1,19 @@
 package com.paula.android.bechef;
 
 import android.net.Uri;
-import android.util.Log;
+import com.paula.android.bechef.bookmark.BookmarkFragment;
+import com.paula.android.bechef.bookmark.BookmarkPresenter;
+import com.paula.android.bechef.discover.DiscoverFragment;
+import com.paula.android.bechef.discover.DiscoverPresenter;
+import com.paula.android.bechef.receipt.ReceiptFragment;
+import com.paula.android.bechef.receipt.ReceiptPresenter;
 
-import com.paula.android.bechef.api.GetChannelIdTask;
-import com.paula.android.bechef.api.beans.GetSearchList;
-import com.paula.android.bechef.api.callbacks.GetChannelIdCallback;
-import com.paula.android.bechef.objects.SearchItem;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
+import androidx.annotation.StringDef;
 import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.FragmentTransaction;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
@@ -22,124 +21,128 @@ public class BeChefPresenter implements BeChefContract.Presenter {
 
     private static final String LOG_TAG = BeChefPresenter.class.getSimpleName();
     private final BeChefContract.View mMainView;
+    private FragmentManager mFragmentManager;
 
-    private ArrayList<String> mTabtitles = new ArrayList<>();
-    private GetSearchList mDiscoverItems = new GetSearchList();
-    private boolean mLoading = false;
-    private String mNextPagingId = "";
-    private int mlastVisibleItemPosition;
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            DISCOVER, BOOKMARK, RECEIPT, TODAY, DETAIL
+    })
+    @interface FragmentType {}
+    static final String DISCOVER = "DISCOVER";
+    static final String BOOKMARK = "BOOKMARK";
+    static final String RECEIPT  = "RECEIPT";
+    static final String TODAY    = "TODAY";
+    static final String DETAIL   = "DETAIL";
+
+    private DiscoverFragment mDiscoverFragment;
+    private BookmarkFragment mBookmarkFragment;
+    private ReceiptFragment mReceiptFragment;
+//    private TodayFragment mTodayFragment;
+
+    private DiscoverPresenter mDiscoverPresenter;
+    private BookmarkPresenter mBookmarkPresenter;
+    private ReceiptPresenter mReceiptPresenter;
+//    private TodayPresenter mTodayPresenter;
 
     public BeChefPresenter(BeChefContract.View mainView, FragmentManager fragmentManager) {
         mMainView = checkNotNull(mainView, "mainView cannot be null!");
         mMainView.setPresenter(this);
+        mFragmentManager = fragmentManager;
     }
 
+    @FragmentType
     @Override
     public void transToDiscover() {
-        mTabtitles.clear();
-        mTabtitles.add("Wecook123 料理123");
-        mTabtitles.add("MASAの料理ABC"); //UCr90FXGOO8nAE9B6FAUeTNA
-        mTabtitles.add("iCook 愛料理"); //UCReIdTavsve16EJlilnTPNg
-        mTabtitles.add("楊桃美食網"); //UCctVKh07hVAyQtqpl75pxYA
-        mTabtitles.add("乾杯與小菜的日常"); //UCOJDuGX9SqzPkureXZfS60w
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-        mMainView.showDiscoverUi(mTabtitles, mDiscoverItems);
-
-        // TODO: Use String constants and objects, modify onCompleted function
-        Map<String, String> queryParameters = new HashMap<>();
-
-//        queryParameters.put("q", "wecook123");
-//        queryParameters.put("type", "channel");
-
-        queryParameters.put("pageToken", "");
-        queryParameters.put("channelId", "UCQGVzUNv0UTn-t0Xzd06E4Q");
-
-        loadDiscoverItems(queryParameters);
-    }
-
-    private void loadDiscoverItems(Map<String, String> queryParameters) {
-        if (!mLoading) {
-            mLoading = true;
-            Log.d(LOG_TAG, "Loading...");
-            queryParameters.put("part", "snippet");
-            queryParameters.put("maxResults", "10");
-
-            new GetChannelIdTask(queryParameters, new GetChannelIdCallback() {
-                @Override
-                public void onCompleted(GetSearchList bean) {
-                    Log.d(LOG_TAG, "size: " + bean.getSearchItems().size());
-                    mMainView.updateSearchItems(bean);
-                    mNextPagingId = bean.getNextPageToken();
-                    mLoading = false;
-                    Log.d(LOG_TAG, "loading done: " + mNextPagingId);
-                }
-
-                @Override
-                public void onError(String errorMessage) {
-                    Log.d(LOG_TAG, "Error: " + errorMessage);
-                    mLoading = false;
-                }
-            }).execute();
+        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
+        if (mDiscoverFragment == null) mDiscoverFragment = DiscoverFragment.newInstance();
+        if (mBookmarkFragment != null) transaction.hide(mBookmarkFragment);
+        if (mReceiptFragment != null) transaction.hide(mReceiptFragment);
+//        if (mTodayFragment != null) transaction.hide(mTodayFragment);
+        if (!mDiscoverFragment.isAdded()) {
+            transaction.add(R.id.linearlayout_main_container, mDiscoverFragment, DISCOVER);
+        } else {
+            transaction.show(mDiscoverFragment);
         }
+        transaction.commit();
+
+        if (mDiscoverPresenter == null) {
+            mDiscoverPresenter = new DiscoverPresenter(mDiscoverFragment);
+        }
+
+        mMainView.showDiscoverUi();
     }
 
+    @FragmentType
     @Override
     public void transToBookmark() {
-        mTabtitles.clear();
-        mTabtitles.add("bookmark one");
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-        mMainView.showBookmarkUi(mTabtitles, new ArrayList<String>());
+        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
+        if (mBookmarkFragment == null) mBookmarkFragment = BookmarkFragment.newInstance();
+        if (mDiscoverFragment != null) transaction.hide(mDiscoverFragment);
+        if (mReceiptFragment != null) transaction.hide(mReceiptFragment);
+//        if (mTodayFragment != null) transaction.hide(mTodayFragment);
+        if (!mBookmarkFragment.isAdded()) {
+            transaction.add(R.id.linearlayout_main_container, mBookmarkFragment, BOOKMARK);
+        } else {
+            transaction.show(mBookmarkFragment);
+        }
+        transaction.commit();
+
+        if (mBookmarkPresenter == null) {
+            mBookmarkPresenter = new BookmarkPresenter(mBookmarkFragment);
+        }
+
+        mMainView.showBookmarkUi();
     }
 
+    @FragmentType
     @Override
     public void transToReceipt() {
-        mTabtitles.clear();
-        mTabtitles.add("receipt one");
-        mMainView.showReceiptUi(mTabtitles, new ArrayList<String>());
+
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+
+        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
+        if (mReceiptFragment == null) mReceiptFragment = ReceiptFragment.newInstance();
+        if (mDiscoverFragment != null) transaction.hide(mDiscoverFragment);
+        if (mBookmarkFragment != null) transaction.hide(mBookmarkFragment);
+//        if (mTodayFragment != null) transaction.hide(mTodayFragment);
+        if (!mReceiptFragment.isAdded()) {
+            transaction.add(R.id.linearlayout_main_container, mReceiptFragment, RECEIPT);
+        } else {
+            transaction.show(mReceiptFragment);
+        }
+        transaction.commit();
+
+        if (mReceiptPresenter == null) {
+            mReceiptPresenter = new ReceiptPresenter(mReceiptFragment);
+        }
+
+        mMainView.showReceiptUi();
     }
 
+    @FragmentType
     @Override
     public void transToToday() {
         transToMenuList();
         mMainView.showTodayUi();
     }
 
+    @FragmentType
     @Override
     public void transToDetail(Uri uri) {
-        Log.d(LOG_TAG, "Uri is: " + uri);
     }
 
+    @FragmentType
     @Override
     public void transToMenuList() {
-        mTabtitles.clear();
-        mTabtitles.add("menu one");
-        mMainView.showMenuListUi(mTabtitles, new ArrayList<String>());
     }
 
+    @FragmentType
     @Override
     public void transToBuyList() {
-        mTabtitles.clear();
-        mTabtitles.add("buylist one");
-        mMainView.showBuyListUi(mTabtitles, new ArrayList<String>());
-    }
-
-    @Override
-    public void onScrollStateChanged(int visibleItemCount, int totalItemCount, int newState) {
-        if (newState == RecyclerView.SCROLL_STATE_IDLE && visibleItemCount > 0) {
-
-            if (!mLoading && mlastVisibleItemPosition == totalItemCount - 1 && !"".equals(mNextPagingId)) {
-                Map<String, String> queryParameters = new HashMap<>();
-                queryParameters.put("pageToken", mNextPagingId);
-                queryParameters.put("channelId", "UCQGVzUNv0UTn-t0Xzd06E4Q");
-
-                loadDiscoverItems(queryParameters);
-            }
-        }
-    }
-
-    @Override
-    public void onScrolled(RecyclerView.LayoutManager layoutManager) {
-        mlastVisibleItemPosition = ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
     }
 
     @Override

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:animateLayoutChanges="false"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@color/white">
+
+        <CheckBox
+            android:id="@+id/radio_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:layout_marginStart="8dp"
+            android:button="@drawable/custom_checkbox"
+            app:layout_constraintBottom_toBottomOf="@id/imageview_thumbnail"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/imageview_thumbnail" />
+
+        <ImageView
+            android:id="@+id/imageview_thumbnail"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:layout_margin="8dp"
+            android:background="@drawable/all_picture_placeholder"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/radio_item"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            android:src="@drawable/ic_play_circle_filled"
+            app:layout_constraintStart_toStartOf="@id/imageview_thumbnail"
+            app:layout_constraintEnd_toEndOf="@id/imageview_thumbnail"
+            app:layout_constraintTop_toTopOf="@id/imageview_thumbnail"
+            app:layout_constraintBottom_toBottomOf="@id/imageview_thumbnail"/>
+
+        <TextView
+            android:id="@+id/textview_video_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:ellipsize="end"
+            android:lineSpacingExtra="4dp"
+            android:maxLines="2"
+            android:text=""
+            android:textColor="@color/black"
+            android:textSize="@dimen/small_content_text_size"
+            app:layout_constraintEnd_toStartOf="@+id/imagebotton"
+            app:layout_constraintStart_toEndOf="@id/imageview_thumbnail"
+            app:layout_constraintTop_toTopOf="@id/imageview_thumbnail" />
+
+        <ImageView
+            android:id="@+id/imageview_star_first"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_star_border"
+            app:layout_constraintBottom_toBottomOf="@+id/imageview_thumbnail"
+            app:layout_constraintStart_toStartOf="@id/textview_video_title"/>
+        <ImageView
+            android:id="@+id/imageview_star_second"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/imageview_star_first"
+            app:layout_constraintBottom_toBottomOf="@id/imageview_star_first"
+            app:layout_constraintStart_toEndOf="@id/imageview_star_first"
+            android:background="@drawable/ic_star_border" />
+        <ImageView
+            android:id="@+id/imageview_star_third"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/imageview_star_first"
+            app:layout_constraintBottom_toBottomOf="@id/imageview_star_first"
+            app:layout_constraintStart_toEndOf="@id/imageview_star_second"
+            android:background="@drawable/ic_star_border" />
+        <ImageView
+            android:id="@+id/imageview_star_forth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/imageview_star_first"
+            app:layout_constraintBottom_toBottomOf="@id/imageview_star_first"
+            app:layout_constraintStart_toEndOf="@id/imageview_star_third"
+            android:background="@drawable/ic_star_border" />
+        <ImageView
+            android:id="@+id/imageview_star_fifth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@id/imageview_star_first"
+            app:layout_constraintBottom_toBottomOf="@id/imageview_star_first"
+            app:layout_constraintStart_toEndOf="@id/imageview_star_forth"
+            android:background="@drawable/ic_star_border" />
+
+        <ImageButton
+            android:id="@+id/imagebotton"
+            android:layout_width="@dimen/small_icon_size"
+            android:layout_height="@dimen/small_icon_size"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/imageview_thumbnail"
+            app:layout_constraintBottom_toBottomOf="@id/imageview_thumbnail"
+            android:background="@drawable/ic_more"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintlayout_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+        <View
+            android:id="@+id/view_detail_bar"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:background="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/imageView" />
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/custom_detail_bar_left"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/custom_detail_bar_right"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/custom_detail_box"
+            android:text="video descriptrions ..................\ntatweirofr\nweoindf\nweoidf"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageView"
+            app:layout_constraintStart_toEndOf="@+id/imageView2"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

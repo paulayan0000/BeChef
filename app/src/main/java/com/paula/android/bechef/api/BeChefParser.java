@@ -10,9 +10,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class BeChefParser {
+class BeChefParser {
 
-    public static GetSearchList parseGetSearchList(String jsonString) throws JSONException, YoutubeException {
+    static GetSearchList parseGetSearchList(String jsonString) throws JSONException, YoutubeException {
         GetSearchList beanGetSearchList = new GetSearchList();
 
         beanGetSearchList.setViewType(Constants.VIEWTYPE_DISCOVER);
