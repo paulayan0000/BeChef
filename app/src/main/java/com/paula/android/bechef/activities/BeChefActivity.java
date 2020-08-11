@@ -1,10 +1,10 @@
 package com.paula.android.bechef.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.paula.android.bechef.BeChefContract;
@@ -12,23 +12,22 @@ import com.paula.android.bechef.BeChefPresenter;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.user.UserManager;
 import com.paula.android.bechef.utils.Constants;
-
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class BeChefActivity extends BaseActivity implements BeChefContract.View {
-
     private static final String LOG_TAG = BeChefActivity.class.getSimpleName();
-
     private BeChefContract.Presenter mPresenter;
+    private BottomNavigationView mBottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (UserManager.getInstance().isLoginStatus()) {
             init();
         } else {
@@ -49,22 +48,16 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
 
     @Override
     public void onBackPressed() {
+        if (mPresenter.isDetailShown()) showBottomNavigationView(true);
         super.onBackPressed();
-        finish();
     }
 
     private void init() {
-
         setContentView(R.layout.activity_bechef);
-
         mPresenter = new BeChefPresenter(this, getSupportFragmentManager());
-        mPresenter.start();
-
         setToolbar();
-
-        BottomNavigationView navigation = findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        navigation.setOnNavigationItemReselectedListener(mOnNavigationItemReselectedListener);
+        mBottomNavigationView = setBottomNavigationView();
+        mPresenter.start();
     }
 
     public void popLogin() {
@@ -74,6 +67,13 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     private void setToolbar() {
         TextView statusbarTextView = findViewById(R.id.textview_statusbar);
         statusbarTextView.setHeight(getStatusBarHeight());
+    }
+
+    private BottomNavigationView setBottomNavigationView() {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        bottomNavigationView.setOnNavigationItemReselectedListener(mOnNavigationItemReselectedListener);
+        return bottomNavigationView;
     }
 
     public int getStatusBarHeight() {
@@ -98,20 +98,13 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     }
 
     @Override
-    public void showTodayUi() {
-    }
-
-    @Override
-    public void showMenuUi() {
-    }
-
-    @Override
-    public void showBuyUi() {
-    }
-
-    @Override
     public void setPresenter(BeChefContract.Presenter presenter) {
         mPresenter = checkNotNull(presenter);
+    }
+
+    @Override
+    public Context getContext() {
+        return getContext();
     }
 
     private BottomNavigationView.OnNavigationItemReselectedListener mOnNavigationItemReselectedListener
@@ -127,13 +120,13 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
                     appBarLayout = findViewById(R.id.bookmark_appbar);
                     break;
                 case R.id.navigation_receipt:
-                case R.id.navigation_today:
                     break;
                 default:
             }
             if (appBarLayout != null) appBarLayout.setExpanded(true, true);
         }
     };
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
@@ -148,9 +141,6 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
                 case R.id.navigation_receipt:
                     mPresenter.transToReceipt();
                     break;
-                case R.id.navigation_today:
-                    mPresenter.transToToday();
-                    break;
                 default:
                     return false;
             }
@@ -158,34 +148,11 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
         }
     };
 
-//    private void setToolbarTitle(String title) {
-//        mToolbarTitle.setText(title);
-//        final TextView toolbarTitleAnother = findViewById(R.id.textview_toolbar_title_another);
-//
-//        if (getResources().getString(R.string.title_menu_list).equals(title)) {
-//            toolbarTitleAnother.setVisibility(View.VISIBLE);
-//            mToolbarTitle.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    mPresenter.transToMenuList();
-//                    mToolbarTitle.setTextColor(getResources().getColor(R.color.white));
-//                    toolbarTitleAnother.setTextColor(getResources().getColor(R.color.colorPrimaryLight));
-//                }
-//            });
-//            toolbarTitleAnother.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    mPresenter.transToBuyList();
-//                    mToolbarTitle.setTextColor(getResources().getColor(R.color.colorPrimaryLight));
-//                    toolbarTitleAnother.setTextColor(getResources().getColor(R.color.white));
-//                }
-//            });
-//        } else {
-//            mToolbarTitle.setTextColor(getResources().getColor(R.color.white));
-//            toolbarTitleAnother.setTextColor(getResources().getColor(R.color.colorPrimaryLight));
-//            mToolbarTitle.setOnClickListener(null);
-//            toolbarTitleAnother.setOnClickListener(null);
-//            toolbarTitleAnother.setVisibility(View.GONE);
-//        }
-//    }
+    public void transToDetail(Object content) {
+        mPresenter.transToDetail(content);
+    }
+
+    public void showBottomNavigationView(Boolean isShow) {
+        mBottomNavigationView.setVisibility(isShow ? View.VISIBLE : View.GONE);
+    }
 }

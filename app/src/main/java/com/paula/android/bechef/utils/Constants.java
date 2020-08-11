@@ -12,16 +12,4 @@ public class Constants {
     // Recycler view type
     public static final int VIEWTYPE_NORMAL = 0;
     public static final int VIEWTYPE_LOADING = 1;
-
-    // ViewPager view type
-    public static final int VIEWTYPE_DISCOVER = 0;
-    public static final int VIEWTYPE_BOOKMARK = 1;
-    public static final int VIEWTYPE_RECEIPT = 2;
-    public static final int VIEWTYPE_MENULIST = 3;
-    public static final int VIEWTYPE_BUYLIST = 4;
-
-    // Discover table
-    public static final String DISCOVER_TABLE_NAME = "discover_table";
-    public static final String DISCOVER_CHANNEL_ID = "discover_channel_id";
-    public static final String DISCOVER_CHANNEL_NAME = "discover_channel_name";
 }

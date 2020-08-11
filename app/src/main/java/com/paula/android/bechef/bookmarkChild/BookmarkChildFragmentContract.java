@@ -1,19 +1,19 @@
 package com.paula.android.bechef.bookmarkChild;
 
-import com.paula.android.bechef.BasePresenter;
-import com.paula.android.bechef.BaseView;
-import com.paula.android.bechef.api.beans.GetSearchList;
+import com.paula.android.bechef.ChildContract;
+import java.util.ArrayList;
 
-import androidx.recyclerview.widget.RecyclerView;
+public interface BookmarkChildFragmentContract extends ChildContract {
+    interface View extends ChildView<Presenter> {
 
-public interface BookmarkChildFragmentContract {
-    interface View extends BaseView<Presenter> {
-
-        void updateData(GetSearchList bean);
+        void updateData(ArrayList<?> newData);
 
         void scrollViewTo(int position);
+
+        void showDetailUi(Object content);
     }
-    interface Presenter extends BasePresenter {
+    interface Presenter extends ChildPresenter {
+
         void scrollTo(int position);
     }
 }

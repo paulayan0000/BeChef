@@ -1,26 +1,17 @@
 package com.paula.android.bechef;
 
-import android.net.Uri;
-
-public interface BeChefContract {
+public interface BeChefContract extends BaseContract{
     interface View extends BaseView<Presenter> {
         void showDiscoverUi();
         void showBookmarkUi();
         void showReceiptUi();
-        void showTodayUi();
-        void showMenuUi();
-        void showBuyUi();
     }
     interface Presenter extends BasePresenter{
         void transToDiscover();
         void transToBookmark();
         void transToReceipt();
-        void transToToday();
-        void transToDetail(Uri uri);
+        void transToDetail(Object content);
 
-        // Today title onClick method
-        void transToMenuList();
-        void transToBuyList();
-
+        Boolean isDetailShown();
     }
 }

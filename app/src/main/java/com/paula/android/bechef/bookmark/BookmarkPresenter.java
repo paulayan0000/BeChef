@@ -1,16 +1,18 @@
 package com.paula.android.bechef.bookmark;
 
-import com.paula.android.bechef.api.beans.GetSearchList;
-
+import com.paula.android.bechef.data.LoadDataTask;
+import com.paula.android.bechef.data.LoadDataCallback;
+import com.paula.android.bechef.data.dao.BookmarkTabDao;
+import com.paula.android.bechef.data.database.BookmarkTabDatabase;
 import java.util.ArrayList;
+import androidx.room.RoomDatabase;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class BookmarkPresenter implements BookmarkContract.Presenter {
-
     private final BookmarkContract.View mBookmarkView;
-    private ArrayList<String> mTabtitles = new ArrayList<>();
-    private ArrayList<GetSearchList> mBookmarkItems = new ArrayList<>();
+    private ArrayList<String> mTabTitles = new ArrayList<>();
+    private LoadDataTask mLoadDataTask;
 
     public BookmarkPresenter(BookmarkContract.View bookmarkView) {
         mBookmarkView = checkNotNull(bookmarkView, "bookmarkView cannot be null!");
@@ -19,14 +21,24 @@ public class BookmarkPresenter implements BookmarkContract.Presenter {
 
     @Override
     public void start() {
-        mTabtitles.add("bookmark one");
-        mTabtitles.add("bookmark two");
-        GetSearchList tableOne = new GetSearchList();
-        tableOne.setTableName("bookmark one");
-        GetSearchList tableTwo = new GetSearchList();
-        tableTwo.setTableName("bookmark two");
-        mBookmarkItems.add(tableOne);
-        mBookmarkItems.add(tableTwo);
-        mBookmarkView.showDefaultUi(mTabtitles, mBookmarkItems);
+        mTabTitles.clear();
+        BookmarkTabDatabase db = BookmarkTabDatabase.getInstance(mBookmarkView.getContext());
+
+        mLoadDataTask = new LoadDataTask(db, new LoadDataCallback() {
+            private  ArrayList<String> mGotTabTitles;
+
+            @Override
+            public void doInBackground(RoomDatabase database) {
+                BookmarkTabDao bookmarkTabDao = ((BookmarkTabDatabase) database).bookmarkDao();
+                mGotTabTitles = new ArrayList<>(bookmarkTabDao.getAllTabTitles());
+            }
+
+            @Override
+            public void onCompleted() {
+                mTabTitles.addAll(mGotTabTitles);
+                mBookmarkView.showDefaultUi(mTabTitles, null);
+            }
+        });
+        mLoadDataTask.execute();
     }
 }

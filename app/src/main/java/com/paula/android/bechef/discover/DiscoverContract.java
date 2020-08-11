@@ -1,12 +1,11 @@
 package com.paula.android.bechef.discover;
 
-import com.paula.android.bechef.BasePresenter;
-import com.paula.android.bechef.BaseView;
+import com.paula.android.bechef.BaseContract;
 import java.util.ArrayList;
 
-public interface DiscoverContract {
+public interface DiscoverContract extends BaseContract {
     interface View extends BaseView<Presenter> {
-        void showDiscoverUi(ArrayList<String> tabtitles);
+        void showDiscoverUi(ArrayList<String> tabtitles, ArrayList<String> channelIds);
     }
 
     interface Presenter extends BasePresenter {

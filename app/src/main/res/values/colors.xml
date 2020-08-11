@@ -9,5 +9,6 @@
     <color name="bottom_navigation_item_normal">#aeaeae</color>
     <color name="black">#000000</color>
     <color name="picture_placeholder_bkg">#CDCDCD</color>
-    <color name="video_title_bkg">#50000000</color>
+    <color name="translucent_bkg">#80000000</color>
+    <color name="link_text">#4545FF</color>
 </resources>

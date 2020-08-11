@@ -1,16 +1,32 @@
-package com.paula.android.bechef.objects;
+package com.paula.android.bechef.data;
 
-public class Snippet {
+public class SearchItem {
+    private String mId;
     private String mPublishedAt;
     private String mTitle;
     private String mDescription;
     private String mThumbnailMediumUrl;
+    private String mTags;  // Split by space*1
+    private String mDuration;
+    private String mViewCount;
 
-    public Snippet() {
+    public SearchItem() {
+        mId = "";
         mPublishedAt = "";
         mTitle = "";
         mDescription = "";
         mThumbnailMediumUrl = "";
+        mTags = "";
+        mDuration = "";
+        mViewCount = "";
+    }
+
+    public String getId() {
+        return mId;
+    }
+
+    public void setId(String id) {
+        mId = id;
     }
 
     public String getPublishedAt() {
@@ -43,5 +59,29 @@ public class Snippet {
 
     public void setThumbnailMediumUrl(String thumbnailMediumUrl) {
         mThumbnailMediumUrl = thumbnailMediumUrl;
+    }
+
+    public String getTags() {
+        return mTags;
+    }
+
+    public void setTags(String tags) {
+        mTags = tags;
+    }
+
+    public String getDuration() {
+        return mDuration;
+    }
+
+    public void setDuration(String duration) {
+        mDuration = duration;
+    }
+
+    public String getViewCount() {
+        return mViewCount;
+    }
+
+    public void setViewCount(String viewCount) {
+        mViewCount = viewCount;
     }
 }

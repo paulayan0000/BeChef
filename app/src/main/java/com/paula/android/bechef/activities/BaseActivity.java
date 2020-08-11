@@ -5,22 +5,18 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 public class BaseActivity extends AppCompatActivity {
-
     protected Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         this.mContext = this;
-
         setStatusbarTransparent();
     }
 
@@ -40,7 +36,6 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     private void setWindowFlag(Activity activity, final int bits, boolean on) {
-
         Window win = activity.getWindow();
         WindowManager.LayoutParams winParams = win.getAttributes();
         if (on) {
@@ -49,10 +44,5 @@ public class BaseActivity extends AppCompatActivity {
             winParams.flags &= ~bits;
         }
         win.setAttributes(winParams);
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
     }
 }

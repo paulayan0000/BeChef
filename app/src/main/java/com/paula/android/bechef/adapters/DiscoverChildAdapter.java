@@ -4,30 +4,31 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.api.beans.GetSearchList;
-import com.paula.android.bechef.objects.SearchItem;
+import com.paula.android.bechef.discoverChild.DiscoverChildFragmentContract;
+import com.paula.android.bechef.data.SearchItem;
 import com.paula.android.bechef.utils.Constants;
+import com.paula.android.bechef.utils.Utils;
 import com.squareup.picasso.Picasso;
-
 import java.util.ArrayList;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class DiscoverChildAdapter extends RecyclerView.Adapter{
-
+    private DiscoverChildFragmentContract.Presenter mPresenter;
     private ArrayList<SearchItem> mArrayList;
     private String mNextPageToken;
     private Context mContext;
 
-    public DiscoverChildAdapter(GetSearchList bean) {
+    public DiscoverChildAdapter(GetSearchList bean, DiscoverChildFragmentContract.Presenter presenter) {
         mArrayList = bean.getSearchItems();
         mNextPageToken = bean.getNextPageToken();
+        mPresenter = presenter;
     }
 
     public void updateData(GetSearchList newBean) {
@@ -61,19 +62,25 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter{
         if (mArrayList.size() > 0) {
             if (holder instanceof DiscoverChildAdapter.DiscoverViewHolder) {
                 DiscoverViewHolder viewHolder = (DiscoverViewHolder) holder;
-                viewHolder.getTvVideoTitle().setText(mArrayList.get(position).getSnippet().getTitle());
-                viewHolder.getTvVideoDescription().setText(mArrayList.get(position).getSnippet().getDescription());
-                viewHolder.getTvVideoTime().setText(mArrayList.get(position).getSnippet().getPublishedAt());
+                viewHolder.mTvVideoTitle.setText(mArrayList.get(position).getTitle());
+                viewHolder.mTvVideoTime.setText(Utils.getCreatedTime(mArrayList.get(position).getPublishedAt()));
 
                 Picasso.with(mContext)
-                        .load(mArrayList.get(position).getSnippet().getThumbnailMediumUrl())
+                        .load(mArrayList.get(position).getThumbnailMediumUrl())
                         .error(R.drawable.all_picture_placeholder)
                         .placeholder(R.drawable.all_picture_placeholder)
-                        .into(viewHolder.getIvThumbnail());
-                viewHolder.getIvThumbnail().setOnClickListener(new View.OnClickListener() {
+                        .into(viewHolder.mIvThumbnail);
+                viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(mContext, mArrayList.get(position).getId(), Toast.LENGTH_SHORT).show();
+                        mPresenter.openDetail(mArrayList.get(position).getId());
+                    }
+                });
+                viewHolder.mIbtnBookmark.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // TODO: take full description from YouTube Data API, and transTo edit page
+                        Toast.makeText(mContext, "add " + mArrayList.get(position).getId(), Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -87,35 +94,17 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter{
     }
 
     private class DiscoverViewHolder extends RecyclerView.ViewHolder {
-
         private ImageView mIvThumbnail;
         private TextView mTvVideoTitle;
-        private TextView mTvVideoDescription;
         private TextView mTvVideoTime;
+        private ImageButton mIbtnBookmark;
 
         private DiscoverViewHolder(View itemView) {
             super(itemView);
-
             mIvThumbnail = itemView.findViewById(R.id.imageview_thumbnail);
             mTvVideoTitle = itemView.findViewById(R.id.textview_video_title);
-            mTvVideoDescription = itemView.findViewById(R.id.textview_video_description);
             mTvVideoTime = itemView.findViewById(R.id.textview_video_time);
-        }
-
-        private ImageView getIvThumbnail() {
-            return mIvThumbnail;
-        }
-
-        private TextView getTvVideoTitle() {
-            return mTvVideoTitle;
-        }
-
-        private TextView getTvVideoDescription() {
-            return mTvVideoDescription;
-        }
-
-        private TextView getTvVideoTime() {
-            return mTvVideoTime;
+            mIbtnBookmark = itemView.findViewById(R.id.imagebutton_bookmark);
         }
     }
 

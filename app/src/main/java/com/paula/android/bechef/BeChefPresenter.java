@@ -1,16 +1,15 @@
 package com.paula.android.bechef;
 
-import android.net.Uri;
 import com.paula.android.bechef.bookmark.BookmarkFragment;
 import com.paula.android.bechef.bookmark.BookmarkPresenter;
+import com.paula.android.bechef.detail.DetailFragment;
+import com.paula.android.bechef.detail.DetailPresenter;
 import com.paula.android.bechef.discover.DiscoverFragment;
 import com.paula.android.bechef.discover.DiscoverPresenter;
 import com.paula.android.bechef.receipt.ReceiptFragment;
 import com.paula.android.bechef.receipt.ReceiptPresenter;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
 import androidx.annotation.StringDef;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -25,24 +24,21 @@ public class BeChefPresenter implements BeChefContract.Presenter {
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            DISCOVER, BOOKMARK, RECEIPT, TODAY, DETAIL
+            DISCOVER, BOOKMARK, RECEIPT, DETAIL
     })
     @interface FragmentType {}
     static final String DISCOVER = "DISCOVER";
     static final String BOOKMARK = "BOOKMARK";
     static final String RECEIPT  = "RECEIPT";
-    static final String TODAY    = "TODAY";
     static final String DETAIL   = "DETAIL";
 
     private DiscoverFragment mDiscoverFragment;
     private BookmarkFragment mBookmarkFragment;
     private ReceiptFragment mReceiptFragment;
-//    private TodayFragment mTodayFragment;
 
     private DiscoverPresenter mDiscoverPresenter;
     private BookmarkPresenter mBookmarkPresenter;
     private ReceiptPresenter mReceiptPresenter;
-//    private TodayPresenter mTodayPresenter;
 
     public BeChefPresenter(BeChefContract.View mainView, FragmentManager fragmentManager) {
         mMainView = checkNotNull(mainView, "mainView cannot be null!");
@@ -59,7 +55,6 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         if (mDiscoverFragment == null) mDiscoverFragment = DiscoverFragment.newInstance();
         if (mBookmarkFragment != null) transaction.hide(mBookmarkFragment);
         if (mReceiptFragment != null) transaction.hide(mReceiptFragment);
-//        if (mTodayFragment != null) transaction.hide(mTodayFragment);
         if (!mDiscoverFragment.isAdded()) {
             transaction.add(R.id.linearlayout_main_container, mDiscoverFragment, DISCOVER);
         } else {
@@ -83,7 +78,6 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         if (mBookmarkFragment == null) mBookmarkFragment = BookmarkFragment.newInstance();
         if (mDiscoverFragment != null) transaction.hide(mDiscoverFragment);
         if (mReceiptFragment != null) transaction.hide(mReceiptFragment);
-//        if (mTodayFragment != null) transaction.hide(mTodayFragment);
         if (!mBookmarkFragment.isAdded()) {
             transaction.add(R.id.linearlayout_main_container, mBookmarkFragment, BOOKMARK);
         } else {
@@ -108,7 +102,6 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         if (mReceiptFragment == null) mReceiptFragment = ReceiptFragment.newInstance();
         if (mDiscoverFragment != null) transaction.hide(mDiscoverFragment);
         if (mBookmarkFragment != null) transaction.hide(mBookmarkFragment);
-//        if (mTodayFragment != null) transaction.hide(mTodayFragment);
         if (!mReceiptFragment.isAdded()) {
             transaction.add(R.id.linearlayout_main_container, mReceiptFragment, RECEIPT);
         } else {
@@ -125,28 +118,36 @@ public class BeChefPresenter implements BeChefContract.Presenter {
 
     @FragmentType
     @Override
-    public void transToToday() {
-        transToMenuList();
-        mMainView.showTodayUi();
+    public void transToDetail(Object content) {
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+
+        if (mDiscoverFragment != null && !mDiscoverFragment.isHidden()) {
+            transaction.hide(mDiscoverFragment);
+            transaction.addToBackStack(DISCOVER);
+        }
+        if (mBookmarkFragment != null && !mBookmarkFragment.isHidden()) {
+            transaction.hide(mBookmarkFragment);
+            transaction.addToBackStack(BOOKMARK);
+        }
+        if (mReceiptFragment != null && !mReceiptFragment.isHidden()) {
+            transaction.hide(mReceiptFragment);
+            transaction.addToBackStack(RECEIPT);
+        }
+        DetailFragment detailFragment = DetailFragment.newInstance();
+        transaction.add(R.id.linearlayout_main_container, detailFragment, DETAIL);
+        transaction.commit();
+
+        DetailPresenter detailPresenter = new DetailPresenter(detailFragment, content);
     }
 
-    @FragmentType
     @Override
-    public void transToDetail(Uri uri) {
-    }
-
-    @FragmentType
-    @Override
-    public void transToMenuList() {
-    }
-
-    @FragmentType
-    @Override
-    public void transToBuyList() {
+    public Boolean isDetailShown() {
+        return mFragmentManager.findFragmentByTag(DETAIL) != null;
     }
 
     @Override
     public void start() {
         transToDiscover();
     }
+
 }

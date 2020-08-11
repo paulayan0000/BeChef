@@ -9,7 +9,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-public class BeChefClient {
+class BeChefClient {
     private static final String LOG_TAG = BeChefClient.class.getSimpleName();
     private static final String KEY = "AIzaSyAajGSZR9eHL_IKeV34fd_nN58tYUVf5FQ";
 
@@ -31,7 +31,6 @@ public class BeChefClient {
         for (Map.Entry<String, String> entry : queryParameters.entrySet()) {
             httpUrl.addQueryParameter(entry.getKey(), entry.getValue());
         }
-
         Request request = new Request.Builder()
                 .url(httpUrl.build())
                 .build();
@@ -46,7 +45,7 @@ public class BeChefClient {
         if (responseBody == null) throw new NullPointerException("Null response body");
         if (response.isSuccessful()) {
             String responseData = responseBody.string();
-//            Log.d(LOG_TAG, "Response Data: " + responseData);
+            Log.d(LOG_TAG, "Response Data: " + responseData);
             return responseData;
         } else {
             throw new IOException("Unexpected code " + response);

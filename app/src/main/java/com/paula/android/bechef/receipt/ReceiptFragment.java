@@ -4,12 +4,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.paula.android.bechef.R;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
+import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class ReceiptFragment extends Fragment implements ReceiptContract.View {
 
@@ -26,11 +26,18 @@ public class ReceiptFragment extends Fragment implements ReceiptContract.View {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_receipt, container, false);
+        View view = inflater.inflate(R.layout.fragment_receipt, container, false);
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mPresenter.start();
     }
 
     @Override
     public void setPresenter(ReceiptContract.Presenter presenter) {
-
+        mPresenter = checkNotNull(presenter);
     }
 }

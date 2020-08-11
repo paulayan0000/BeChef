@@ -1,29 +1,29 @@
 package com.paula.android.bechef.adapters;
 
 import android.content.Context;
-import android.os.AsyncTask;
-
 import com.paula.android.bechef.bookmarkChild.BookmarkChildFragment;
 import com.paula.android.bechef.discoverChild.DiscoverChildFragment;
-import com.paula.android.bechef.objects.DiscoverItem;
-
 import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.room.Room;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-public class DiscoverFragmentAdapter extends FragmentStateAdapter {
-
+public class FragmentAdapter extends FragmentStateAdapter {
     private Fragment mFragment;
     private ArrayList<String> mTabTitles;
-    private Context mContext;
+    private ArrayList<String> mChannelIds;
 
-    public DiscoverFragmentAdapter(@NonNull Fragment fragment, ArrayList<String> tabTitles) {
+    public FragmentAdapter(@NonNull Fragment fragment, ArrayList<String> tabTitles, ArrayList<String> channelIds) {
         super(fragment);
         mFragment = fragment;
         mTabTitles = tabTitles;
-        mContext = fragment.getContext();
+        mChannelIds = channelIds;
+    }
+
+    public FragmentAdapter(@NonNull Fragment fragment, ArrayList<String> tabTitles) {
+        super(fragment);
+        mFragment = fragment;
+        mTabTitles = tabTitles;
     }
 
     @NonNull
@@ -33,12 +33,10 @@ public class DiscoverFragmentAdapter extends FragmentStateAdapter {
 
         switch (className) {
             case "DiscoverFragment":
-                return DiscoverChildFragment.newInstance(position);
+                return DiscoverChildFragment.newInstance(mChannelIds.get(position));
             case "BookmarkFragment":
-                return BookmarkChildFragment.newInstance(mTabTitles.get(position));
-
             default:
-                return BookmarkChildFragment.newInstance("");
+                return BookmarkChildFragment.newInstance(position);
         }
     }
 
@@ -51,9 +49,13 @@ public class DiscoverFragmentAdapter extends FragmentStateAdapter {
         return mTabTitles;
     }
 
-    public void updateTabTitles(ArrayList<String> newTitleArray) {
-        if (newTitleArray != null) {
-            mTabTitles = newTitleArray;
+    public void updateData(ArrayList<String> newTabTitles, ArrayList<String> newChannelIds) {
+        if (newTabTitles != null) {
+            mTabTitles = newTabTitles;
+            notifyDataSetChanged();
+        }
+        if (newChannelIds != null) {
+            mChannelIds = newChannelIds;
             notifyDataSetChanged();
         }
     }

@@ -1,9 +1,8 @@
 package com.paula.android.bechef.receipt;
 
-import com.paula.android.bechef.BasePresenter;
-import com.paula.android.bechef.BaseView;
+import com.paula.android.bechef.BaseContract;
 
-public interface ReceiptContract {
+public interface ReceiptContract extends BaseContract {
     interface View extends BaseView<Presenter> {
 
     }

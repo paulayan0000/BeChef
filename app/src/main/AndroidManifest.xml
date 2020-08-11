@@ -22,6 +22,7 @@
         </activity>
         <activity
             android:name=".activities.BeChefActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
