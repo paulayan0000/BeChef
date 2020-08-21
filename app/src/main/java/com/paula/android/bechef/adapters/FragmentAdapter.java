@@ -1,8 +1,8 @@
 package com.paula.android.bechef.adapters;
 
-import android.content.Context;
 import com.paula.android.bechef.bookmarkChild.BookmarkChildFragment;
 import com.paula.android.bechef.discoverChild.DiscoverChildFragment;
+import com.paula.android.bechef.receiptChild.ReceiptChildFragment;
 import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -35,8 +35,9 @@ public class FragmentAdapter extends FragmentStateAdapter {
             case "DiscoverFragment":
                 return DiscoverChildFragment.newInstance(mChannelIds.get(position));
             case "BookmarkFragment":
+                return BookmarkChildFragment.newInstance(position, mFragment);
             default:
-                return BookmarkChildFragment.newInstance(position);
+                return ReceiptChildFragment.newInstance(position, mFragment);
         }
     }
 
@@ -50,12 +51,16 @@ public class FragmentAdapter extends FragmentStateAdapter {
     }
 
     public void updateData(ArrayList<String> newTabTitles, ArrayList<String> newChannelIds) {
-        if (newTabTitles != null) {
-            mTabTitles = newTabTitles;
-            notifyDataSetChanged();
-        }
+        updateData(newTabTitles);
         if (newChannelIds != null) {
             mChannelIds = newChannelIds;
+            notifyDataSetChanged();
+        }
+    }
+
+    public void updateData(ArrayList<String> newTabTitles) {
+        if (newTabTitles != null) {
+            mTabTitles = newTabTitles;
             notifyDataSetChanged();
         }
     }

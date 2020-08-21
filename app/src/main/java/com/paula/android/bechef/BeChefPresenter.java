@@ -13,12 +13,9 @@ import java.lang.annotation.RetentionPolicy;
 import androidx.annotation.StringDef;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class BeChefPresenter implements BeChefContract.Presenter {
-
-    private static final String LOG_TAG = BeChefPresenter.class.getSimpleName();
     private final BeChefContract.View mMainView;
     private FragmentManager mFragmentManager;
 
@@ -51,7 +48,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     public void transToDiscover() {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
+//        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
         if (mDiscoverFragment == null) mDiscoverFragment = DiscoverFragment.newInstance();
         if (mBookmarkFragment != null) transaction.hide(mBookmarkFragment);
         if (mReceiptFragment != null) transaction.hide(mReceiptFragment);
@@ -65,8 +62,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         if (mDiscoverPresenter == null) {
             mDiscoverPresenter = new DiscoverPresenter(mDiscoverFragment);
         }
-
-        mMainView.showDiscoverUi();
+        mMainView.setMenuId(R.id.navigation_discover);
     }
 
     @FragmentType
@@ -74,7 +70,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     public void transToBookmark() {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
+//        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
         if (mBookmarkFragment == null) mBookmarkFragment = BookmarkFragment.newInstance();
         if (mDiscoverFragment != null) transaction.hide(mDiscoverFragment);
         if (mReceiptFragment != null) transaction.hide(mReceiptFragment);
@@ -88,8 +84,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         if (mBookmarkPresenter == null) {
             mBookmarkPresenter = new BookmarkPresenter(mBookmarkFragment);
         }
-
-        mMainView.showBookmarkUi();
+        mMainView.setMenuId(R.id.navigation_bookmark);
     }
 
     @FragmentType
@@ -98,7 +93,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
 
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
+//        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
         if (mReceiptFragment == null) mReceiptFragment = ReceiptFragment.newInstance();
         if (mDiscoverFragment != null) transaction.hide(mDiscoverFragment);
         if (mBookmarkFragment != null) transaction.hide(mBookmarkFragment);
@@ -112,8 +107,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         if (mReceiptPresenter == null) {
             mReceiptPresenter = new ReceiptPresenter(mReceiptFragment);
         }
-
-        mMainView.showReceiptUi();
+        mMainView.setMenuId(R.id.navigation_receipt);
     }
 
     @FragmentType
@@ -138,6 +132,22 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         transaction.commit();
 
         DetailPresenter detailPresenter = new DetailPresenter(detailFragment, content);
+    }
+
+    @Override
+    public void showToolbar(int itemId) {
+            switch (itemId) {
+                case R.id.navigation_discover:
+                    mDiscoverFragment.setToolbar();
+                    break;
+                case R.id.navigation_bookmark:
+                    mBookmarkFragment.setToolbar();
+                    break;
+                case R.id.navigation_receipt:
+                    mReceiptFragment.setToolbar();
+                    break;
+                default:
+            }
     }
 
     @Override

@@ -2,14 +2,11 @@ package com.paula.android.bechef.detail;
 
 import android.util.Log;
 import android.widget.Toast;
-
 import com.paula.android.bechef.api.BeChefApiHelper;
 import com.paula.android.bechef.api.GetYouTubeDataTask;
 import com.paula.android.bechef.api.beans.GetSearchList;
 import com.paula.android.bechef.api.callbacks.GetYouTubeDataCallback;
 import com.paula.android.bechef.api.exceptions.NoResourceException;
-import com.paula.android.bechef.data.entity.BookmarkItem;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +26,6 @@ public class DetailPresenter implements DetailContract.Presenter {
 
     @Override
     public void start() {
-//        mDetailView.showDetailUi(mContent);
         if (mContent instanceof String) {
             Map<String, String> queryParameters = new HashMap<>();
             queryParameters.put("pageToken", "");
@@ -48,7 +44,6 @@ public class DetailPresenter implements DetailContract.Presenter {
 
             new GetYouTubeDataTask(queryParameters, new GetYouTubeDataCallback() {
                 private Exception error;
-//                private String mErrorMessage = "";
 
                 @Override
                 public GetSearchList doInBackground(Map<String, String> queryParameters) {
@@ -57,16 +52,14 @@ public class DetailPresenter implements DetailContract.Presenter {
                         bean = BeChefApiHelper.GetYoutubeVideos(queryParameters);
                     } catch (Exception e) {
                         error = e;
-//                        Toast.makeText(mDetailView.getContext(),
-//                                "此資源不存在！", Toast.LENGTH_LONG).show();
-                    }//                        mErrorMessage = e.getMessage();
-
-                    return bean;                }
+                    }
+                    return bean;
+                }
 
                 @Override
                 public void onCompleted(GetSearchList bean) {
                     if (bean != null && error == null) {
-                        mDetailView.showDetailUi(bean.getSearchItems().get(0));
+                        mDetailView.showDetailUi(bean.getDiscoverItems().get(0));
                         mLoading = false;
                     } else {
                         onError(error);

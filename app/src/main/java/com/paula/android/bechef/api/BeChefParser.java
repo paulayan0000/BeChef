@@ -3,7 +3,7 @@ package com.paula.android.bechef.api;
 import com.paula.android.bechef.api.beans.GetSearchList;
 import com.paula.android.bechef.api.exceptions.NoResourceException;
 import com.paula.android.bechef.api.exceptions.YoutubeException;
-import com.paula.android.bechef.data.SearchItem;
+import com.paula.android.bechef.data.DiscoverItem;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,27 +27,30 @@ class BeChefParser {
         if (data.isNull(0)) {
             throw new NoResourceException("NoResourceException: No result, response: " + jsonString);
         }
+        DiscoverItem parsedItem;
         for (int i = 0; i < data.length(); i++) {
-            beanGetSearchList.getSearchItems().add(parseSearchItem(data.getJSONObject(i)));
+            parsedItem = parseSearchItem(data.getJSONObject(i));
+            if (parsedItem != null) beanGetSearchList.getDiscoverItems().add(parsedItem);
         }
         return beanGetSearchList;
     }
 
-    private static SearchItem parseSearchItem(JSONObject jsonObject) {
-        SearchItem searchItem = new SearchItem();
+    private static DiscoverItem parseSearchItem(JSONObject jsonObject) {
+        DiscoverItem discoverItem = new DiscoverItem();
         switch (getDataString(jsonObject, "kind")) {
             case "youtube#video": // api type: video
-                searchItem.setId(getDataString(jsonObject, "id"));
+                discoverItem.setId(getDataString(jsonObject, "id"));
                 break;
             case "youtube#searchResult": // api type: search
                 try {
-                    searchItem.setId(getDataString(jsonObject.getJSONObject("id"), "videoId"));
+                    discoverItem.setId(jsonObject.getJSONObject("id").getString("videoId"));
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    return null;
                 }
                 break;
             default:
-                return searchItem;
+                return discoverItem;
         }
         // Get snippet data
         JSONObject jsonSnippet;
@@ -55,13 +58,13 @@ class BeChefParser {
             jsonSnippet = jsonObject.getJSONObject("snippet");
         } catch (JSONException e) {
             e.printStackTrace();
-            return searchItem;
+            return null;
         }
-        searchItem.setPublishedAt(getDataString(jsonSnippet, "publishedAt"));
-        searchItem.setTitle(getDataString(jsonSnippet, "title"));
-        searchItem.setDescription(getDataString(jsonSnippet, "description"));
+        discoverItem.setPublishedAt(getDataString(jsonSnippet, "publishedAt"));
+        discoverItem.setTitle(getDataString(jsonSnippet, "title"));
+        discoverItem.setDescription(getDataString(jsonSnippet, "description"));
         try {
-            searchItem.setThumbnailMediumUrl(jsonSnippet.getJSONObject("thumbnails")
+            discoverItem.setImageUrl(jsonSnippet.getJSONObject("thumbnails")
                     .getJSONObject("medium").getString("url"));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -80,7 +83,7 @@ class BeChefParser {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            searchItem.setTags(tags.toString());
+            discoverItem.setTags(tags.toString());
         }
 
         // Get contentDetails data
@@ -89,9 +92,9 @@ class BeChefParser {
             jsonContentDetails = jsonObject.getJSONObject("contentDetails");
         } catch (JSONException e) {
             e.printStackTrace();
-            return searchItem;
+            return discoverItem;
         }
-        searchItem.setDuration(getDataString(jsonContentDetails, "duration"));
+        discoverItem.setDuration(getDataString(jsonContentDetails, "duration"));
 
         // Get statistics data
         JSONObject jsonStatistics;
@@ -99,10 +102,10 @@ class BeChefParser {
             jsonStatistics = jsonObject.getJSONObject("statistics");
         } catch (JSONException e) {
             e.printStackTrace();
-            return searchItem;
+            return discoverItem;
         }
-        searchItem.setViewCount(getDataString(jsonStatistics, "viewCount"));
-        return searchItem;
+        discoverItem.setViewCount(getDataString(jsonStatistics, "viewCount"));
+        return discoverItem;
     }
 
     private static String getDataString(JSONObject jsonObject, String key) {

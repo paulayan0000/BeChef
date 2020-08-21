@@ -37,7 +37,7 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        View view = inflater.inflate(R.layout.fragment_child, container, false);
         mContext = view.getContext();
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerview_discover_main);
@@ -46,7 +46,6 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
         mDiscoverChildAdapter = new DiscoverChildAdapter(new GetSearchList(), mPresenter);
         recyclerView.setAdapter(mDiscoverChildAdapter);
         recyclerView.addOnScrollListener(mOnScrollListener);
-
         return view;
     }
 
@@ -79,7 +78,9 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
         @Override
         public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
             super.getItemOffsets(outRect, view, parent, state);
-            if (outRect.top == 0) outRect.top = (int) Utils.convertDpToPixel((float) 8, mContext);
+            if (outRect.bottom == 0) outRect.bottom = (int) Utils.convertDpToPixel((float) 8, mContext);
+            if (parent.getChildAdapterPosition(view) == 0)
+                outRect.top = (int) Utils.convertDpToPixel((float) 8, mContext);
         }
     };
 
@@ -95,6 +96,6 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
 
     @Override
     public void showDetailUi(Object content) {
-        ((BeChefActivity) getActivity()).transToDetail(content);
+        if (getActivity() != null) ((BeChefActivity) getActivity()).transToDetail(content);
     }
 }

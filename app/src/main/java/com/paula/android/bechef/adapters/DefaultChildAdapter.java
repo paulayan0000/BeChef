@@ -8,15 +8,14 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 import com.paula.android.bechef.ChildContract;
 import com.paula.android.bechef.R;
+import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
+import com.paula.android.bechef.data.entity.ReceiptItem;
 import java.util.ArrayList;
-import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class DefaultChildAdapter extends RecyclerView.Adapter{
-//    private int mExpandedPosition = -1;
-//    private int mPreviousExpandedPosition = -1;
     private ChildContract.ChildPresenter mChildPresenter;
     private ArrayList mDataArrayList;
 
@@ -33,35 +32,8 @@ public class DefaultChildAdapter extends RecyclerView.Adapter{
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position, @NonNull List payloads) {
-        BookmarkItem bookmarkItem = (BookmarkItem) mDataArrayList.get(position);
         DefaultViewHolder viewHolder = (DefaultViewHolder) holder;
-        if (payloads.isEmpty()) {
-            viewHolder.mTvItemTitle.setText(bookmarkItem.getTitle());
-            viewHolder.mRbItemChoose.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                }
-            });
-        }
-//        final boolean isExpanded = position == mExpandedPosition;
-//        viewHolder.mClItemDetail.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
-//        if (isExpanded) mPreviousExpandedPosition = position;
-//        if (!payloads.isEmpty() && (int) payloads.get(0) == getItemCount() - 1)
-//            ((BookmarkChildFragmentContract.Presenter) mChildPresenter).scrollTo(position);
-        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mChildPresenter.openDetail(mDataArrayList.get(position));
-//                mExpandedPosition = isExpanded ? -1 : position;
-//                notifyItemChanged(mPreviousExpandedPosition, mPreviousExpandedPosition);
-//                notifyItemChanged(position, position);
-            }
-        });
+        viewHolder.bindView(mDataArrayList.get(position));
     }
 
     @Override
@@ -75,13 +47,46 @@ public class DefaultChildAdapter extends RecyclerView.Adapter{
     }
 
     private class DefaultViewHolder extends RecyclerView.ViewHolder {
-        private TextView mTvItemTitle;
+        private TextView mTvItemTitle, mTvTags, mTvTimeCount;
         private CheckBox mRbItemChoose;
 
         private DefaultViewHolder(@NonNull View itemView) {
             super(itemView);
             mTvItemTitle = itemView.findViewById(R.id.textview_title);
+            mTvTags = itemView.findViewById(R.id.textview_tags);
+            mTvTimeCount = itemView.findViewById(R.id.textview_time_count);
             mRbItemChoose = itemView.findViewById(R.id.radio_item);
+        }
+
+        void bindView(final Object data) {
+
+            String timeAndCount;
+            if (data instanceof BookmarkItem) {
+                BookmarkItem bookmarkItem = (BookmarkItem) data;
+                timeAndCount = bookmarkItem.getPublishedTime() + " • " + bookmarkItem.getRating() + "分";
+            }
+            else {
+                ReceiptItem receiptItem = (ReceiptItem) data;
+                timeAndCount = "耗時 : " + receiptItem.getDuration() + " • 份量 : "
+                        + receiptItem.getWeight() + "人份 • " + receiptItem.getRating() + "分";
+            }
+            mTvTimeCount.setText(timeAndCount);
+
+            BaseItem baseItem = (BaseItem) data;
+            mTvItemTitle.setText(baseItem.getTitle());
+            mTvTags.setText(baseItem.getTags());
+
+            mRbItemChoose.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                }
+            });
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mChildPresenter.openDetail(data);
+                }
+            });
         }
     }
 }

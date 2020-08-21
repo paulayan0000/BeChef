@@ -6,6 +6,7 @@ import java.util.ArrayList;
 public interface DiscoverContract extends BaseContract {
     interface View extends BaseView<Presenter> {
         void showDiscoverUi(ArrayList<String> tabtitles, ArrayList<String> channelIds);
+        void setToolbar();
     }
 
     interface Presenter extends BasePresenter {

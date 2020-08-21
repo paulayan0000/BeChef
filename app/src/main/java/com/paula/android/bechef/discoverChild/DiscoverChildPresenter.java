@@ -2,17 +2,11 @@ package com.paula.android.bechef.discoverChild;
 
 import android.util.Log;
 import android.widget.Toast;
-
 import com.paula.android.bechef.api.BeChefApiHelper;
 import com.paula.android.bechef.api.GetYouTubeDataTask;
 import com.paula.android.bechef.api.beans.GetSearchList;
 import com.paula.android.bechef.api.callbacks.GetYouTubeDataCallback;
 import com.paula.android.bechef.api.exceptions.NoResourceException;
-import com.paula.android.bechef.api.exceptions.YoutubeException;
-
-import org.json.JSONException;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,7 +22,7 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
     private int mlastVisibleItemPosition;
     private boolean mLoading = false;
     private String mNextPagingId = "";
-    private String mChannelId = "";
+    private String mChannelId;
 
     DiscoverChildPresenter(DiscoverChildFragmentContract.View discoverChildFragmentView, String channelId) {
         mDiscoverChildFragmentView = checkNotNull(discoverChildFragmentView, "discoverChildView cannot be null!");
@@ -46,7 +40,6 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
 
             queryParameters.put("pageToken", "");
             queryParameters.put("channelId", mChannelId);
-//            queryParameters.put("id", "GOb-JxRylNo");
 
             loadDiscoverItems(queryParameters);
         }
@@ -74,7 +67,6 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
             queryParameters.put("order", "date");
 
             new GetYouTubeDataTask(queryParameters, new GetYouTubeDataCallback() {
-//                private String mErrorMessage = "";
                 Exception error;
 
                 @Override
@@ -84,10 +76,7 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
                         bean = BeChefApiHelper.SearchYoutubeData(queryParameters);
                     } catch (Exception e) {
                         error = e;
-//                        Toast.makeText(mDiscoverChildFragmentView.getContext(),
-//                                "此資源不存在！", Toast.LENGTH_LONG).show();
-                    }//                        mErrorMessage = e.getMessage();
-
+                    }
                     return bean;
                 }
 

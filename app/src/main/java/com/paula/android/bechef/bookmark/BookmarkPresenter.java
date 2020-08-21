@@ -12,7 +12,6 @@ import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 public class BookmarkPresenter implements BookmarkContract.Presenter {
     private final BookmarkContract.View mBookmarkView;
     private ArrayList<String> mTabTitles = new ArrayList<>();
-    private LoadDataTask mLoadDataTask;
 
     public BookmarkPresenter(BookmarkContract.View bookmarkView) {
         mBookmarkView = checkNotNull(bookmarkView, "bookmarkView cannot be null!");
@@ -21,11 +20,14 @@ public class BookmarkPresenter implements BookmarkContract.Presenter {
 
     @Override
     public void start() {
+        loadBookmarkTabs();
+    }
+
+    public void loadBookmarkTabs() {
         mTabTitles.clear();
         BookmarkTabDatabase db = BookmarkTabDatabase.getInstance(mBookmarkView.getContext());
-
-        mLoadDataTask = new LoadDataTask(db, new LoadDataCallback() {
-            private  ArrayList<String> mGotTabTitles;
+        LoadDataTask loadDataTask = new LoadDataTask(db, new LoadDataCallback() {
+            private ArrayList<String> mGotTabTitles;
 
             @Override
             public void doInBackground(RoomDatabase database) {
@@ -36,9 +38,9 @@ public class BookmarkPresenter implements BookmarkContract.Presenter {
             @Override
             public void onCompleted() {
                 mTabTitles.addAll(mGotTabTitles);
-                mBookmarkView.showDefaultUi(mTabTitles, null);
+                mBookmarkView.showDefaultUi(mTabTitles);
             }
         });
-        mLoadDataTask.execute();
+        loadDataTask.execute();
     }
 }

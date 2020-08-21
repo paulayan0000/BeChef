@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.activities.BeChefActivity;
 import com.paula.android.bechef.adapters.DefaultChildAdapter;
-import com.paula.android.bechef.data.entity.BookmarkItem;
+import com.paula.android.bechef.bookmark.BookmarkFragment;
 import com.paula.android.bechef.utils.Utils;
 import java.util.ArrayList;
 import androidx.annotation.NonNull;
@@ -21,30 +21,32 @@ import androidx.recyclerview.widget.RecyclerView;
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class BookmarkChildFragment extends Fragment implements BookmarkChildFragmentContract.View {
+    private BookmarkFragment mBookmarkFragment;
     private BookmarkChildFragmentContract.Presenter mPresenter;
     private Context mContext;
     private DefaultChildAdapter mDefaultChildAdapter;
     private RecyclerView mRecyclerView;
 
-    private BookmarkChildFragment(int tabIndex) {
+    private BookmarkChildFragment(int tabIndex, Fragment fragment) {
         if (mPresenter == null) {
             mPresenter = new BookmarkChildPresenter(this, tabIndex);
         }
+        mBookmarkFragment = (BookmarkFragment) fragment;
     }
 
-    public static BookmarkChildFragment newInstance(int tabIndex) {
-        return new BookmarkChildFragment(tabIndex);
+    public static BookmarkChildFragment newInstance(int tabIndex, Fragment fragment) {
+        return new BookmarkChildFragment(tabIndex, fragment);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        View view = inflater.inflate(R.layout.fragment_child, container, false);
         mContext = view.getContext();
         mRecyclerView = view.findViewById(R.id.recyclerview_discover_main);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         if (mRecyclerView.getItemDecorationCount() == 0) mRecyclerView.addItemDecoration(dec);
-        mDefaultChildAdapter = new DefaultChildAdapter(new ArrayList<BookmarkItem>(), mPresenter);
+        mDefaultChildAdapter = new DefaultChildAdapter(new ArrayList<>(), mPresenter);
         mRecyclerView.setAdapter(mDefaultChildAdapter);
         return view;
     }
@@ -61,8 +63,7 @@ public class BookmarkChildFragment extends Fragment implements BookmarkChildFrag
             super.getItemOffsets(outRect, view, parent, state);
             if (outRect.top == 0) outRect.top = (int) Utils.convertDpToPixel((float) 8, mContext);
 
-            if (parent.getChildAdapterPosition(view) == 0)
-                outRect.top = 0;
+            if (parent.getChildAdapterPosition(view) == 0) outRect.top = 0;
         }
     };
 
@@ -74,15 +75,11 @@ public class BookmarkChildFragment extends Fragment implements BookmarkChildFrag
     @Override
     public void updateData(ArrayList<?> newData) {
         mDefaultChildAdapter.updateData(newData);
-    }
-
-    @Override
-    public void scrollViewTo(int position) {
-        mRecyclerView.smoothScrollToPosition(position);
+        mBookmarkFragment.updateView(newData.size());
     }
 
     @Override
     public void showDetailUi(Object content) {
-        ((BeChefActivity) getActivity()).transToDetail(content);
+        if (getActivity() != null) ((BeChefActivity) getActivity()).transToDetail(content);
     }
 }

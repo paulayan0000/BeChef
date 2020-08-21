@@ -1,7 +1,6 @@
 package com.paula.android.bechef.api.callbacks;
 
 import com.paula.android.bechef.api.beans.GetSearchList;
-
 import java.util.Map;
 
 public interface GetYouTubeDataCallback {

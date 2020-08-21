@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.paula.android.bechef.BeChefContract;
 import com.paula.android.bechef.BeChefPresenter;
@@ -15,7 +14,6 @@ import com.paula.android.bechef.utils.Constants;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
@@ -24,6 +22,7 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     private static final String LOG_TAG = BeChefActivity.class.getSimpleName();
     private BeChefContract.Presenter mPresenter;
     private BottomNavigationView mBottomNavigationView;
+    private int mMenuId = R.id.navigation_bookmark;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +63,7 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
         startActivityForResult(new Intent(mContext, LoginActivity.class), Constants.LOGIN_ACTIVITY);
     }
 
-    private void setToolbar() {
+    public void setToolbar() {
         TextView statusbarTextView = findViewById(R.id.textview_statusbar);
         statusbarTextView.setHeight(getStatusBarHeight());
     }
@@ -72,7 +71,6 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     private BottomNavigationView setBottomNavigationView() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        bottomNavigationView.setOnNavigationItemReselectedListener(mOnNavigationItemReselectedListener);
         return bottomNavigationView;
     }
 
@@ -86,18 +84,6 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     }
 
     @Override
-    public void showDiscoverUi() {
-    }
-
-    @Override
-    public void showBookmarkUi() {
-    }
-
-    @Override
-    public void showReceiptUi() {
-    }
-
-    @Override
     public void setPresenter(BeChefContract.Presenter presenter) {
         mPresenter = checkNotNull(presenter);
     }
@@ -107,43 +93,26 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
         return getContext();
     }
 
-    private BottomNavigationView.OnNavigationItemReselectedListener mOnNavigationItemReselectedListener
-            = new BottomNavigationView.OnNavigationItemReselectedListener() {
-        @Override
-        public void onNavigationItemReselected(@NonNull MenuItem item) {
-            AppBarLayout appBarLayout = null;
-            switch (item.getItemId()) {
-                case R.id.navigation_discover:
-                    appBarLayout = findViewById(R.id.discover_appbar);
-                    break;
-                case R.id.navigation_bookmark:
-                    appBarLayout = findViewById(R.id.bookmark_appbar);
-                    break;
-                case R.id.navigation_receipt:
-                    break;
-                default:
-            }
-            if (appBarLayout != null) appBarLayout.setExpanded(true, true);
-        }
-    };
-
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_discover:
-                    mPresenter.transToDiscover();
-                    break;
-                case R.id.navigation_bookmark:
-                    mPresenter.transToBookmark();
-                    break;
-                case R.id.navigation_receipt:
-                    mPresenter.transToReceipt();
-                    break;
-                default:
-                    return false;
-            }
+            int gotItemId = item.getItemId();
+            if (mMenuId != gotItemId) {
+                switch (gotItemId) {
+                    case R.id.navigation_discover:
+                        mPresenter.transToDiscover();
+                        break;
+                    case R.id.navigation_bookmark:
+                        mPresenter.transToBookmark();
+                        break;
+                    case R.id.navigation_receipt:
+                        mPresenter.transToReceipt();
+                        break;
+                    default:
+                        return false;
+                }
+            } else mPresenter.showToolbar(mMenuId);
             return true;
         }
     };
@@ -154,5 +123,10 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
 
     public void showBottomNavigationView(Boolean isShow) {
         mBottomNavigationView.setVisibility(isShow ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setMenuId(int menuId) {
+        this.mMenuId = menuId;
     }
 }

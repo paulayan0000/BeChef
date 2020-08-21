@@ -1,11 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white">
+
     <TextView
+        android:id="@+id/textview_step_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="step"/>
+        android:text=""
+        android:layout_margin="8dp"
+        android:textColor="@color/black"
+        android:textSize="@dimen/small_content_text_size"
+        app:layout_constraintStart_toStartOf="parent"/>
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/textview_step_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_margin="8dp"
+        android:textColor="@color/black"
+        android:textSize="@dimen/small_content_text_size"
+        app:layout_constraintStart_toEndOf="@id/textview_step_number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

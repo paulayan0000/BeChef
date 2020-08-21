@@ -11,7 +11,7 @@ import android.widget.Toast;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.api.beans.GetSearchList;
 import com.paula.android.bechef.discoverChild.DiscoverChildFragmentContract;
-import com.paula.android.bechef.data.SearchItem;
+import com.paula.android.bechef.data.DiscoverItem;
 import com.paula.android.bechef.utils.Constants;
 import com.paula.android.bechef.utils.Utils;
 import com.squareup.picasso.Picasso;
@@ -21,21 +21,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class DiscoverChildAdapter extends RecyclerView.Adapter{
     private DiscoverChildFragmentContract.Presenter mPresenter;
-    private ArrayList<SearchItem> mArrayList;
+    private ArrayList<DiscoverItem> mArrayList;
     private String mNextPageToken;
     private Context mContext;
 
     public DiscoverChildAdapter(GetSearchList bean, DiscoverChildFragmentContract.Presenter presenter) {
-        mArrayList = bean.getSearchItems();
+        mArrayList = bean.getDiscoverItems();
         mNextPageToken = bean.getNextPageToken();
         mPresenter = presenter;
     }
 
     public void updateData(GetSearchList newBean) {
         if (!mNextPageToken.equals(newBean.getNextPageToken())) {
-            mArrayList.addAll(newBean.getSearchItems());
+            mArrayList.addAll(newBean.getDiscoverItems());
             mNextPageToken = newBean.getNextPageToken();
-            notifyDataSetChanged();
+
+            notifyItemRangeInserted(getItemCount(), newBean.getDiscoverItems().size());
         }
     }
 
@@ -66,7 +67,7 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter{
                 viewHolder.mTvVideoTime.setText(Utils.getCreatedTime(mArrayList.get(position).getPublishedAt()));
 
                 Picasso.with(mContext)
-                        .load(mArrayList.get(position).getThumbnailMediumUrl())
+                        .load(mArrayList.get(position).getImageUrl())
                         .error(R.drawable.all_picture_placeholder)
                         .placeholder(R.drawable.all_picture_placeholder)
                         .into(viewHolder.mIvThumbnail);

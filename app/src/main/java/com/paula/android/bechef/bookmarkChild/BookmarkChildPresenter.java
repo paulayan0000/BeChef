@@ -13,8 +13,7 @@ import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 public class BookmarkChildPresenter implements BookmarkChildFragmentContract.Presenter {
     private BookmarkChildFragmentContract.View mBookmarkChildFragmentView;
     private int mTabIndex;
-    private LoadDataTask mLoadDataTask;
-    private  ArrayList<BookmarkItem> mBookmarkItems = new ArrayList<>();
+    private ArrayList<BookmarkItem> mBookmarkItems = new ArrayList<>();
 
     BookmarkChildPresenter(BookmarkChildFragmentContract.View bookmarkChildFragmentView, int tabIndex) {
         mBookmarkChildFragmentView = checkNotNull(bookmarkChildFragmentView, "bookmarkChildView cannot be null!");
@@ -24,8 +23,12 @@ public class BookmarkChildPresenter implements BookmarkChildFragmentContract.Pre
 
     @Override
     public void start() {
+        loadBookmarkItems();
+    }
+
+    private void loadBookmarkItems() {
         BookmarkItemDatabase db = BookmarkItemDatabase.getInstance(mBookmarkChildFragmentView.getContext());
-        mLoadDataTask = new LoadDataTask(db, new LoadDataCallback() {
+        LoadDataTask loadDataTask = new LoadDataTask(db, new LoadDataCallback() {
             private ArrayList<BookmarkItem> mGotBookmarkItems;
 
             @Override
@@ -33,18 +36,14 @@ public class BookmarkChildPresenter implements BookmarkChildFragmentContract.Pre
                 BookmarkItemDao bookmarkItemDao = ((BookmarkItemDatabase) database).bookmarkDao();
                 mGotBookmarkItems = new ArrayList<>(bookmarkItemDao.getAllWithTab(mTabIndex));
             }
+
             @Override
             public void onCompleted() {
                 mBookmarkItems.addAll(mGotBookmarkItems);
                 mBookmarkChildFragmentView.updateData(mBookmarkItems);
             }
         });
-        mLoadDataTask.execute();
-    }
-
-    @Override
-    public void scrollTo(int position) {
-        mBookmarkChildFragmentView.scrollViewTo(position);
+        loadDataTask.execute();
     }
 
     @Override

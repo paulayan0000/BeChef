@@ -12,7 +12,6 @@ import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 public class DiscoverPresenter implements DiscoverContract.Presenter{
     private final DiscoverContract.View mDiscoverView;
     private ArrayList<String> mTabTitles = new ArrayList<>();
-    private LoadDataTask mLoadDataTask;
 
     public DiscoverPresenter(DiscoverContract.View discoverView) {
         mDiscoverView = checkNotNull(discoverView, "discoverView cannot be null!");
@@ -21,11 +20,15 @@ public class DiscoverPresenter implements DiscoverContract.Presenter{
 
     @Override
     public void start() {
+        loadDiscoverTabs();
+    }
+
+    private void loadDiscoverTabs() {
         mTabTitles.clear();
         DiscoverTabDatabase db = DiscoverTabDatabase.getInstance(mDiscoverView.getContext());
-        mLoadDataTask = new LoadDataTask(db, new LoadDataCallback() {
+        LoadDataTask loadDataTask = new LoadDataTask(db, new LoadDataCallback() {
             private ArrayList<String> mGotTabTitles;
-            private  ArrayList<String> mGotChannelIds;
+            private ArrayList<String> mGotChannelIds;
 
             @Override
             public void doInBackground(RoomDatabase database) {
@@ -40,6 +43,6 @@ public class DiscoverPresenter implements DiscoverContract.Presenter{
                 mDiscoverView.showDiscoverUi(mTabTitles, mGotChannelIds);
             }
         });
-        mLoadDataTask.execute();
+        loadDataTask.execute();
     }
 }

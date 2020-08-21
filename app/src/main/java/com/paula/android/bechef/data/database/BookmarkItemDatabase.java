@@ -28,16 +28,17 @@ public abstract class BookmarkItemDatabase extends RoomDatabase {
                     for (int j = 0; j <= 1; j++) {
                         for (int i = 0; i < 10; i++) {
                             BookmarkItem bookmarkItem = new BookmarkItem(j * 10 + i,
-                                    "video_id_" + j + i,
-                                    "description_" + j + i,
-                                    "2000年12月12日",
+                                    "20" + j + i + "年12月12日",
                                     j,
                                     "title_" + j + i,
                                     "image_url_" + j + i,
                                     i % 10,
-                                    "tag" + j + ";tag" + i,
+                                    "#tag" + j + " #tag" + i,
                                     -1,
-                                    i);
+                                    i,
+//                                    "description_" + j + i,
+                                    "",
+                                    "video_id_" + j + i);
                             bookmarkItems.add(bookmarkItem);
                         }
                     }

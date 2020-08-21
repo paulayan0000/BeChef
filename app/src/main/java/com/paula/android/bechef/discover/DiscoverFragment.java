@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.paula.android.bechef.R;
@@ -21,6 +22,7 @@ public class DiscoverFragment extends Fragment implements DiscoverContract.View{
     private FragmentAdapter mDiscoverMainAdapter;
     private ArrayList<String> mTabTitles = new ArrayList<>();
     private ArrayList<String> mChannelIds = new ArrayList<>();
+    private AppBarLayout mAppBarLayout;
 
     public DiscoverFragment() {
         // Required empty public constructor
@@ -31,9 +33,10 @@ public class DiscoverFragment extends Fragment implements DiscoverContract.View{
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_discover, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        mAppBarLayout = view.findViewById(R.id.appbar);
+        view.findViewById(R.id.constraintlayout_info).setVisibility(View.GONE);
         TabLayout tabLayout = view.findViewById(R.id.tabLayout);
         new TabLayoutMediator(tabLayout, getViewPager(view), true, mTabConfigurationStrategy).attach();
         return view;
@@ -47,10 +50,8 @@ public class DiscoverFragment extends Fragment implements DiscoverContract.View{
 
     private ViewPager2 getViewPager(View view) {
         ViewPager2 viewPager = view.findViewById(R.id.viewpager_main_container);
-
         mDiscoverMainAdapter = new FragmentAdapter(this, mTabTitles, mChannelIds);
         viewPager.setAdapter(mDiscoverMainAdapter);
-
         viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         return viewPager;
     }
@@ -65,6 +66,11 @@ public class DiscoverFragment extends Fragment implements DiscoverContract.View{
     @Override
     public void setPresenter(DiscoverContract.Presenter presenter) {
         mPresenter = checkNotNull(presenter);
+    }
+
+    @Override
+    public void setToolbar() {
+        mAppBarLayout.setExpanded(true, true);
     }
 
     @Override

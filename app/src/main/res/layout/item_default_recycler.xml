@@ -65,7 +65,7 @@
         android:ellipsize="end"
         android:lineSpacingExtra="4dp"
         android:singleLine="true"
-        android:text="50分鐘    2人份    4.5分"
+        android:text=""
         android:textColor="@color/bottom_navigation_item_normal"
         android:textSize="@dimen/small_content_text_size"
         app:layout_constraintEnd_toEndOf="@id/textview_title"

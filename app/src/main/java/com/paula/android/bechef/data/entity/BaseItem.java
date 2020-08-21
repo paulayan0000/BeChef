@@ -1,15 +1,14 @@
 package com.paula.android.bechef.data.entity;
 
-import com.paula.android.bechef.data.SearchItem;
-
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 public class BaseItem {
     @PrimaryKey
     @NonNull
-    private int uid;
+    private int uid = -1;
 
     @ColumnInfo(name = "tab_uid")
     private int mTabUid = -1;
@@ -21,7 +20,7 @@ public class BaseItem {
     private String mImageUrl;
 
     @ColumnInfo(name = "rating")
-    private double mRating = -1;
+    private double mRating = 0.0;
 
     @ColumnInfo(name = "tags")
     private String mTags; // Split by space*1
@@ -32,8 +31,14 @@ public class BaseItem {
     @ColumnInfo(name = "item_index")
     private int mItemIndex = -1;
 
+    @ColumnInfo(name = "description")
+    private String mDescription;
+
+    @ColumnInfo(name = "video_id")
+    private String mVideoId;
+
     public BaseItem(int uid, int tabUid, String title, String imageUrl, double rating, String tags,
-                    int inTodayId, int itemIndex) {
+                    int inTodayId, int itemIndex, String description, String videoId) {
         this.uid = uid;
         mTabUid = tabUid;
         mTitle = title;
@@ -42,12 +47,17 @@ public class BaseItem {
         mTags = tags;
         mInTodayId = inTodayId;
         mItemIndex = itemIndex;
+        mDescription = description;
+        mVideoId = videoId;
     }
 
-    public BaseItem(SearchItem searchItem) {
-        mTitle = searchItem.getTitle();
-        mImageUrl = searchItem.getThumbnailMediumUrl();
-        mTags = searchItem.getTags();
+    @Ignore
+    public BaseItem() {
+        mTitle = "";
+        mImageUrl = "";
+        mTags = "";
+        mDescription = "";
+        mVideoId = "";
     }
 
     public int getUid() {
@@ -112,5 +122,21 @@ public class BaseItem {
 
     public void setItemIndex(int itemIndex) {
         mItemIndex = itemIndex;
+    }
+
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public void setDescription(String description) {
+        mDescription = description;
+    }
+
+    public String getVideoId() {
+        return mVideoId;
+    }
+
+    public void setVideoId(String videoId) {
+        mVideoId = videoId;
     }
 }
