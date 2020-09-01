@@ -1,20 +1,19 @@
 package com.paula.android.bechef.data;
 
 import android.os.AsyncTask;
-import androidx.room.RoomDatabase;
 
-public class LoadDataTask extends AsyncTask<Void, Void, Void> {
-    private RoomDatabase mDatabase;
-    private LoadDataCallback mCallback;
+public class LoadDataTask<T> extends AsyncTask<Void, Void, Void> {
+    private T mDao;
+    private LoadDataCallback<T> mCallback;
 
-    public LoadDataTask(RoomDatabase database, LoadDataCallback callback) {
-        mDatabase = database;
+    public LoadDataTask(LoadDataCallback<T> callback) {
+        mDao = callback.getDao();
         mCallback = callback;
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
-        mCallback.doInBackground(mDatabase);
+        mCallback.doInBackground(mDao);
         return null;
     }
 

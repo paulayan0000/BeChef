@@ -1,17 +1,20 @@
 package com.paula.android.bechef.data.entity;
 
-import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
+import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+@Entity
 public class BaseItem {
-    @PrimaryKey
-    @NonNull
-    private int uid = -1;
+    @Ignore
+    private Boolean mIsSelected = false;
+
+    @PrimaryKey(autoGenerate = true)
+    private int uid = 0;
 
     @ColumnInfo(name = "tab_uid")
-    private int mTabUid = -1;
+    private int mTabUid = 0;
 
     @ColumnInfo(name = "title")
     private String mTitle;
@@ -28,8 +31,8 @@ public class BaseItem {
     @ColumnInfo(name = "in_today_id")
     private int mInTodayId = -1;
 
-    @ColumnInfo(name = "item_index")
-    private int mItemIndex = -1;
+    @ColumnInfo(name = "created_time")
+    private String mCreatedTime;
 
     @ColumnInfo(name = "description")
     private String mDescription;
@@ -37,16 +40,15 @@ public class BaseItem {
     @ColumnInfo(name = "video_id")
     private String mVideoId;
 
-    public BaseItem(int uid, int tabUid, String title, String imageUrl, double rating, String tags,
-                    int inTodayId, int itemIndex, String description, String videoId) {
-        this.uid = uid;
+    public BaseItem(int tabUid, String title, String imageUrl, double rating, String tags,
+                    int inTodayId, String createdTime, String description, String videoId) {
         mTabUid = tabUid;
         mTitle = title;
         mImageUrl = imageUrl;
         mRating = rating;
         mTags = tags;
         mInTodayId = inTodayId;
-        mItemIndex = itemIndex;
+        mCreatedTime = createdTime;
         mDescription = description;
         mVideoId = videoId;
     }
@@ -58,6 +60,14 @@ public class BaseItem {
         mTags = "";
         mDescription = "";
         mVideoId = "";
+    }
+
+    public Boolean getSelected() {
+        return mIsSelected;
+    }
+
+    public void setSelected(Boolean selected) {
+        mIsSelected = selected;
     }
 
     public int getUid() {
@@ -116,12 +126,12 @@ public class BaseItem {
         mInTodayId = inTodayId;
     }
 
-    public int getItemIndex() {
-        return mItemIndex;
+    public String getCreatedTime() {
+        return mCreatedTime;
     }
 
-    public void setItemIndex(int itemIndex) {
-        mItemIndex = itemIndex;
+    public void setCreatedTime(String createdTime) {
+        mCreatedTime = createdTime;
     }
 
     public String getDescription() {

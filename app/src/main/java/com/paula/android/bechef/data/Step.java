@@ -3,14 +3,9 @@ package com.paula.android.bechef.data;
 import java.util.ArrayList;
 
 public class Step {
-    private int mStepNumber = -1;
+    private int mStepNumber;
     private String mStepDescription;
     private ArrayList<String> mImageUrls;
-
-    public Step() {
-        mStepDescription = "";
-        mImageUrls = null;
-    }
 
     public Step(int stepNumber, String stepDescription, ArrayList<String> imageUrls) {
         mStepNumber = stepNumber;

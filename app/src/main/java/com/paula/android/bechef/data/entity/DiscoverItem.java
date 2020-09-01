@@ -1,6 +1,4 @@
-package com.paula.android.bechef.data;
-
-import com.paula.android.bechef.data.entity.BaseItem;
+package com.paula.android.bechef.data.entity;
 
 public class DiscoverItem extends BaseItem {
     private String mId;

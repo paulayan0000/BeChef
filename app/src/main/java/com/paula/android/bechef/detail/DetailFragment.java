@@ -6,32 +6,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.activities.BeChefActivity;
 import com.paula.android.bechef.adapters.DetailAdapter;
 import com.paula.android.bechef.data.entity.BookmarkItem;
-import com.paula.android.bechef.data.DiscoverItem;
+import com.paula.android.bechef.data.entity.DiscoverItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class DetailFragment extends Fragment implements DetailContract.View {
     private DetailContract.Presenter mPresenter;
     private RecyclerView mRvDetail;
     private ImageButton mIbtnMore;
+    private boolean mIsBottomShown;
 
-//    private TextView mTvContent;
-
-    public DetailFragment() {
-        // Required empty public constructor
+    private DetailFragment(boolean isBottomShown) {
+        mIsBottomShown = isBottomShown;
     }
 
-    public static DetailFragment newInstance() {
-        return new DetailFragment();
+    public static DetailFragment newInstance(boolean isBottomShown) {
+        return new DetailFragment(isBottomShown);
     }
 
     @Override
@@ -44,7 +46,7 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_detail, container, false);
-        ImageButton ibtnBack = root.findViewById(R.id.imagebotton_toolbar_back);
+        ImageButton ibtnBack = root.findViewById(R.id.imagebutton_toolbar_back);
         ibtnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,5 +87,12 @@ public class DetailFragment extends Fragment implements DetailContract.View {
                 Toast.makeText(getContext(), content.getClass().getSimpleName(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        if (getActivity() != null)
+            ((BeChefActivity) getActivity()).showBottomNavigationView(mIsBottomShown);
+        super.onDestroy();
     }
 }

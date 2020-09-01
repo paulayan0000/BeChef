@@ -5,15 +5,14 @@ import androidx.room.ColumnInfo;
 import androidx.room.PrimaryKey;
 
 public class BaseTab {
-    @PrimaryKey
-    @NonNull
-    private int uid;
+    @PrimaryKey(autoGenerate = true)
+    private int uid = 0;
 
     @ColumnInfo(name = "tab_name")
+    @NonNull
     private String mTabName;
 
-    public BaseTab(int uid, String tabName) {
-        this.uid = uid;
+    public BaseTab(@NonNull String tabName) {
         mTabName = tabName;
     }
 
@@ -25,6 +24,7 @@ public class BaseTab {
         this.uid = uid;
     }
 
+    @NonNull
     public String getTabName() {
         return mTabName;
     }

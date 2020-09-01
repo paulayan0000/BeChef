@@ -9,7 +9,7 @@
     <View
         android:id="@+id/view_top_divider"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="1dp"
         android:layout_margin="8dp"
         android:visibility="gone"
         android:background="@color/bottom_navigation_item_normal"/>
@@ -62,7 +62,7 @@
     <View
         android:id="@+id/view_bottom_divider"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="1dp"
         android:layout_margin="8dp"
         android:visibility="gone"
         android:background="@color/bottom_navigation_item_normal"

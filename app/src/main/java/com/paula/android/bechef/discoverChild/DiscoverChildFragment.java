@@ -6,11 +6,15 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.activities.BeChefActivity;
 import com.paula.android.bechef.adapters.DiscoverChildAdapter;
 import com.paula.android.bechef.api.beans.GetSearchList;
+import com.paula.android.bechef.data.entity.BaseTab;
+import com.paula.android.bechef.data.entity.DiscoverTab;
 import com.paula.android.bechef.utils.Utils;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -24,14 +28,23 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
     private Context mContext;
     private DiscoverChildAdapter mDiscoverChildAdapter;
 
-    private DiscoverChildFragment(String channelId) {
+//    private DiscoverChildFragment(String channelId) {
+//        if (mPresenter == null) {
+//            mPresenter = new DiscoverChildPresenter(this, channelId);
+//        }
+//    }
+//
+//    public static DiscoverChildFragment newInstance(String channelId) {
+//        return new DiscoverChildFragment(channelId);
+//    }
+    private DiscoverChildFragment(DiscoverTab discoverTab) {
         if (mPresenter == null) {
-            mPresenter = new DiscoverChildPresenter(this, channelId);
+            mPresenter = new DiscoverChildPresenter(this, discoverTab);
         }
     }
 
-    public static DiscoverChildFragment newInstance(String channelId) {
-        return new DiscoverChildFragment(channelId);
+    public static DiscoverChildFragment newInstance(DiscoverTab discoverTab) {
+        return new DiscoverChildFragment(discoverTab);
     }
 
     @Override
@@ -39,6 +52,7 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_child, container, false);
         mContext = view.getContext();
+        view.findViewById(R.id.constraintlayout_info).setVisibility(View.GONE);
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerview_discover_main);
         recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
@@ -78,7 +92,8 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
         @Override
         public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
             super.getItemOffsets(outRect, view, parent, state);
-            if (outRect.bottom == 0) outRect.bottom = (int) Utils.convertDpToPixel((float) 8, mContext);
+            if (outRect.bottom == 0)
+                outRect.bottom = (int) Utils.convertDpToPixel((float) 8, mContext);
             if (parent.getChildAdapterPosition(view) == 0)
                 outRect.top = (int) Utils.convertDpToPixel((float) 8, mContext);
         }
@@ -95,7 +110,7 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
     }
 
     @Override
-    public void showDetailUi(Object content) {
-        if (getActivity() != null) ((BeChefActivity) getActivity()).transToDetail(content);
+    public void showDetailUi(Object content, boolean isBottomShown) {
+        ((BeChefActivity) mContext).transToDetail(content, true);
     }
 }

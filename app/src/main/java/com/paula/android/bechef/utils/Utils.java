@@ -1,30 +1,28 @@
 package com.paula.android.bechef.utils;
 
 import android.content.Context;
-import android.text.format.DateFormat;
 
-import com.paula.android.bechef.BeChef;
-
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class Utils {
-    private final static long minute = 60 * 1000;// 1分鐘
-    private final static long hour = 60 * minute;// 1小時
-    private final static long day = 24 * hour;// 1天
-    private final static long week = 7 * day;// 1週
-    private final static long month = 31 * day;// 1月
-    private final static long year = 12 * month;// 1年
+    private final static long minute = 60 * 1000; // 1分鐘
+    private final static long hour = 60 * minute; // 1小時
+    private final static long day = 24 * hour; // 1天
+    private final static long week = 7 * day; // 1週
+    private final static long month = 31 * day; // 1月
+    private final static long year = 12 * month; // 1年
 
-    public static float convertDpToPixel(float dp, Context context){
+    public static float convertDpToPixel(float dp, Context context) {
         return dp * context.getResources().getDisplayMetrics().density;
     }
 
     public static String getCreatedTime(String utcTime) {
-        SimpleDateFormat utcFormater = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");//UTC时间格式
+        SimpleDateFormat utcFormater = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
         utcFormater.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date gpsUTCDate;
         try {
@@ -60,6 +58,10 @@ public class Utils {
             e.printStackTrace();
         }
         return "剛剛";
+    }
 
+    public static boolean doesDatabaseExist(Context context, String dbName) {
+        File dbFile = context.getDatabasePath(dbName);
+        return dbFile.exists();
     }
 }

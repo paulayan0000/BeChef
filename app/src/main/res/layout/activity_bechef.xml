@@ -33,6 +33,7 @@
         app:itemIconTint="@drawable/nav_itembutton"
         app:itemHorizontalTranslationEnabled="false"
         app:menu="@menu/navigation"
+        android:animateLayoutChanges="false"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

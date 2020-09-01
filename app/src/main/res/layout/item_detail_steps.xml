@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:paddingBottom="8dp">
 
     <TextView
         android:id="@+id/textview_step_number"
@@ -24,7 +25,15 @@
         android:textColor="@color/black"
         android:textSize="@dimen/small_content_text_size"
         app:layout_constraintStart_toEndOf="@id/textview_step_number"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview_step_image"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/textview_step_description"
+        app:layout_constraintEnd_toEndOf="@id/textview_step_description"
+        app:layout_constraintTop_toBottomOf="@id/textview_step_description"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

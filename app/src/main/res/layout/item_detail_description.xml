@@ -57,7 +57,7 @@
     <View
         android:id="@+id/view_divider"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="1dp"
         android:layout_margin="8dp"
         android:background="@color/bottom_navigation_item_normal"
         app:layout_constraintTop_toBottomOf="@id/textview_time_count"/>

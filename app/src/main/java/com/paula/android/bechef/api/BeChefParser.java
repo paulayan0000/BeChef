@@ -3,7 +3,8 @@ package com.paula.android.bechef.api;
 import com.paula.android.bechef.api.beans.GetSearchList;
 import com.paula.android.bechef.api.exceptions.NoResourceException;
 import com.paula.android.bechef.api.exceptions.YoutubeException;
-import com.paula.android.bechef.data.DiscoverItem;
+import com.paula.android.bechef.data.entity.DiscoverItem;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -1,8 +1,10 @@
 package com.paula.android.bechef.api;
 
 import android.util.Log;
+
 import java.io.IOException;
 import java.util.Map;
+
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -36,7 +38,10 @@ class BeChefClient {
                 .build();
         Response response = mOkHttpClient.newCall(request).execute();
 
-        return doResponse(response);
+        if (apiTypeName.equals("search"))
+            return doResponse(response).replaceAll("&amp;", "&");
+        else
+            return doResponse(response);
     }
 
     private String doResponse(Response response) throws IOException {

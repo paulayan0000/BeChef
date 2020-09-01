@@ -8,11 +8,14 @@ import com.paula.android.bechef.discover.DiscoverFragment;
 import com.paula.android.bechef.discover.DiscoverPresenter;
 import com.paula.android.bechef.receipt.ReceiptFragment;
 import com.paula.android.bechef.receipt.ReceiptPresenter;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
 import androidx.annotation.StringDef;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class BeChefPresenter implements BeChefContract.Presenter {
@@ -23,11 +26,13 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     @StringDef({
             DISCOVER, BOOKMARK, RECEIPT, DETAIL
     })
-    @interface FragmentType {}
+    @interface FragmentType {
+    }
+
     static final String DISCOVER = "DISCOVER";
     static final String BOOKMARK = "BOOKMARK";
-    static final String RECEIPT  = "RECEIPT";
-    static final String DETAIL   = "DETAIL";
+    static final String RECEIPT = "RECEIPT";
+    static final String DETAIL = "DETAIL";
 
     private DiscoverFragment mDiscoverFragment;
     private BookmarkFragment mBookmarkFragment;
@@ -112,7 +117,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
 
     @FragmentType
     @Override
-    public void transToDetail(Object content) {
+    public void transToDetail(Object content, boolean isBottomShown) {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
         if (mDiscoverFragment != null && !mDiscoverFragment.isHidden()) {
@@ -127,7 +132,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
             transaction.hide(mReceiptFragment);
             transaction.addToBackStack(RECEIPT);
         }
-        DetailFragment detailFragment = DetailFragment.newInstance();
+        DetailFragment detailFragment = DetailFragment.newInstance(isBottomShown);
         transaction.add(R.id.linearlayout_main_container, detailFragment, DETAIL);
         transaction.commit();
 
@@ -136,28 +141,22 @@ public class BeChefPresenter implements BeChefContract.Presenter {
 
     @Override
     public void showToolbar(int itemId) {
-            switch (itemId) {
-                case R.id.navigation_discover:
-                    mDiscoverFragment.setToolbar();
-                    break;
-                case R.id.navigation_bookmark:
-                    mBookmarkFragment.setToolbar();
-                    break;
-                case R.id.navigation_receipt:
-                    mReceiptFragment.setToolbar();
-                    break;
-                default:
-            }
-    }
-
-    @Override
-    public Boolean isDetailShown() {
-        return mFragmentManager.findFragmentByTag(DETAIL) != null;
+        switch (itemId) {
+            case R.id.navigation_discover:
+                mDiscoverFragment.setToolbar();
+                break;
+            case R.id.navigation_bookmark:
+                mBookmarkFragment.setToolbar(true);
+                break;
+            case R.id.navigation_receipt:
+                mReceiptFragment.setToolbar(true);
+                break;
+            default:
+        }
     }
 
     @Override
     public void start() {
         transToDiscover();
     }
-
 }

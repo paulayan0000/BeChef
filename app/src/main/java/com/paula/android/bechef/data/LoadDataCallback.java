@@ -1,10 +1,10 @@
 package com.paula.android.bechef.data;
 
-import androidx.room.RoomDatabase;
+public interface LoadDataCallback<T> {
 
-public interface LoadDataCallback {
+    T getDao();
 
-    void doInBackground(RoomDatabase database);
+    void doInBackground(T dao);
 
     void onCompleted();
 }

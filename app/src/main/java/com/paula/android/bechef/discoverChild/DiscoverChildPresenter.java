@@ -2,13 +2,18 @@ package com.paula.android.bechef.discoverChild;
 
 import android.util.Log;
 import android.widget.Toast;
+
 import com.paula.android.bechef.api.BeChefApiHelper;
 import com.paula.android.bechef.api.GetYouTubeDataTask;
 import com.paula.android.bechef.api.beans.GetSearchList;
 import com.paula.android.bechef.api.callbacks.GetYouTubeDataCallback;
 import com.paula.android.bechef.api.exceptions.NoResourceException;
+import com.paula.android.bechef.data.entity.BaseTab;
+import com.paula.android.bechef.data.entity.DiscoverTab;
+
 import java.util.HashMap;
 import java.util.Map;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,10 +29,15 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
     private String mNextPagingId = "";
     private String mChannelId;
 
-    DiscoverChildPresenter(DiscoverChildFragmentContract.View discoverChildFragmentView, String channelId) {
+//    DiscoverChildPresenter(DiscoverChildFragmentContract.View discoverChildFragmentView, String channelId) {
+//        mDiscoverChildFragmentView = checkNotNull(discoverChildFragmentView, "discoverChildView cannot be null!");
+//        discoverChildFragmentView.setPresenter(this);
+//        mChannelId = channelId;
+//    }
+    DiscoverChildPresenter(DiscoverChildFragmentContract.View discoverChildFragmentView, DiscoverTab discoverTab) {
         mDiscoverChildFragmentView = checkNotNull(discoverChildFragmentView, "discoverChildView cannot be null!");
         discoverChildFragmentView.setPresenter(this);
-        mChannelId = channelId;
+        mChannelId = discoverTab.getChannelId();
     }
 
     @Override
@@ -35,8 +45,8 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
         if (mChannelId != null) {
             Map<String, String> queryParameters = new HashMap<>();
 
-    //        queryParameters.put("q", "wecook123");
-    //        queryParameters.put("type", "channel");
+            //        queryParameters.put("q", "wecook123");
+            //        queryParameters.put("type", "channel");
 
             queryParameters.put("pageToken", "");
             queryParameters.put("channelId", mChannelId);
@@ -109,7 +119,7 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
     }
 
     @Override
-    public void openDetail(Object content) {
-        mDiscoverChildFragmentView.showDetailUi(content);
+    public void openDetail(Object content, boolean isBottomShown) {
+        mDiscoverChildFragmentView.showDetailUi(content, isBottomShown);
     }
 }

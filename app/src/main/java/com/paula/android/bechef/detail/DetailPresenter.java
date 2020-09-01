@@ -2,11 +2,13 @@ package com.paula.android.bechef.detail;
 
 import android.util.Log;
 import android.widget.Toast;
+
 import com.paula.android.bechef.api.BeChefApiHelper;
 import com.paula.android.bechef.api.GetYouTubeDataTask;
 import com.paula.android.bechef.api.beans.GetSearchList;
 import com.paula.android.bechef.api.callbacks.GetYouTubeDataCallback;
 import com.paula.android.bechef.api.exceptions.NoResourceException;
+
 import java.util.HashMap;
 import java.util.Map;
 

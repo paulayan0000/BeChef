@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -16,12 +17,12 @@ public class UserManager {
     private static final String LOG_TAG = UserManager.class.getSimpleName();
     private static GoogleSignInAccount mGoogleSignInAccount;
 
-    public static UserManager getInstance() {
-        return ourInstance;
-    }
-
     private UserManager() {
 
+    }
+
+    public static UserManager getInstance() {
+        return ourInstance;
     }
 
     public Intent getGoogleSignInClient(Context context) {
@@ -35,13 +36,14 @@ public class UserManager {
 
     public GoogleSignInAccount checkLastSignedInAccount(Context context) {
         Log.d(LOG_TAG, "check last signed-in account");
-        if (mGoogleSignInAccount == null) mGoogleSignInAccount = GoogleSignIn.getLastSignedInAccount(context);
+        if (mGoogleSignInAccount == null)
+            mGoogleSignInAccount = GoogleSignIn.getLastSignedInAccount(context);
         logUserInfo((Activity) context);
         return mGoogleSignInAccount;
     }
 
     public GoogleSignInAccount checkSignedInAccountFromIntent(Intent data, Context context) {
-        Log.d(LOG_TAG,"check sign-in account from intent");
+        Log.d(LOG_TAG, "check sign-in account from intent");
         if (mGoogleSignInAccount == null) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {

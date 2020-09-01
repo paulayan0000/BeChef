@@ -1,9 +1,29 @@
 package com.paula.android.bechef;
 
-public interface ChildContract extends BaseContract{
+import java.util.ArrayList;
+
+public interface ChildContract extends BaseContract {
     interface ChildView<T> extends BaseView<T> {
+        void showDetailUi(Object content, boolean isBottomShown);
     }
+
     interface ChildPresenter extends BasePresenter {
-        void openDetail(Object content);
+        void openDetail(Object content, boolean isBottomShown);
+    }
+
+    interface CustomChildView<T> extends ChildView<T> {
+        void showSelectableUi(boolean isSelectable);
+
+        void updateItems(ArrayList<?> items);
+
+        void refreshData();
+    }
+
+    interface CustomChildPresenter extends ChildPresenter {
+        void transToSelectable();
+
+        void loadSpecificItems(int type);
+
+        void loadItems();
     }
 }

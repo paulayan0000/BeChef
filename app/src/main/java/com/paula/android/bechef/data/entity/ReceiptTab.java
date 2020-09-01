@@ -4,7 +4,7 @@ import androidx.room.Entity;
 
 @Entity(tableName = "receipt_tab")
 public class ReceiptTab extends BaseTab {
-    public ReceiptTab(int uid, String tabName) {
-        super(uid, tabName);
+    public ReceiptTab(String tabName) {
+        super(tabName);
     }
 }

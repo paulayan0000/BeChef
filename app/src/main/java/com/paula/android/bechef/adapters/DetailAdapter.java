@@ -7,8 +7,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.paula.android.bechef.R;
-import com.paula.android.bechef.data.DiscoverItem;
+import com.paula.android.bechef.data.entity.DiscoverItem;
 import com.paula.android.bechef.data.Material;
 import com.paula.android.bechef.data.Step;
 import com.paula.android.bechef.data.entity.BaseItem;
@@ -16,10 +17,13 @@ import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.detail.DetailContract;
 import com.squareup.picasso.Picasso;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import static android.text.TextUtils.isEmpty;
@@ -28,6 +32,7 @@ public class DetailAdapter extends RecyclerView.Adapter {
     private static final int HEAD = 0;
     private static final int BODY = 1;
     private static final int FOOT = 2;
+    private static final int IMAGE_ITEM_LIMIT = 3;
 
     private DetailContract.Presenter mDetailPresenter;
     private Context mContext;
@@ -41,16 +46,15 @@ public class DetailAdapter extends RecyclerView.Adapter {
         mDetailPresenter = presenter;
         if (mBaseItem instanceof DiscoverItem) {
             DiscoverItem discoverItem = (DiscoverItem) baseItem;
-            mTimeAndCount = getFormatDate(discoverItem.getPublishedAt())+ " • "
+            mTimeAndCount = getFormatDate(discoverItem.getPublishedAt()) + " • "
                     + "觀看次數 : " + getFormatCount(discoverItem.getViewCount()) + "次";
-        }
-        else if (mBaseItem instanceof BookmarkItem) {
+        } else if (mBaseItem instanceof BookmarkItem) {
             BookmarkItem bookmarkItem = (BookmarkItem) baseItem;
-            mTimeAndCount = bookmarkItem.getPublishedTime() + " • " + bookmarkItem.getRating() + "分";
-        }
-        else {
+            mTimeAndCount = bookmarkItem.getCreatedTime() + " • " + bookmarkItem.getRating() + "分";
+        } else {
             mReceiptItem = (ReceiptItem) baseItem;
-            mTimeAndCount = "耗時 : " + mReceiptItem.getDuration() + " • 份量 : "
+            mTimeAndCount = mReceiptItem.getCreatedTime() + " • " + mReceiptItem.getRating()
+                    + "分\n耗時 : " + mReceiptItem.getDuration() + " • 份量 : "
                     + mReceiptItem.getWeight() + "人份 • " + mReceiptItem.getRating() + "分";
             mMaterialSize = mReceiptItem.getMaterials().size();
         }
@@ -84,8 +88,6 @@ public class DetailAdapter extends RecyclerView.Adapter {
         } else {
             ((StepsViewHolder) holder).bindView(mReceiptItem.getSteps().get(position - mMaterialSize - 1));
         }
-        // TODO: StepsViewHolder and MaterialsViewHolder bindView.
-        //  Material : If p == 1: show solid upper divider; else if position == size : show lower solid divider
     }
 
     @Override
@@ -159,16 +161,28 @@ public class DetailAdapter extends RecyclerView.Adapter {
 
     private class StepsViewHolder extends RecyclerView.ViewHolder {
         private TextView mTvNumber, mTvDescription;
+        private RecyclerView mRecyclerView;
 
         StepsViewHolder(@NonNull View itemView) {
             super(itemView);
             mTvNumber = itemView.findViewById(R.id.textview_step_number);
             mTvDescription = itemView.findViewById(R.id.textview_step_description);
+            mRecyclerView = itemView.findViewById(R.id.recyclerview_step_image);
         }
 
-        public void bindView(Step step) {
+        void bindView(Step step) {
             mTvNumber.setText(String.valueOf(step.getStepNumber()));
             mTvDescription.setText(step.getStepDescription());
+
+            int imageCount = step.getImageUrls().size();
+            if (imageCount != 0) {
+                mRecyclerView.setVisibility(View.VISIBLE);
+                GridLayoutManager layoutManager = new GridLayoutManager(mContext,
+                        Math.min(imageCount, IMAGE_ITEM_LIMIT));
+                StepImageAdapter stepImageAdapter = new StepImageAdapter(step.getImageUrls());
+                mRecyclerView.setLayoutManager(layoutManager);
+                mRecyclerView.setAdapter(stepImageAdapter);
+            }
         }
     }
 
@@ -182,12 +196,13 @@ public class DetailAdapter extends RecyclerView.Adapter {
             mTvAmount = itemView.findViewById(R.id.textview_material_amount);
         }
 
-        public void showDivider(boolean showTop, boolean showBottom) {
+        void showDivider(boolean showTop, boolean showBottom) {
             if (showTop) itemView.findViewById(R.id.view_top_divider).setVisibility(View.VISIBLE);
-            if (showBottom) itemView.findViewById(R.id.view_bottom_divider).setVisibility(View.VISIBLE);
+            if (showBottom)
+                itemView.findViewById(R.id.view_bottom_divider).setVisibility(View.VISIBLE);
         }
 
-        public void bindView(Material material) {
+        void bindView(Material material) {
             if (material.getMaterialIndex() == 0) mTvType.setVisibility(View.VISIBLE);
             String materialType = material.getMaterialType();
             mTvType.setText(materialType.equals("") ? "預備食材" : materialType);

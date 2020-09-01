@@ -1,16 +1,10 @@
 package com.paula.android.bechef.data;
 
 public class Material {
-    private int mMaterialIndex = -1;
+    private int mMaterialIndex;
     private String mMaterialType;
     private String mMaterialName;
     private String mMaterialAmount;
-
-    public Material() {
-        mMaterialType = "";
-        mMaterialName = "";
-        mMaterialAmount = "";
-    }
 
     public Material(int materialIndex, String materialType, String materialName, String materialAmount) {
         mMaterialIndex = materialIndex;

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.user.UserManager;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;

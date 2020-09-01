@@ -8,8 +8,8 @@ public class DiscoverTab extends BaseTab {
     @ColumnInfo(name = "channel_id")
     private String mChannelId;
 
-    public DiscoverTab(int uid, String channelId, String tabName) {
-        super(uid, tabName);
+    public DiscoverTab(String channelId, String tabName) {
+        super(tabName);
         mChannelId = channelId;
     }
 

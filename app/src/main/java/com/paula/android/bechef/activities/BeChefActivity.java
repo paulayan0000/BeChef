@@ -3,14 +3,17 @@ package com.paula.android.bechef.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.paula.android.bechef.BeChefContract;
 import com.paula.android.bechef.BeChefPresenter;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.user.UserManager;
 import com.paula.android.bechef.utils.Constants;
+
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,17 +48,14 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        if (mPresenter.isDetailShown()) showBottomNavigationView(true);
-        super.onBackPressed();
-    }
-
     private void init() {
         setContentView(R.layout.activity_bechef);
         mPresenter = new BeChefPresenter(this, getSupportFragmentManager());
         setToolbar();
-        mBottomNavigationView = setBottomNavigationView();
+        mBottomNavigationView = findViewById(R.id.navigation);
+        ;
+        mBottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
         mPresenter.start();
     }
 
@@ -68,19 +68,13 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
         statusbarTextView.setHeight(getStatusBarHeight());
     }
 
-    private BottomNavigationView setBottomNavigationView() {
-        BottomNavigationView bottomNavigationView = findViewById(R.id.navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-        return bottomNavigationView;
-    }
-
     public int getStatusBarHeight() {
-        int result = 0;
+        int statusBarHeight = 0;
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
         if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
+            statusBarHeight = getResources().getDimensionPixelSize(resourceId);
         }
-        return result;
+        return statusBarHeight;
     }
 
     @Override
@@ -90,7 +84,7 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
 
     @Override
     public Context getContext() {
-        return getContext();
+        return mContext;
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -117,8 +111,8 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
         }
     };
 
-    public void transToDetail(Object content) {
-        mPresenter.transToDetail(content);
+    public void transToDetail(Object content, boolean isBottomShown) {
+        mPresenter.transToDetail(content, isBottomShown);
     }
 
     public void showBottomNavigationView(Boolean isShow) {
