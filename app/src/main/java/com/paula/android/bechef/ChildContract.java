@@ -11,12 +11,14 @@ public interface ChildContract extends BaseContract {
         void openDetail(Object content, boolean isBottomShown);
     }
 
-    interface CustomChildView<T> extends ChildView<T> {
+    interface CustomChildView<T, E> extends ChildView<T> {
         void showSelectableUi(boolean isSelectable);
 
-        void updateItems(ArrayList<?> items);
+        void updateItems(ArrayList<E> items);
 
         void refreshData();
+
+        ArrayList<E> getChosenItems();
     }
 
     interface CustomChildPresenter extends ChildPresenter {

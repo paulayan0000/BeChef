@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 
 import com.paula.android.bechef.data.Material;
 import com.paula.android.bechef.data.Step;
+import com.paula.android.bechef.data.dao.BaseDao;
 import com.paula.android.bechef.data.dao.BookmarkItemDao;
 import com.paula.android.bechef.data.dao.ReceiptItemDao;
 import com.paula.android.bechef.data.entity.BookmarkItem;
@@ -83,9 +84,27 @@ public abstract class ItemDatabase extends RoomDatabase {
                         return mReceiptItemDatabaseInstance;
 
                     ArrayList<Step> steps = new ArrayList<>();
-                    steps.add(new Step(1, "將麵粉加入水中，將麵粉加入水中，將麵粉加入水中，將麵粉加入水中", new ArrayList<String>() {
-                    }));
-                    steps.add(new Step(2, "攪拌至麵糊表面光滑，攪拌至麵糊表面光滑，攪拌至麵糊表面光滑，攪拌至麵糊表面光滑", new ArrayList<String>()));
+                    ArrayList<String> imageUrls1 = new ArrayList<>();
+                    imageUrls1.add("https://i.ytimg.com/vi/oqGVLj2fAnc/mqdefault.jpg");
+                    steps.add(new Step(1, "將麵粉加入水中，將麵粉加入水中，將麵粉加入水中，將麵粉加入水中", imageUrls1));
+
+                    ArrayList<String> imageUrls2 = new ArrayList<>();
+                    imageUrls2.add("https://i.ytimg.com/vi/oqGVLj2fAnc/mqdefault.jpg");
+                    imageUrls2.add("https://i.ytimg.com/vi/oqGVLj2fAnc/mqdefault.jpg");
+                    steps.add(new Step(2, "攪拌至麵糊表面光滑，攪拌至麵糊表面光滑，攪拌至麵糊表面光滑，攪拌至麵糊表面光滑", imageUrls2));
+
+                    ArrayList<String> imageUrls3 = new ArrayList<>();
+                    imageUrls3.add("https://i.ytimg.com/vi/oqGVLj2fAnc/mqdefault.jpg");
+                    imageUrls3.add("https://i.ytimg.com/vi/oqGVLj2fAnc/mqdefault.jpg");
+                    imageUrls3.add("https://i.ytimg.com/vi/oqGVLj2fAnc/mqdefault.jpg");
+                    steps.add(new Step(3, "攪拌至麵糊表面光滑，攪拌至麵糊表面光滑，攪拌至麵糊表面光滑，攪拌至麵糊表面光滑", imageUrls3));
+
+                    ArrayList<String> imageUrls4 = new ArrayList<>();
+                    imageUrls4.add("https://i.ytimg.com/vi/oqGVLj2fAnc/mqdefault.jpg");
+                    imageUrls4.add("https://i.ytimg.com/vi/oqGVLj2fAnc/mqdefault.jpg");
+                    imageUrls4.add("https://i.ytimg.com/vi/oqGVLj2fAnc/mqdefault.jpg");
+                    imageUrls4.add("https://i.ytimg.com/vi/oqGVLj2fAnc/mqdefault.jpg");
+                    steps.add(new Step(4, "攪拌至麵糊表面光滑，攪拌至麵糊表面光滑，攪拌至麵糊表面光滑，攪拌至麵糊表面光滑", imageUrls4));
 
                     ArrayList<Material> materials = new ArrayList<>();
                     materials.add(new Material(0, "", "水", "500 c.c."));
@@ -94,22 +113,24 @@ public abstract class ItemDatabase extends RoomDatabase {
 
                     // TODO: remove fake default data
                     final ArrayList<ReceiptItem> receiptItems = new ArrayList<>();
-                    for (int i = 0; i < 10; i++) {
-                        ReceiptItem receiptItem = new ReceiptItem(
-                                steps,
-                                materials,
-                                "1" + i + "分鐘",
-                                i % 10,
-                                1,
-                                "title_" + i,
-                                "image_url_" + i,
-                                i % 10,
-                                "#tag" + i,
-                                -1,
-                                "202" + i + "年12月12日",
-                                "description_" + i,
-                                "video_id_" + i);
-                        receiptItems.add(receiptItem);
+                    for (int j = 0; j <= 1; j++) {
+                        for (int i = 0; i < 10; i++) {
+                            ReceiptItem receiptItem = new ReceiptItem(
+                                    steps,
+                                    materials,
+                                    j + i + "分鐘",
+                                    i % 10,
+                                    j + 1,
+                                    "title_" + j + i,
+                                    "https://i.ytimg.com/vi/oqGVLj2fAnc/mqdefault.jpg",
+                                    i % 10,
+                                    "#tag" + j + " #tag" + i,
+                                    -1,
+                                    "20" + j + i + "年12月12日",
+                                    "description_" + j + i,
+                                    "");
+                            receiptItems.add(receiptItem);
+                        }
                     }
                     // default tab with empty title
                     new AsyncTask<Void, Void, Void>() {

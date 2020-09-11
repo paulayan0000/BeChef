@@ -8,12 +8,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.paula.android.bechef.ChildContract;
 import com.paula.android.bechef.R;
-import com.paula.android.bechef.bookmarkChild.BookmarkChildPresenter;
+import com.paula.android.bechef.customChild.CustomChildPresenter;
 import com.paula.android.bechef.data.entity.BaseItem;
-import com.paula.android.bechef.data.entity.BookmarkItem;
-import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -21,21 +18,18 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class DefaultChildAdapter extends RecyclerView.Adapter {
-    private ChildContract.CustomChildPresenter mChildPresenter;
+public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
+    private CustomChildPresenter mChildPresenter;
     private Context mContext;
     private Boolean mIsSelectable;
-    private ArrayList<?> mDataArrayList;
-    private ArrayList<BookmarkItem> mChosenBookmarkItems;
-    private ArrayList<ReceiptItem> mChosenReceiptItems;
+    private ArrayList<T> mDataArrayList;
+    private ArrayList<T> mChosenDataArrayList;
 
-    public DefaultChildAdapter(Boolean isSelectable, ArrayList<BaseItem> bean, ChildContract.CustomChildPresenter presenter) {
+    public DefaultChildAdapter(Boolean isSelectable, ArrayList<T> bean, CustomChildPresenter presenter) {
         mIsSelectable = isSelectable;
         mDataArrayList = bean;
         mChildPresenter = presenter;
-        if (mChildPresenter instanceof BookmarkChildPresenter)
-            mChosenBookmarkItems = new ArrayList<>();
-        else mChosenReceiptItems = new ArrayList<>();
+        mChosenDataArrayList = new ArrayList<>();
     }
 
     @NonNull
@@ -48,8 +42,7 @@ public class DefaultChildAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        DefaultViewHolder viewHolder = (DefaultViewHolder) holder;
-        viewHolder.bindView(mDataArrayList.get(position));
+        ((DefaultViewHolder) holder).bindView(mDataArrayList.get(position));
     }
 
     @Override
@@ -57,7 +50,7 @@ public class DefaultChildAdapter extends RecyclerView.Adapter {
         return mDataArrayList.size();
     }
 
-    public void updateData(ArrayList<?> newData) {
+    public void updateData(ArrayList<T> newData) {
         mDataArrayList = newData;
         notifyDataSetChanged();
     }
@@ -81,7 +74,7 @@ public class DefaultChildAdapter extends RecyclerView.Adapter {
             mIvImage = itemView.findViewById(R.id.imageview_thumbnail);
         }
 
-        void bindView(final Object data) {
+        void bindView(final T data) {
             final BaseItem baseItem = (BaseItem) data;
             mTvTimeCount.setText(baseItem.getCreatedTime() + " • " + baseItem.getRating() + "分");
             mTvItemTitle.setText(baseItem.getTitle());
@@ -96,13 +89,8 @@ public class DefaultChildAdapter extends RecyclerView.Adapter {
                         boolean isSelected = !v.isSelected();
                         v.setSelected(isSelected);
                         baseItem.setSelected(isSelected);
-                        if (data instanceof BookmarkItem) {
-                            if (isSelected) mChosenBookmarkItems.add((BookmarkItem) data);
-                            else mChosenBookmarkItems.remove(data);
-                        } else {
-                            if (isSelected) mChosenReceiptItems.add((ReceiptItem) data);
-                            else mChosenReceiptItems.remove(data);
-                        }
+                        if (isSelected) mChosenDataArrayList.add(data);
+                        else mChosenDataArrayList.remove(data);
                     }
                 });
             } else {
@@ -134,19 +122,12 @@ public class DefaultChildAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public ArrayList<BookmarkItem> getChosenBookmarkItems() {
-        return mChosenBookmarkItems;
-    }
-
-    public ArrayList<ReceiptItem> getChosenReceiptItems() {
-        return mChosenReceiptItems;
+    public ArrayList<T> getChosenItems() {
+        return mChosenDataArrayList;
     }
 
     private void clearChosenItems() {
-        if (mChosenBookmarkItems != null) {
-            mChosenBookmarkItems.clear();
-            return;
-        }
-        if (mChosenReceiptItems != null) mChosenReceiptItems.clear();
+        if (mChosenDataArrayList != null)
+            mChosenDataArrayList.clear();
     }
 }

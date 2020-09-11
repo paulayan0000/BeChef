@@ -47,20 +47,15 @@ public abstract class TabDatabase extends RoomDatabase {
                     DiscoverTab discoverTab1 = new DiscoverTab(
                             "UCQGVzUNv0UTn-t0Xzd06E4Q",
                             "Wecook123 料理123");
-//                    discoverTab1.setUid(0);
                     DiscoverTab discoverTab2 = new DiscoverTab(
                             "UCr90FXGOO8nAE9B6FAUeTNA",
                             "MASAの料理ABC");
-//                    discoverTab2.setUid(1);
                     DiscoverTab discoverTab3 = new DiscoverTab(
                             "UCReIdTavsve16EJlilnTPNg", "iCook 愛料理");
-//                    discoverTab3.setUid(2);
                     DiscoverTab discoverTab4 = new DiscoverTab(
                             "UCctVKh07hVAyQtqpl75pxYA", "楊桃美食網");
-//                    discoverTab4.setUid(3);
                     DiscoverTab discoverTab5 = new DiscoverTab(
                             "UCOJDuGX9SqzPkureXZfS60w", "乾杯與小菜的日常");
-//                    discoverTab5.setUid(4);
 
                     final ArrayList<DiscoverTab> discoverTabs = new ArrayList<>();
                     discoverTabs.add(discoverTab1);
@@ -98,14 +93,12 @@ public abstract class TabDatabase extends RoomDatabase {
                     // add default data
                     BookmarkTab bookmarkTab1 = new BookmarkTab(
                             "未命名書籤");
-//                    bookmarkTab1.setUid(0);
                     final ArrayList<BookmarkTab> bookmarkTabs = new ArrayList<>();
                     bookmarkTabs.add(bookmarkTab1);
 
                     // TODO: remove fake default data
                     BookmarkTab bookmarkTab2 = new BookmarkTab(
                             "Default tab2");
-//                    bookmarkTab2.setUid(1);
                     bookmarkTabs.add(bookmarkTab2);
 
                     new AsyncTask<Void, Void, Void>() {
@@ -136,11 +129,13 @@ public abstract class TabDatabase extends RoomDatabase {
                     // add default data
                     ReceiptTab receiptTab1 = new ReceiptTab(
                             "未命名書籤");
-//                    receiptTab1.setUid(0);
                     final ArrayList<ReceiptTab> receiptTabs = new ArrayList<>();
                     receiptTabs.add(receiptTab1);
 
                     // TODO: remove fake default data
+                    ReceiptTab receiptTab2 = new ReceiptTab(
+                            "Receipt 2");
+                    receiptTabs.add(receiptTab2);
 
                     new AsyncTask<Void, Void, Void>() {
                         @Override

@@ -1,11 +1,8 @@
 package com.paula.android.bechef;
 
 import android.content.Context;
-
-import com.paula.android.bechef.data.entity.BaseTab;
-
 import java.util.ArrayList;
-import java.util.Collection;
+import androidx.fragment.app.FragmentManager;
 
 public interface BaseContract {
     interface BaseView<T> {
@@ -18,19 +15,16 @@ public interface BaseContract {
         void start();
     }
 
-    interface CustomView<T, E> extends BaseView<T> {
-//        void showDefaultUi(ArrayList<String> tabTitles);
-        void showDefaultUi(ArrayList<?> tabTitles);
-
-        void setToolbar(boolean isShow);
-
+    interface CustomView<T> extends BaseView<T> {
         void refreshCurrentUi();
 
         void refreshUi(int tabIndex);
 
-        ArrayList<E> getChosenItems();
+        ArrayList<?> getChosenItems();
 
         int getCurrentTabIndex();
+
+        void showSelectable(boolean selectable);
     }
 
     interface CustomPresenter<E> extends BasePresenter {
@@ -44,9 +38,10 @@ public interface BaseContract {
 
         ArrayList<E> getChosenItems();
 
-//        ArrayList<String> getTabTitles();
         ArrayList<?> getOtherTabs();
 
         int getCurrentTabIndex();
+
+        void transToAction(boolean isTrans, FragmentManager childFragmentManager);
     }
 }

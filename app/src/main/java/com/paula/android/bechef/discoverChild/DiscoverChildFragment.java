@@ -11,7 +11,6 @@ import com.paula.android.bechef.R;
 import com.paula.android.bechef.activities.BeChefActivity;
 import com.paula.android.bechef.adapters.DiscoverChildAdapter;
 import com.paula.android.bechef.api.beans.GetSearchList;
-import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.data.entity.DiscoverTab;
 import com.paula.android.bechef.utils.Utils;
 
@@ -28,15 +27,6 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
     private Context mContext;
     private DiscoverChildAdapter mDiscoverChildAdapter;
 
-//    private DiscoverChildFragment(String channelId) {
-//        if (mPresenter == null) {
-//            mPresenter = new DiscoverChildPresenter(this, channelId);
-//        }
-//    }
-//
-//    public static DiscoverChildFragment newInstance(String channelId) {
-//        return new DiscoverChildFragment(channelId);
-//    }
     private DiscoverChildFragment(DiscoverTab discoverTab) {
         if (mPresenter == null) {
             mPresenter = new DiscoverChildPresenter(this, discoverTab);

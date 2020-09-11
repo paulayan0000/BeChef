@@ -34,7 +34,7 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
 //        discoverChildFragmentView.setPresenter(this);
 //        mChannelId = channelId;
 //    }
-    DiscoverChildPresenter(DiscoverChildFragmentContract.View discoverChildFragmentView, DiscoverTab discoverTab) {
+    public DiscoverChildPresenter(DiscoverChildFragmentContract.View discoverChildFragmentView, DiscoverTab discoverTab) {
         mDiscoverChildFragmentView = checkNotNull(discoverChildFragmentView, "discoverChildView cannot be null!");
         discoverChildFragmentView.setPresenter(this);
         mChannelId = discoverTab.getChannelId();

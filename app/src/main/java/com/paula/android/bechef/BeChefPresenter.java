@@ -143,13 +143,13 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     public void showToolbar(int itemId) {
         switch (itemId) {
             case R.id.navigation_discover:
-                mDiscoverFragment.setToolbar();
+                mDiscoverFragment.showToolbar();
                 break;
             case R.id.navigation_bookmark:
-                mBookmarkFragment.setToolbar(true);
+                mBookmarkFragment.showToolbar();
                 break;
             case R.id.navigation_receipt:
-                mReceiptFragment.setToolbar(true);
+                mReceiptFragment.showToolbar();
                 break;
             default:
         }

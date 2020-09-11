@@ -12,13 +12,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
-import com.paula.android.bechef.BaseContract;
+import com.paula.android.bechef.customMain.CustomMainPresenter;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.bookmark.BookmarkPresenter;
 import com.paula.android.bechef.data.LoadDataCallback;
 import com.paula.android.bechef.data.LoadDataTask;
-import com.paula.android.bechef.data.dao.BaseDao;
 import com.paula.android.bechef.data.dao.BookmarkItemDao;
 import com.paula.android.bechef.data.dao.ReceiptItemDao;
 import com.paula.android.bechef.data.database.ItemDatabase;
@@ -32,11 +30,11 @@ import com.paula.android.bechef.receipt.ReceiptPresenter;
 
 import java.util.ArrayList;
 
-public class ActionChooseFragment<E> extends Fragment implements View.OnClickListener {
-    private BaseContract.CustomPresenter<E> mPresenter;
+public class ActionChooseFragment<T, E> extends Fragment implements View.OnClickListener {
+    private CustomMainPresenter<T, E> mPresenter;
     private Context mContext;
 
-    public ActionChooseFragment(BaseContract.CustomPresenter<E> presenter) {
+    public ActionChooseFragment(CustomMainPresenter<T, E> presenter) {
         mPresenter = presenter;
     }
 
@@ -104,43 +102,29 @@ public class ActionChooseFragment<E> extends Fragment implements View.OnClickLis
                                 if (which == 0) {
                                     Toast.makeText(getContext(), "新增標籤對話框", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    if (mPresenter instanceof BookmarkPresenter) {
-                                        new LoadDataTask<>(new LoadDataCallback<BookmarkItemDao>() {
-                                            @Override
-                                            public BookmarkItemDao getDao() {
-                                                return ItemDatabase.getBookmarkInstance(mContext).bookmarkDao();
-                                            }
+                                    new LoadDataTask<>(new LoadDataCallback<ItemDatabase>() {
+                                        @Override
+                                        public ItemDatabase getDao() {
+                                            if (mPresenter instanceof BookmarkPresenter)
+                                                return ItemDatabase.getBookmarkInstance(mContext);
+                                            else
+                                                return ItemDatabase.getReceiptInstance(mContext);
+                                        }
 
-                                            @Override
-                                            public void doInBackground(BookmarkItemDao dao) {
-                                                updateBookmarkTabUid(dao, ((BaseTab) baseTabs.get(which - 1)).getUid());
-                                            }
+                                        @Override
+                                        public void doInBackground(ItemDatabase database) {
+                                            int tabUid = ((BaseTab) baseTabs.get(which - 1)).getUid();
+                                            if (mPresenter instanceof BookmarkPresenter)
+                                                updateBookmarkTabUid(database.bookmarkDao(), tabUid);
+                                            else
+                                                updateReceiptTabUid(database.receiptDao(), tabUid);
+                                        }
 
-                                            @Override
-                                            public void onCompleted() {
-                                                mPresenter.refreshData(which - 1);
-                                                refreshCurrentPage();
-                                            }
-                                        }).execute();
-                                    } else {
-                                        new LoadDataTask<>(new LoadDataCallback<ReceiptItemDao>() {
-                                            @Override
-                                            public ReceiptItemDao getDao() {
-                                                return ItemDatabase.getReceiptInstance(mContext).receiptDao();
-                                            }
-
-                                            @Override
-                                            public void doInBackground(ReceiptItemDao dao) {
-                                                updateReceiptTabUid(dao, ((BaseTab) baseTabs.get(which - 1)).getUid());
-                                            }
-
-                                            @Override
-                                            public void onCompleted() {
-                                                mPresenter.refreshData(which - 1);
-                                                refreshCurrentPage();
-                                            }
-                                        }).execute();
-                                    }
+                                        @Override
+                                        public void onCompleted() {
+                                            moveComplete(which);
+                                        }
+                                    }).execute();
                                 }
                             }
                         };
@@ -151,41 +135,28 @@ public class ActionChooseFragment<E> extends Fragment implements View.OnClickLis
                 clickCallback = new AlertDialogClickCallback() {
                     @Override
                     public void onPositiveButtonClick() {
-                        if (mPresenter instanceof BookmarkPresenter) {
-                            new LoadDataTask<>(new LoadDataCallback<BaseDao<BookmarkItem>>() {
-                                @Override
-                                public BaseDao<BookmarkItem> getDao() {
-                                    return ItemDatabase.getBookmarkInstance(mContext).bookmarkDao();
-                                }
+                        new LoadDataTask<>(new LoadDataCallback<ItemDatabase>() {
+                            @Override
+                            public ItemDatabase getDao() {
+                                if (mPresenter instanceof BookmarkPresenter)
+                                    return ItemDatabase.getBookmarkInstance(mContext);
+                                else
+                                    return ItemDatabase.getReceiptInstance(mContext);
+                            }
 
-                                @Override
-                                public void doInBackground(BaseDao<BookmarkItem> dao) {
-                                    dao.deleteItems(((BookmarkPresenter) mPresenter).getChosenItems());
-                                }
+                            @Override
+                            public void doInBackground(ItemDatabase database) {
+                                if (mPresenter instanceof BookmarkPresenter)
+                                    database.bookmarkDao().deleteItems(((BookmarkPresenter) mPresenter).getChosenItems());
+                                else
+                                    database.receiptDao().deleteItems(((ReceiptPresenter) mPresenter).getChosenItems());
+                            }
 
-                                @Override
-                                public void onCompleted() {
-                                    refreshCurrentPage();
-                                }
-                            }).execute();
-                        } else {
-                            new LoadDataTask<>(new LoadDataCallback<BaseDao<ReceiptItem>>() {
-                                @Override
-                                public BaseDao<ReceiptItem> getDao() {
-                                    return ItemDatabase.getReceiptInstance(mContext).receiptDao();
-                                }
-
-                                @Override
-                                public void doInBackground(BaseDao<ReceiptItem> dao) {
-                                    dao.deleteItems(((ReceiptPresenter) mPresenter).getChosenItems());
-                                }
-
-                                @Override
-                                public void onCompleted() {
-                                    refreshCurrentPage();
-                                }
-                            }).execute();
-                        }
+                            @Override
+                            public void onCompleted() {
+                                refreshCurrentPage();
+                            }
+                        }).execute();
                     }
                 };
                 break;
@@ -201,17 +172,23 @@ public class ActionChooseFragment<E> extends Fragment implements View.OnClickLis
     }
 
     private void updateBookmarkTabUid(BookmarkItemDao dao, int newTabUid) {
-        ArrayList<BookmarkItem> chosenBookmarkItems = ((BookmarkPresenter) mPresenter).getChosenItems();
-        for (BookmarkItem chosenBookmarkItem : chosenBookmarkItems) {
-            dao.setNewTabUid(chosenBookmarkItem.getUid(), newTabUid);
+        ArrayList<BookmarkItem> chosenItems = ((BookmarkPresenter) mPresenter).getChosenItems();
+        for (BookmarkItem chosenItem : chosenItems) {
+            dao.setNewTabUid(chosenItem.getUid(), newTabUid);
         }
     }
 
     private void updateReceiptTabUid(ReceiptItemDao dao, int newTabUid) {
-        ArrayList<ReceiptItem> chosenReceiptItems = ((ReceiptPresenter) mPresenter).getChosenItems();
-        for (ReceiptItem chosenReceiptItem : chosenReceiptItems) {
-            dao.setNewTabUid(chosenReceiptItem.getUid(), newTabUid);
+        ArrayList<ReceiptItem> chosenItems = ((ReceiptPresenter) mPresenter).getChosenItems();
+        for (ReceiptItem chosenItem : chosenItems) {
+            dao.setNewTabUid(chosenItem.getUid(), newTabUid);
         }
+    }
+
+    private void moveComplete(int which) {
+        int currentIndex = mPresenter.getCurrentTabIndex();
+        mPresenter.refreshData(which <= currentIndex ? which - 1 : which);
+        refreshCurrentPage();
     }
 
     private void refreshCurrentPage() {

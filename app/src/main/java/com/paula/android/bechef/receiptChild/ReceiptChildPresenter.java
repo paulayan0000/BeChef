@@ -1,78 +1,53 @@
 package com.paula.android.bechef.receiptChild;
 
+import com.paula.android.bechef.customChild.CustomChildPresenter;
 import com.paula.android.bechef.data.LoadDataCallback;
 import com.paula.android.bechef.data.LoadDataTask;
 import com.paula.android.bechef.data.dao.ReceiptItemDao;
 import com.paula.android.bechef.data.database.ItemDatabase;
-import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.data.entity.ReceiptItem;
-import com.paula.android.bechef.data.entity.ReceiptTab;
+import com.paula.android.bechef.utils.Constants;
 
 import java.util.ArrayList;
 
-import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
-
-public class ReceiptChildPresenter implements ReceiptChildFragmentContract.Presenter {
-    private ReceiptChildFragmentContract.View mReceiptChildFragmentView;
-    private int mTabUid;
-    private ArrayList<BaseItem> mReceiptItems = new ArrayList<>();
-
-//    ReceiptChildPresenter(ReceiptChildFragmentContract.View receiptChildFragmentView, int tabIndex) {
-//        mReceiptChildFragmentView = checkNotNull(receiptChildFragmentView, "receiptChildView cannot be null!");
-//        receiptChildFragmentView.setPresenter(this);
-//        mTabIndex = tabIndex;
-//    }
-    ReceiptChildPresenter(ReceiptChildFragmentContract.View receiptChildFragmentView, ReceiptTab receiptTab) {
-        mReceiptChildFragmentView = checkNotNull(receiptChildFragmentView, "receiptChildView cannot be null!");
-        receiptChildFragmentView.setPresenter(this);
-        mTabUid = receiptTab.getUid();
-    }
-
-    @Override
-    public void start() {
-        loadReceiptItems();
-    }
-
-    private void loadReceiptItems() {
-        new LoadDataTask<>(new LoadDataCallback<ReceiptItemDao>() {
-            private ArrayList<ReceiptItem> mGotReceiptItems;
-
-            @Override
-            public ReceiptItemDao getDao() {
-                return ItemDatabase.getReceiptInstance(mReceiptChildFragmentView.getContext()).receiptDao();
-            }
-
-            @Override
-            public void doInBackground(ReceiptItemDao receiptItemDao) {
-                mGotReceiptItems = new ArrayList<>(receiptItemDao.getAllWithTimeDesc(mTabUid));
-            }
-
-            @Override
-            public void onCompleted() {
-                mReceiptItems.addAll(mGotReceiptItems);
-                mReceiptChildFragmentView.updateItems(mReceiptItems);
-            }
-        }).execute();
-    }
-
-    @Override
-    public void openDetail(Object content, boolean isBottomShown) {
-        mReceiptChildFragmentView.showDetailUi(content, isBottomShown);
-    }
-
-    @Override
-    public void transToSelectable() {
-
+public class ReceiptChildPresenter extends CustomChildPresenter<ReceiptItem> {
+    ReceiptChildPresenter(ReceiptChildFragment receiptChildFragment, BaseTab baseTab) {
+        super(receiptChildFragment, baseTab);
     }
 
     @Override
     public void loadSpecificItems(int type) {
+        mDataFilterType = type;
+        new LoadDataTask<>(new LoadDataCallback<ReceiptItemDao>() {
+            @Override
+            public ReceiptItemDao getDao() {
+                return ItemDatabase.getReceiptInstance(mCustomChildFragment.getContext()).receiptDao();
+            }
 
-    }
+            @Override
+            public void doInBackground(ReceiptItemDao receiptItemDao) {
+                switch (mDataFilterType) {
+                    case Constants.FILTER_WITH_TIME_ASC:
+                        mDataArrayList = new ArrayList<>(receiptItemDao.getAllWithTimeAsc(mTabUid));
+                        break;
+                    case Constants.FILTER_WITH_RATING_DESC:
+                        mDataArrayList = new ArrayList<>(receiptItemDao.getAllWithRatingDesc(mTabUid));
+                        break;
+                    case Constants.FILTER_WITH_RATING_ASC:
+                        mDataArrayList = new ArrayList<>(receiptItemDao.getAllWithRatingAsc(mTabUid));
+                        break;
+                    default:
+                    case Constants.FILTER_WITH_TIME_DESC:
+                        mDataArrayList = new ArrayList<>(receiptItemDao.getAllWithTimeDesc(mTabUid));
+                        break;
+                }
+            }
 
-    @Override
-    public void loadItems() {
-
+            @Override
+            public void onCompleted() {
+                mCustomChildFragment.updateItems(mDataArrayList);
+            }
+        }).execute();
     }
 }
