@@ -8,6 +8,11 @@ import com.paula.android.bechef.api.GetYouTubeDataTask;
 import com.paula.android.bechef.api.beans.GetSearchList;
 import com.paula.android.bechef.api.callbacks.GetYouTubeDataCallback;
 import com.paula.android.bechef.api.exceptions.NoResourceException;
+import com.paula.android.bechef.data.LoadDataCallback;
+import com.paula.android.bechef.data.LoadDataTask;
+import com.paula.android.bechef.data.dao.BookmarkItemDao;
+import com.paula.android.bechef.data.database.ItemDatabase;
+import com.paula.android.bechef.data.entity.BookmarkItem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,10 +34,31 @@ public class DetailPresenter implements DetailContract.Presenter {
     @Override
     public void start() {
         if (mContent instanceof String) {
-            Map<String, String> queryParameters = new HashMap<>();
-            queryParameters.put("pageToken", "");
-            queryParameters.put("id", (String) mContent);
-            loadVideo(queryParameters);
+            new LoadDataTask<>(new LoadDataCallback<BookmarkItemDao>() {
+                private BookmarkItem mBookmarkItem = null;
+                @Override
+                public BookmarkItemDao getDao() {
+                    return ItemDatabase.getBookmarkInstance(mDetailView.getContext()).bookmarkDao();
+                }
+
+                @Override
+                public void doInBackground(BookmarkItemDao dao) {
+                    mBookmarkItem = dao.getItemWithVideoId((String) mContent);
+                }
+
+                @Override
+                public void onCompleted() {
+                    if (mBookmarkItem != null) {
+                        mDetailView.showDetailUi(mBookmarkItem);
+                    } else {
+                        Map<String, String> queryParameters = new HashMap<>();
+                        queryParameters.put("pageToken", "");
+                        queryParameters.put("id", (String) mContent);
+                        loadVideo(queryParameters);
+                    }
+                }
+            }).execute();
+
         } else {
             mDetailView.showDetailUi(mContent);
         }

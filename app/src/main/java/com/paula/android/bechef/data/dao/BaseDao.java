@@ -9,7 +9,10 @@ import androidx.room.Update;
 
 public interface BaseDao<T> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(ArrayList<T> items);
+    Long[] insert(ArrayList<T> items);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    Long insert(T item);
 
     @Delete
     void deleteItem(T items);

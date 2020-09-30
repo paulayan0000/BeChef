@@ -40,11 +40,11 @@ class BeChefParser {
         DiscoverItem discoverItem = new DiscoverItem();
         switch (getDataString(jsonObject, "kind")) {
             case "youtube#video": // api type: video
-                discoverItem.setId(getDataString(jsonObject, "id"));
+                discoverItem.setVideoId(getDataString(jsonObject, "id"));
                 break;
             case "youtube#searchResult": // api type: search
                 try {
-                    discoverItem.setId(jsonObject.getJSONObject("id").getString("videoId"));
+                    discoverItem.setVideoId(jsonObject.getJSONObject("id").getString("videoId"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     return null;

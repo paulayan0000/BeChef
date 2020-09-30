@@ -8,4 +8,8 @@ public class BookmarkItem extends BaseItem {
                         String tags, int inTodayId, String createdTime, String description, String videoId) {
         super(tabUid, title, imageUrl, rating, tags, inTodayId, createdTime, description, videoId);
     }
+
+    public BookmarkItem(DiscoverItem discoverItem) {
+        super(discoverItem);
+    }
 }

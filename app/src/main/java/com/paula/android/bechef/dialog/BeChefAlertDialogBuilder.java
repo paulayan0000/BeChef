@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.widget.Button;
 
 import com.paula.android.bechef.R;
+import com.paula.android.bechef.utils.Utils;
 
 import java.util.ArrayList;
 
@@ -15,7 +16,7 @@ public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
     private Context mContext;
 
     public BeChefAlertDialogBuilder(@NonNull Context context) {
-        super(context);
+        super(context, R.style.MyDialogTheme);
         mContext = context;
         setCancelable(true);
     }

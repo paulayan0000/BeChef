@@ -1,6 +1,5 @@
 package com.paula.android.bechef.data.dao;
 
-import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.data.entity.DiscoverTab;
 
 import java.util.List;

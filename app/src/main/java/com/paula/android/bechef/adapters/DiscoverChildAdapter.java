@@ -79,14 +79,12 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
         private ImageView mIvThumbnail;
         private TextView mTvVideoTitle;
         private TextView mTvVideoTime;
-        private ImageButton mIbtnBookmark;
 
         private DiscoverViewHolder(View itemView) {
             super(itemView);
             mIvThumbnail = itemView.findViewById(R.id.imageview_thumbnail);
             mTvVideoTitle = itemView.findViewById(R.id.textview_video_title);
             mTvVideoTime = itemView.findViewById(R.id.textview_video_time);
-            mIbtnBookmark = itemView.findViewById(R.id.imagebutton_bookmark);
         }
 
         void bindView(final DiscoverItem discoverItem) {
@@ -101,14 +99,7 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mPresenter.openDetail(discoverItem.getId(), true);
-                }
-            });
-            mIbtnBookmark.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // TODO: take full description from YouTube Data API, and transTo edit page
-                    Toast.makeText(mContext, "add " + discoverItem.getId(), Toast.LENGTH_SHORT).show();
+                    mPresenter.openDetail(discoverItem.getVideoId(), true);
                 }
             });
         }

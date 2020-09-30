@@ -10,6 +10,10 @@ import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.utils.Constants;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 
 public class BookmarkChildPresenter extends CustomChildPresenter<BookmarkItem> {
     BookmarkChildPresenter(BookmarkChildFragment bookmarkChildFragment, BaseTab baseTab) {
@@ -19,35 +23,76 @@ public class BookmarkChildPresenter extends CustomChildPresenter<BookmarkItem> {
     @Override
     public void loadSpecificItems(int type) {
         mDataFilterType = type;
-        new LoadDataTask<>(new LoadDataCallback<BookmarkItemDao>() {
-            @Override
-            public BookmarkItemDao getDao() {
-                return ItemDatabase.getBookmarkInstance(mCustomChildFragment.getContext()).bookmarkDao();
-            }
+        switch (mDataFilterType) {
+            case Constants.FILTER_WITH_TIME_ASC:
+                ItemDatabase.getBookmarkInstance(mCustomChildFragment.getContext()).bookmarkDao()
+                        .getAllWithTimeAscLive(mTabUid).observe((LifecycleOwner) mCustomChildFragment, new Observer<List<BookmarkItem>>() {
+                    @Override
+                    public void onChanged(List<BookmarkItem> bookmarkItems) {
+                        mCustomChildFragment.updateItems(new ArrayList<>(bookmarkItems));
+                    }
+                });
+                break;
 
-            @Override
-            public void doInBackground(BookmarkItemDao bookmarkItemDao) {
-                switch (mDataFilterType) {
-                    case Constants.FILTER_WITH_TIME_ASC:
-                        mDataArrayList = new ArrayList<>(bookmarkItemDao.getAllWithTimeAsc(mTabUid));
-                        break;
-                    case Constants.FILTER_WITH_RATING_DESC:
-                        mDataArrayList = new ArrayList<>(bookmarkItemDao.getAllWithRatingDesc(mTabUid));
-                        break;
-                    case Constants.FILTER_WITH_RATING_ASC:
-                        mDataArrayList = new ArrayList<>(bookmarkItemDao.getAllWithRatingAsc(mTabUid));
-                        break;
-                    default:
-                    case Constants.FILTER_WITH_TIME_DESC:
-                        mDataArrayList = new ArrayList<>(bookmarkItemDao.getAllWithTimeDesc(mTabUid));
-                        break;
-                }
-            }
+            case Constants.FILTER_WITH_TIME_DESC:
+                ItemDatabase.getBookmarkInstance(mCustomChildFragment.getContext()).bookmarkDao()
+                        .getAllWithTimeDescLive(mTabUid).observe((LifecycleOwner) mCustomChildFragment, new Observer<List<BookmarkItem>>() {
+                    @Override
+                    public void onChanged(List<BookmarkItem> bookmarkItems) {
+                        mCustomChildFragment.updateItems(new ArrayList<>(bookmarkItems));
+                    }
+                });
+                break;
 
-            @Override
-            public void onCompleted() {
-                mCustomChildFragment.updateItems(mDataArrayList);
-            }
-        }).execute();
+            case Constants.FILTER_WITH_RATING_ASC:
+                ItemDatabase.getBookmarkInstance(mCustomChildFragment.getContext()).bookmarkDao()
+                        .getAllWithRatingAscLive(mTabUid).observe((LifecycleOwner) mCustomChildFragment, new Observer<List<BookmarkItem>>() {
+                    @Override
+                    public void onChanged(List<BookmarkItem> bookmarkItems) {
+                        mCustomChildFragment.updateItems(new ArrayList<>(bookmarkItems));
+                    }
+                });
+                break;
+
+            case Constants.FILTER_WITH_RATING_DESC:
+                ItemDatabase.getBookmarkInstance(mCustomChildFragment.getContext()).bookmarkDao()
+                        .getAllWithRatingDescLive(mTabUid).observe((LifecycleOwner) mCustomChildFragment, new Observer<List<BookmarkItem>>() {
+                    @Override
+                    public void onChanged(List<BookmarkItem> bookmarkItems) {
+                        mCustomChildFragment.updateItems(new ArrayList<>(bookmarkItems));
+                    }
+                });
+                break;
+        }
+//        new LoadDataTask<>(new LoadDataCallback<BookmarkItemDao>() {
+//            @Override
+//            public BookmarkItemDao getDao() {
+//                return ItemDatabase.getBookmarkInstance(mCustomChildFragment.getContext()).bookmarkDao();
+//            }
+//
+//            @Override
+//            public void doInBackground(BookmarkItemDao bookmarkItemDao) {
+//                switch (mDataFilterType) {
+//                    case Constants.FILTER_WITH_TIME_ASC:
+//                        mDataArrayList = new ArrayList<>(bookmarkItemDao.getAllWithTimeAsc(mTabUid));
+//                        break;
+//                    case Constants.FILTER_WITH_RATING_DESC:
+//                        mDataArrayList = new ArrayList<>(bookmarkItemDao.getAllWithRatingDesc(mTabUid));
+//                        break;
+//                    case Constants.FILTER_WITH_RATING_ASC:
+//                        mDataArrayList = new ArrayList<>(bookmarkItemDao.getAllWithRatingAsc(mTabUid));
+//                        break;
+//                    default:
+//                    case Constants.FILTER_WITH_TIME_DESC:
+//                        mDataArrayList = new ArrayList<>(bookmarkItemDao.getAllWithTimeDesc(mTabUid));
+//                        break;
+//                }
+//            }
+//
+//            @Override
+//            public void onCompleted() {
+//                mCustomChildFragment.updateItems(mDataArrayList);
+//            }
+//        }).execute();
     }
 }

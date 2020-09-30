@@ -78,7 +78,10 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
             final BaseItem baseItem = (BaseItem) data;
             mTvTimeCount.setText(baseItem.getCreatedTime() + " • " + baseItem.getRating() + "分");
             mTvItemTitle.setText(baseItem.getTitle());
-            mTvTags.setText(baseItem.getTags());
+            if ("".equals(baseItem.getTags()))
+                mTvTags.setVisibility(View.GONE);
+            else
+                mTvTags.setText(baseItem.getTags());
 
             if (mIsSelectable) {
                 mIbtnChoose.setVisibility(View.VISIBLE);

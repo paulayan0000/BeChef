@@ -58,8 +58,22 @@ public class BaseItem {
         mTitle = "";
         mImageUrl = "";
         mTags = "";
+        mCreatedTime = "";
         mDescription = "";
         mVideoId = "";
+    }
+
+    @Ignore
+    public BaseItem(DiscoverItem discoverItem) {
+        mTabUid = discoverItem.getTabUid();
+        mTitle = discoverItem.getTitle();
+        mImageUrl = discoverItem.getImageUrl();
+        mRating = discoverItem.getRating();
+        mTags = discoverItem.getTags();
+        mInTodayId = discoverItem.getInTodayId();
+        mCreatedTime = discoverItem.getCreatedTime();
+        mDescription = discoverItem.getDescription();
+        mVideoId = discoverItem.getVideoId();
     }
 
     public Boolean getSelected() {

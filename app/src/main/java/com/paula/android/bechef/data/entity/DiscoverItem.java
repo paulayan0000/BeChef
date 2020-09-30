@@ -1,25 +1,15 @@
 package com.paula.android.bechef.data.entity;
 
 public class DiscoverItem extends BaseItem {
-    private String mId;
     private String mPublishedAt;
     private String mDuration;
     private String mViewCount;
 
     public DiscoverItem() {
         super();
-        mId = "";
         mPublishedAt = "";
         mDuration = "";
         mViewCount = "";
-    }
-
-    public String getId() {
-        return mId;
-    }
-
-    public void setId(String id) {
-        mId = id;
     }
 
     public String getPublishedAt() {
