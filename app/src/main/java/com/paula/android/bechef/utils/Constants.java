@@ -25,4 +25,6 @@ public class Constants {
     public static final int FILTER_WITH_TIME_ASC = 1;
     public static final int FILTER_WITH_RATING_DESC = 2;
     public static final int FILTER_WITH_RATING_ASC = 3;
+
+    public static final String DATE_FORMAT = "yyyy年MM月dd日";
 }

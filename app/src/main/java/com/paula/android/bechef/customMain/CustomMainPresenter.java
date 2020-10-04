@@ -3,8 +3,6 @@ package com.paula.android.bechef.customMain;
 import com.paula.android.bechef.BaseContract;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.action.ActionChooseFragment;
-import com.paula.android.bechef.data.entity.BaseItem;
-import com.paula.android.bechef.data.entity.BookmarkItem;
 
 import java.util.ArrayList;
 
@@ -16,7 +14,7 @@ import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 public class CustomMainPresenter<T, E> implements BaseContract.CustomPresenter {
     protected CustomMainFragment<T, E> mCustomView;
     private ArrayList<T> mTabs;
-    private ActionChooseFragment mActionChooseFragment;
+    private ActionChooseFragment<T, E> mActionChooseFragment;
     private FragmentTransaction mTransaction;
 
     public CustomMainPresenter(CustomMainFragment<T, E> customView) {
@@ -53,14 +51,6 @@ public class CustomMainPresenter<T, E> implements BaseContract.CustomPresenter {
         ArrayList<T> otherTabs = new ArrayList<>(mTabs);
         otherTabs.remove(getCurrentTabIndex());
         return otherTabs;
-    }
-
-    public void refreshCurrentData() {
-        mCustomView.refreshCurrentUi();
-    }
-
-    public void refreshData(int tabIndex) {
-        mCustomView.refreshUi(tabIndex);
     }
 
     public int getCurrentTabIndex() {

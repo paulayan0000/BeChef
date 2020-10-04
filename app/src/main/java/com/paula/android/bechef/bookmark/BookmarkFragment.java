@@ -26,10 +26,4 @@ public class BookmarkFragment extends CustomMainFragment<BookmarkTab, BookmarkIt
         if (childFragment != null) return ((BookmarkChildFragment)childFragment).getChosenItems();
         return new ArrayList<>();
     }
-
-    @Override
-    public void refreshUi(int tabIndex) {
-        Fragment childFragment = getChildFragment(tabIndex);
-        if (childFragment != null) ((BookmarkChildFragment) childFragment).refreshData();
-    }
 }

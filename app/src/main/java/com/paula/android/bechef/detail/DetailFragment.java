@@ -14,8 +14,8 @@ import com.paula.android.bechef.adapters.DetailAdapter;
 import com.paula.android.bechef.data.LoadDataCallback;
 import com.paula.android.bechef.data.LoadDataTask;
 import com.paula.android.bechef.data.dao.BookmarkTabDao;
-import com.paula.android.bechef.data.dao.DiscoverTabDao;
 import com.paula.android.bechef.data.database.TabDatabase;
+import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.BookmarkTab;
 import com.paula.android.bechef.data.entity.DiscoverItem;
@@ -23,13 +23,10 @@ import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.dialog.AddToBookmarkDialog;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -107,20 +104,13 @@ public class DetailFragment extends Fragment implements DetailContract.View {
                 if (content instanceof DiscoverItem)
                     addToBookmark((DiscoverItem) content);
                 else
-                    Toast.makeText(mContext, "show more", Toast.LENGTH_SHORT).show();
+                    // TODO: pop item action dialog
+                    Toast.makeText(mContext, "item " + ((BaseItem) content).getUid(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void addToBookmark(final DiscoverItem discoverItem) {
-//        TabDatabase.getBookmarkInstance(mContext).bookmarkDao().getAll()
-//                .observe(this, new Observer<List<BookmarkTab>>() {
-//                    @Override
-//                    public void onChanged(List<BookmarkTab> bookmarkTabs) {
-//                        AddToBookmarkDialog addToBookmarkDialog = new AddToBookmarkDialog(new ArrayList<>(bookmarkTabs), discoverItem);
-//                        addToBookmarkDialog.show(getChildFragmentManager(), "edit");
-//                    }
-//                });
         new LoadDataTask<>(new LoadDataCallback<BookmarkTabDao>() {
             private ArrayList<BookmarkTab> mBookmarkTabs = new ArrayList<>();
             @Override
@@ -135,7 +125,7 @@ public class DetailFragment extends Fragment implements DetailContract.View {
 
             @Override
             public void onCompleted() {
-                AddToBookmarkDialog addToBookmarkDialog = new AddToBookmarkDialog(mBookmarkTabs, discoverItem);
+                AddToBookmarkDialog addToBookmarkDialog = new AddToBookmarkDialog(mBookmarkTabs, (DetailPresenter) mPresenter);
                 addToBookmarkDialog.show(getChildFragmentManager(), "edit");
             }
         }).execute();

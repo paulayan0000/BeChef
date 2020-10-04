@@ -8,7 +8,6 @@ import com.paula.android.bechef.api.GetYouTubeDataTask;
 import com.paula.android.bechef.api.beans.GetSearchList;
 import com.paula.android.bechef.api.callbacks.GetYouTubeDataCallback;
 import com.paula.android.bechef.api.exceptions.NoResourceException;
-import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.data.entity.DiscoverTab;
 
 import java.util.HashMap;
@@ -29,11 +28,6 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
     private String mNextPagingId = "";
     private String mChannelId;
 
-//    DiscoverChildPresenter(DiscoverChildFragmentContract.View discoverChildFragmentView, String channelId) {
-//        mDiscoverChildFragmentView = checkNotNull(discoverChildFragmentView, "discoverChildView cannot be null!");
-//        discoverChildFragmentView.setPresenter(this);
-//        mChannelId = channelId;
-//    }
     public DiscoverChildPresenter(DiscoverChildFragmentContract.View discoverChildFragmentView, DiscoverTab discoverTab) {
         mDiscoverChildFragmentView = checkNotNull(discoverChildFragmentView, "discoverChildView cannot be null!");
         discoverChildFragmentView.setPresenter(this);
@@ -58,11 +52,10 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
     @Override
     public void onScrollStateChanged(int visibleItemCount, int totalItemCount, int newState) {
         if (newState == RecyclerView.SCROLL_STATE_IDLE && visibleItemCount > 0 && !"".equals(mChannelId)) {
-            if (!mLoading && mlastVisibleItemPosition == totalItemCount - 1 && !"".equals(mNextPagingId)) {
+            if (mlastVisibleItemPosition == totalItemCount - 1 && !"".equals(mNextPagingId)) {
                 Map<String, String> queryParameters = new HashMap<>();
                 queryParameters.put("pageToken", mNextPagingId);
                 queryParameters.put("channelId", mChannelId);
-
                 loadDiscoverItems(queryParameters);
             }
         }

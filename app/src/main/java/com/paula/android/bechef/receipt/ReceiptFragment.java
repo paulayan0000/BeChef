@@ -26,10 +26,4 @@ public class ReceiptFragment extends CustomMainFragment<ReceiptTab, ReceiptItem>
         if (childFragment != null) return ((ReceiptChildFragment)childFragment).getChosenItems();
         return new ArrayList<>();
     }
-
-    @Override
-    public void refreshUi(int tabIndex) {
-        Fragment childFragment = getChildFragment(tabIndex);
-        if (childFragment != null) ((ReceiptChildFragment) childFragment).refreshData();
-    }
 }

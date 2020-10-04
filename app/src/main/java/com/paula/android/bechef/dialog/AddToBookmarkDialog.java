@@ -19,10 +19,14 @@ import com.paula.android.bechef.data.dao.BookmarkItemDao;
 import com.paula.android.bechef.data.dao.BookmarkTabDao;
 import com.paula.android.bechef.data.database.ItemDatabase;
 import com.paula.android.bechef.data.database.TabDatabase;
+import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.BookmarkTab;
-import com.paula.android.bechef.data.entity.DiscoverItem;
+import com.paula.android.bechef.detail.DetailContract;
+import com.paula.android.bechef.detail.DetailFragment;
+import com.paula.android.bechef.detail.DetailPresenter;
+import com.paula.android.bechef.utils.Constants;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,20 +38,28 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 public class AddToBookmarkDialog extends DialogFragment implements View.OnClickListener {
-    private Context mContext;
+    private DetailPresenter mDetailPresenter;
+    protected Context mContext;
     private EditText mEtTabName;
-    private int mChosenTab = 0;
+    int mChosenTab = 0;
     private float mChosenRating = 0;
     private ArrayList<String> mTabNames = new ArrayList<>();
-    private ArrayList<BookmarkTab> mBookmarkTabs;
-    private DiscoverItem mDiscoverItem;
+    ArrayList<?> mBaseTabs;
 
-    public AddToBookmarkDialog(ArrayList<BookmarkTab> bookmarkTabs, DiscoverItem discoverItem) {
-        mDiscoverItem = discoverItem;
-        mBookmarkTabs = bookmarkTabs;
+    public AddToBookmarkDialog(ArrayList<?> baseTabs, DetailPresenter presenter) {
+        mDetailPresenter = presenter;
+        setTabs(baseTabs);
+    }
+
+    public AddToBookmarkDialog(ArrayList<?> baseTabs) {
+        setTabs(baseTabs);
+    }
+
+    private void setTabs(ArrayList<?> baseTabs) {
+        mBaseTabs = baseTabs;
         mTabNames.add(0, "新增書籤");
-        for (BaseTab baseTab : mBookmarkTabs) {
-            mTabNames.add(baseTab.getTabName());
+        for (Object baseTab : mBaseTabs) {
+            mTabNames.add(((BaseTab) baseTab).getTabName());
         }
     }
 
@@ -66,14 +78,7 @@ public class AddToBookmarkDialog extends DialogFragment implements View.OnClickL
         view.findViewById(R.id.negative_button).setOnClickListener(this);
         view.findViewById(R.id.positive_button).setOnClickListener(this);
 
-        RatingBar ratingBar = view.findViewById(R.id.rating_bar);
-        ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-            @Override
-            public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                mChosenRating = rating;
-                Toast.makeText(mContext, "rating: " + rating, Toast.LENGTH_LONG).show();
-            }
-        });
+        setRatingBar(view);
 
         mEtTabName = view.findViewById(R.id.edittext_new_tab_name);
 
@@ -94,6 +99,16 @@ public class AddToBookmarkDialog extends DialogFragment implements View.OnClickL
         return view;
     }
 
+    protected void setRatingBar(View view) {
+        ((RatingBar) view.findViewById(R.id.rating_bar)).setOnRatingBarChangeListener(
+                new RatingBar.OnRatingBarChangeListener() {
+                    @Override
+                    public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                        mChosenRating = rating;
+                    }
+                });
+    }
+
     private void showTabNameEditText(boolean isShown) {
         mEtTabName.setVisibility(isShown ? View.VISIBLE : View.GONE);
     }
@@ -106,62 +121,50 @@ public class AddToBookmarkDialog extends DialogFragment implements View.OnClickL
                 break;
             case R.id.positive_button:
                 final String tabName = mEtTabName.getText().toString();
-                int tabUid = -1;
-                if (mChosenTab == 0) {
-                    if ("".equals(tabName)) {
-                        Toast.makeText(mContext, "書籤名不可為空白", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    new LoadDataTask<>(new LoadDataCallback<BookmarkTabDao>() {
-                        private BookmarkItemDao mBookmarkItemDao;
-
-                        @Override
-                        public BookmarkTabDao getDao() {
-                            mBookmarkItemDao = ItemDatabase.getBookmarkInstance(mContext).bookmarkDao();
-                            return TabDatabase.getBookmarkInstance(mContext).bookmarkDao();
-                        }
-
-                        @Override
-                        public void doInBackground(BookmarkTabDao dao) {
-                            long newUid = dao.insert(new BookmarkTab(tabName));
-                            BookmarkItem newItem = new BookmarkItem(mDiscoverItem);
-                            newItem.setTabUid((int) newUid);
-                            newItem.setCreatedTime(new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault()).format(new Date()));
-                            newItem.setRating(mChosenRating);
-                            mBookmarkItemDao.insert(newItem);
-                        }
-
-                        @Override
-                        public void onCompleted() {
-                            dismiss();
-                        }
-                    }).execute();
-                } else {
-                    new LoadDataTask<>(new LoadDataCallback<BookmarkItemDao>() {
-                        @Override
-                        public BookmarkItemDao getDao() {
-                            return ItemDatabase.getBookmarkInstance(mContext).bookmarkDao();
-                        }
-
-                        @Override
-                        public void doInBackground(BookmarkItemDao dao) {
-                            BookmarkItem bookmarkItem = new BookmarkItem(mDiscoverItem);
-                            bookmarkItem.setRating(mChosenRating);
-                            bookmarkItem.setTabUid(mBookmarkTabs.get(mChosenTab - 1).getUid());
-                            bookmarkItem.setCreatedTime(new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault()).format(new Date()));
-                            dao.insert(bookmarkItem);
-                        }
-
-                        @Override
-                        public void onCompleted() {
-                            dismiss();
-                        }
-                    }).execute();
-//                    tabUid = mDiscoverTabs.get(mChosenTab - 1).getUid();
-//                    String mTabName = mDiscoverTabs.get(mChosenTab - 1).getTabName();
+                if (mChosenTab == 0 && "".equals(tabName)) {
+                    Toast.makeText(mContext, "書籤名不可為空白", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-//                Toast.makeText(mContext, "tab: " + tabUid + ", " + tabName + "; rating: " + mChosenRating, Toast.LENGTH_SHORT).show();
-//                dismiss();
+                manipulateData(tabName);
         }
+    }
+
+    protected void manipulateData(final String tabName) {
+        new LoadDataTask<>(new LoadDataCallback<BookmarkItemDao>() {
+            private BookmarkTabDao mBookmarkTabDao;
+            private BookmarkItem mBookmarkItem;
+
+            @Override
+            public BookmarkItemDao getDao() {
+                if (mChosenTab == 0)
+                    mBookmarkTabDao = TabDatabase.getBookmarkInstance(mContext).bookmarkDao();
+                return ItemDatabase.getBookmarkInstance(mContext).bookmarkDao();
+            }
+
+            @Override
+            public void doInBackground(BookmarkItemDao dao) {
+                if (mChosenTab == 0) {
+                    long newUid = mBookmarkTabDao.insert(new BookmarkTab(tabName));
+                    mBookmarkItem = getBookmarkItem((int) newUid);
+                } else {
+                    mBookmarkItem = getBookmarkItem(((BaseTab) mBaseTabs.get(mChosenTab - 1)).getUid());
+                }
+                dao.insert(mBookmarkItem);
+            }
+
+            @Override
+            public void onCompleted() {
+                dismiss();
+                mDetailPresenter.transDetailUi(mBookmarkItem);
+            }
+        }).execute();
+    }
+
+    private BookmarkItem getBookmarkItem(int tabUid) {
+        BookmarkItem bookmarkItem = new BookmarkItem((BaseItem) mDetailPresenter.getDataContent());
+        bookmarkItem.setRating(mChosenRating);
+        bookmarkItem.setTabUid(tabUid);
+        bookmarkItem.setCreatedTime(new SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(new Date()));
+        return bookmarkItem;
     }
 }

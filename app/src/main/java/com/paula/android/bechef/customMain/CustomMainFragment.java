@@ -110,15 +110,6 @@ public class CustomMainFragment<T, E> extends BaseMainFragment implements BaseCo
         return getChildFragmentManager().findFragmentByTag("f" + tabIndex);
     }
 
-    @Override
-    public void refreshCurrentUi() {
-        refreshUi(mCurrentTabIndex);
-    }
-
-    @Override
-    public void refreshUi(int tabIndex) {
-    }
-
     public int getCurrentTabIndex() {
         return mCurrentTabIndex;
     }

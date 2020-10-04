@@ -4,6 +4,7 @@ import com.paula.android.bechef.data.entity.DiscoverTab;
 
 import java.util.List;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Query;
 
@@ -14,6 +15,9 @@ public interface DiscoverTabDao extends BaseDao<DiscoverTab> {
 
     @Query("SELECT tab_name FROM discover_tab ORDER BY uid ASC")
     List<String> getAllTabTitles();
+
+    @Query("SELECT * FROM discover_tab ORDER BY uid ASC")
+    LiveData<List<DiscoverTab>> getAllLive();
 
     @Query("SELECT * FROM discover_tab ORDER BY uid ASC")
     List<DiscoverTab> getAll();

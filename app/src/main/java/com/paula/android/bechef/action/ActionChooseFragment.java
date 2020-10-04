@@ -1,7 +1,6 @@
 package com.paula.android.bechef.action;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,18 +16,12 @@ import com.paula.android.bechef.R;
 import com.paula.android.bechef.bookmark.BookmarkPresenter;
 import com.paula.android.bechef.data.LoadDataCallback;
 import com.paula.android.bechef.data.LoadDataTask;
-import com.paula.android.bechef.data.dao.BookmarkItemDao;
-import com.paula.android.bechef.data.dao.ReceiptItemDao;
 import com.paula.android.bechef.data.database.ItemDatabase;
-import com.paula.android.bechef.data.entity.BaseTab;
-import com.paula.android.bechef.data.entity.BookmarkItem;
-import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.dialog.AlertDialogClickCallback;
 import com.paula.android.bechef.dialog.AlertDialogItemsCallback;
 import com.paula.android.bechef.dialog.BeChefAlertDialogBuilder;
+import com.paula.android.bechef.dialog.MoveToDialog;
 import com.paula.android.bechef.receipt.ReceiptPresenter;
-
-import java.util.ArrayList;
 
 public class ActionChooseFragment<T, E> extends Fragment implements View.OnClickListener {
     private CustomMainPresenter<T, E> mPresenter;
@@ -81,56 +74,60 @@ public class ActionChooseFragment<T, E> extends Fragment implements View.OnClick
                 break;
             case R.id.textview_action_move:
                 message = null;
-                final ArrayList<?> baseTabs = mPresenter.getOtherTabs();
-                itemsCallback = new AlertDialogItemsCallback() {
-                    @Override
-                    public String[] getItems() {
-                        String[] tabTitleArray = new String[baseTabs.size() + 1];
-                        tabTitleArray[0] = " + 新增標籤";
-                        for (int i = 0; i < baseTabs.size(); i++) {
-                            tabTitleArray[i + 1] = ((BaseTab) baseTabs.get(i)).getTabName();
-                        }
-                        return tabTitleArray;
-                    }
-
-                    @Override
-                    public DialogInterface.OnClickListener getItemOnClickListener() {
-                        return new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, final int which) {
-                                // TODO: 新增書籤
-                                if (which == 0) {
-                                    Toast.makeText(getContext(), "新增標籤對話框", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    new LoadDataTask<>(new LoadDataCallback<ItemDatabase>() {
-                                        @Override
-                                        public ItemDatabase getDao() {
-                                            if (mPresenter instanceof BookmarkPresenter)
-                                                return ItemDatabase.getBookmarkInstance(mContext);
-                                            else
-                                                return ItemDatabase.getReceiptInstance(mContext);
-                                        }
-
-                                        @Override
-                                        public void doInBackground(ItemDatabase database) {
-                                            int tabUid = ((BaseTab) baseTabs.get(which - 1)).getUid();
-                                            if (mPresenter instanceof BookmarkPresenter)
-                                                updateBookmarkTabUid(database.bookmarkDao(), tabUid);
-                                            else
-                                                updateReceiptTabUid(database.receiptDao(), tabUid);
-                                        }
-
-                                        @Override
-                                        public void onCompleted() {
-                                            moveComplete(which);
-                                        }
-                                    }).execute();
-                                }
-                            }
-                        };
-                    }
-                };
-                break;
+//                final ArrayList<?> baseTabs = mPresenter.getOtherTabs();
+//                MoveToDialog moveToDialog = new MoveToDialog<>(baseTabs, mPresenter.getChosenItems());
+                MoveToDialog moveToDialog = new MoveToDialog<>(mPresenter);
+                moveToDialog.show(getChildFragmentManager(), "move");
+                return;
+//                itemsCallback = new AlertDialogItemsCallback() {
+//                    @Override
+//                    public String[] getItems() {
+//                        String[] tabTitleArray = new String[baseTabs.size() + 1];
+//                        tabTitleArray[0] = " + 新增標籤";
+//                        for (int i = 0; i < baseTabs.size(); i++) {
+//                            tabTitleArray[i + 1] = ((BaseTab) baseTabs.get(i)).getTabName();
+//                        }
+//                        return tabTitleArray;
+//                    }
+//
+//                    @Override
+//                    public DialogInterface.OnClickListener getItemOnClickListener() {
+//                        return new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, final int which) {
+//                                // TODO: 新增書籤
+//                                if (which == 0) {
+//                                    Toast.makeText(getContext(), "新增標籤對話框", Toast.LENGTH_SHORT).show();
+//                                } else {
+//                                    new LoadDataTask<>(new LoadDataCallback<ItemDatabase>() {
+//                                        @Override
+//                                        public ItemDatabase getDao() {
+//                                            if (mPresenter instanceof BookmarkPresenter)
+//                                                return ItemDatabase.getBookmarkInstance(mContext);
+//                                            else
+//                                                return ItemDatabase.getReceiptInstance(mContext);
+//                                        }
+//
+//                                        @Override
+//                                        public void doInBackground(ItemDatabase database) {
+//                                            int tabUid = ((BaseTab) baseTabs.get(which - 1)).getUid();
+//                                            if (mPresenter instanceof BookmarkPresenter)
+//                                                updateBookmarkTabUid(database.bookmarkDao(), tabUid);
+//                                            else
+//                                                updateReceiptTabUid(database.receiptDao(), tabUid);
+//                                        }
+//
+//                                        @Override
+//                                        public void onCompleted() {
+//                                            mPresenter.leaveChooseDialog();
+//                                        }
+//                                    }).execute();
+//                                }
+//                            }
+//                        };
+//                    }
+//                };
+//                break;
             case R.id.textview_action_delete:
                 clickCallback = new AlertDialogClickCallback() {
                     @Override
@@ -154,7 +151,7 @@ public class ActionChooseFragment<T, E> extends Fragment implements View.OnClick
 
                             @Override
                             public void onCompleted() {
-                                refreshCurrentPage();
+                                mPresenter.leaveChooseDialog();
                             }
                         }).execute();
                     }
@@ -171,28 +168,17 @@ public class ActionChooseFragment<T, E> extends Fragment implements View.OnClick
                 .show();
     }
 
-    private void updateBookmarkTabUid(BookmarkItemDao dao, int newTabUid) {
-        ArrayList<BookmarkItem> chosenItems = ((BookmarkPresenter) mPresenter).getChosenItems();
-        for (BookmarkItem chosenItem : chosenItems) {
-            dao.setNewTabUid(chosenItem.getUid(), newTabUid);
-        }
-    }
-
-    private void updateReceiptTabUid(ReceiptItemDao dao, int newTabUid) {
-        ArrayList<ReceiptItem> chosenItems = ((ReceiptPresenter) mPresenter).getChosenItems();
-        for (ReceiptItem chosenItem : chosenItems) {
-            dao.setNewTabUid(chosenItem.getUid(), newTabUid);
-        }
-    }
-
-    private void moveComplete(int which) {
-        int currentIndex = mPresenter.getCurrentTabIndex();
-        mPresenter.refreshData(which <= currentIndex ? which - 1 : which);
-        refreshCurrentPage();
-    }
-
-    private void refreshCurrentPage() {
-        mPresenter.refreshCurrentData();
-        mPresenter.leaveChooseDialog();
-    }
+//    private void updateBookmarkTabUid(BookmarkItemDao dao, int newTabUid) {
+//        ArrayList<BookmarkItem> chosenItems = ((BookmarkPresenter) mPresenter).getChosenItems();
+//        for (BookmarkItem chosenItem : chosenItems) {
+//            dao.setNewTabUid(chosenItem.getUid(), newTabUid);
+//        }
+//    }
+//
+//    private void updateReceiptTabUid(ReceiptItemDao dao, int newTabUid) {
+//        ArrayList<ReceiptItem> chosenItems = ((ReceiptPresenter) mPresenter).getChosenItems();
+//        for (ReceiptItem chosenItem : chosenItems) {
+//            dao.setNewTabUid(chosenItem.getUid(), newTabUid);
+//        }
+//    }
 }

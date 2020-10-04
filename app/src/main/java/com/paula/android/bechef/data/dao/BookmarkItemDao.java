@@ -11,7 +11,7 @@ import androidx.room.Query;
 @Dao
 public interface BookmarkItemDao extends BaseDao<BookmarkItem> {
     @Query("UPDATE bookmark_item SET tab_uid = :newTabUid WHERE uid = :uid")
-    void setNewTabUid(int uid, int newTabUid);
+    void setNewTabUid(int uid, long newTabUid);
 
     @Query("SELECT * FROM bookmark_item WHERE tab_uid = :tabUid ORDER BY created_time ASC")
     LiveData<List<BookmarkItem>> getAllWithTimeAscLive(int tabUid);

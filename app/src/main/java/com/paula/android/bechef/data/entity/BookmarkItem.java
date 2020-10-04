@@ -12,4 +12,8 @@ public class BookmarkItem extends BaseItem {
     public BookmarkItem(DiscoverItem discoverItem) {
         super(discoverItem);
     }
+
+    public BookmarkItem(BaseItem baseItem) {
+        super(baseItem);
+    }
 }

@@ -5,9 +5,6 @@ import android.content.DialogInterface;
 import android.widget.Button;
 
 import com.paula.android.bechef.R;
-import com.paula.android.bechef.utils.Utils;
-
-import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;

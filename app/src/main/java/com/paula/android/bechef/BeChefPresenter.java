@@ -53,7 +53,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     public void transToDiscover() {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-//        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
+        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
         if (mDiscoverFragment == null) mDiscoverFragment = DiscoverFragment.newInstance();
         if (mBookmarkFragment != null) transaction.hide(mBookmarkFragment);
         if (mReceiptFragment != null) transaction.hide(mReceiptFragment);
@@ -75,7 +75,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     public void transToBookmark() {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-//        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
+        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
         if (mBookmarkFragment == null) mBookmarkFragment = BookmarkFragment.newInstance();
         if (mDiscoverFragment != null) transaction.hide(mDiscoverFragment);
         if (mReceiptFragment != null) transaction.hide(mReceiptFragment);
@@ -98,7 +98,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
 
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-//        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
+        if (mFragmentManager.findFragmentByTag(DETAIL) != null) mFragmentManager.popBackStack();
         if (mReceiptFragment == null) mReceiptFragment = ReceiptFragment.newInstance();
         if (mDiscoverFragment != null) transaction.hide(mDiscoverFragment);
         if (mBookmarkFragment != null) transaction.hide(mBookmarkFragment);

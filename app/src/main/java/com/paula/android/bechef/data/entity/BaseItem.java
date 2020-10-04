@@ -64,6 +64,19 @@ public class BaseItem {
     }
 
     @Ignore
+    public BaseItem(BaseItem baseItem) {
+        mTabUid = baseItem.getTabUid();
+        mTitle = baseItem.getTitle();
+        mImageUrl = baseItem.getImageUrl();
+        mRating = baseItem.getRating();
+        mTags = baseItem.getTags();
+        mInTodayId = baseItem.getInTodayId();
+        mCreatedTime = baseItem.getCreatedTime();
+        mDescription = baseItem.getDescription();
+        mVideoId = baseItem.getVideoId();
+    }
+
+    @Ignore
     public BaseItem(DiscoverItem discoverItem) {
         mTabUid = discoverItem.getTabUid();
         mTitle = discoverItem.getTitle();

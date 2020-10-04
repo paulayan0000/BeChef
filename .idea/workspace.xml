@@ -6,7 +6,7 @@
     </shared>
   </component>
   <component name="AndroidLogFilters">
-    <option name="TOOL_WINDOW_LOG_LEVEL" value="verbose" />
+    <option name="TOOL_WINDOW_LOG_LEVEL" value="error" />
     <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="No Filters" />
     <option name="TOOL_WINDOW_REGEXP_FILTER" value="false" />
   </component>
@@ -17,12 +17,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f88ee1f6-23e9-463c-85ef-4e026de63412" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/dialog/AddToBookmarkDialog.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_bookmark_white.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_more_white.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/negative_button.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/positive_button.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/add_to_bookmark_dialog.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/dialog/MoveToDialog.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileContent/fileContent.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/fileHashes/fileHashes.lock" afterDir="false" />
@@ -32,26 +27,36 @@
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/4.6/taskHistory/taskHistory.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/assetWizardSettings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/BaseContract.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/BaseContract.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/BeChefPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/BeChefPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/action/ActionChooseFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/action/ActionChooseFragment.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/adapters/DefaultChildAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/adapters/DefaultChildAdapter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/adapters/DiscoverChildAdapter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/adapters/DiscoverChildAdapter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/api/BeChefParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/api/BeChefParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/bookmark/BookmarkFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/bookmark/BookmarkFragment.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/bookmark/BookmarkPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/bookmark/BookmarkPresenter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/bookmarkChild/BookmarkChildPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/bookmarkChild/BookmarkChildPresenter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/BaseDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/BaseDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/customMain/CustomMainFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/customMain/CustomMainFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/customMain/CustomMainPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/customMain/CustomMainPresenter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/BookmarkItemDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/BookmarkItemDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/BookmarkTabDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/BookmarkTabDao.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/DiscoverTabDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/DiscoverTabDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/ReceiptItemDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/ReceiptItemDao.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/ReceiptTabDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/dao/ReceiptTabDao.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/entity/BaseItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/entity/BaseItem.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/entity/BookmarkItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/entity/BookmarkItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/entity/DiscoverItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/data/entity/DiscoverItem.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/detail/DetailFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/detail/DetailFragment.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/detail/DetailPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/detail/DetailPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/dialog/AddToBookmarkDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/dialog/AddToBookmarkDialog.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/dialog/BeChefAlertDialogBuilder.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/dialog/BeChefAlertDialogBuilder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/fragment_detail.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/fragment_detail.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_discover_recycler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_discover_recycler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/styles.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/styles.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/discover/DiscoverPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/discover/DiscoverPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/discoverChild/DiscoverChildPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/discoverChild/DiscoverChildPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/receipt/ReceiptFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/receipt/ReceiptFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/receipt/ReceiptPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/receipt/ReceiptPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/receiptChild/ReceiptChildPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/receiptChild/ReceiptChildPresenter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/utils/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/utils/Constants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/drawable/negative_button.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/negative_button.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/add_to_bookmark_dialog.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/add_to_bookmark_dialog.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_default_recycler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_default_recycler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_detail_description.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_detail_description.xml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -95,14 +100,17 @@
       </state>
     </system>
   </component>
+  <component name="FavoritesManager">
+    <favorites_list name="BeChef" />
+  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="layoutResourceFile_vertical" />
         <option value="Interface" />
-        <option value="Class" />
         <option value="layoutResourceFile" />
         <option value="resourceFile" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -130,13 +138,6 @@
     <property name="show.do.not.ask.upgrade.gradle.plugin" value="3.2.0" />
   </component>
   <component name="RecentsManager">
-    <key name="CreateClassDialog.RecentsKey">
-      <recent name="com.paula.android.bechef.data.dao" />
-      <recent name="com.paula.android.bechef.dialog" />
-      <recent name="com.paula.android.bechef.data.database" />
-      <recent name="com.paula.android.bechef.data" />
-      <recent name="com.paula.android.bechef.adapters" />
-    </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="com.paula.android.bechef" />
       <recent name="com.paula.android.bechef.data" />
@@ -144,19 +145,26 @@
       <recent name="com.paula.android.bechef.database" />
       <recent name="com.paula.android.bechef.utils" />
     </key>
-    <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="com.paula.android.bechef.data.database" />
-      <recent name="com.paula.android.bechef.data" />
-      <recent name="com.paula.android.bechef.receiptChild" />
-      <recent name="com.paula.android.bechef.data.dao" />
-      <recent name="com.paula.android.bechef.data.entity" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/app/src/main/res/drawable" />
       <recent name="$PROJECT_DIR$/libs/YouTubeAndroidPlayerApi.jar!/com/google/android/youtube/player" />
       <recent name="$PROJECT_DIR$/libs/YouTubeAndroidPlayerApi.jar!/com/google/android/youtube/player/internal" />
       <recent name="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/detail" />
       <recent name="$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/today" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.paula.android.bechef.dialog" />
+      <recent name="com.paula.android.bechef.data.database" />
+      <recent name="com.paula.android.bechef.data" />
+      <recent name="com.paula.android.bechef.receiptChild" />
+      <recent name="com.paula.android.bechef.data.dao" />
+    </key>
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="com.paula.android.bechef.data.dao" />
+      <recent name="com.paula.android.bechef.dialog" />
+      <recent name="com.paula.android.bechef.data.database" />
+      <recent name="com.paula.android.bechef.data" />
+      <recent name="com.paula.android.bechef.adapters" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -296,8 +304,83 @@
           <line>382</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/dialog/MoveToDialog.java</url>
+          <line>40</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/dialog/MoveToDialog.java</url>
+          <line>46</line>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/dialog/MoveToDialog.java</url>
+          <line>57</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/dialog/MoveToDialog.java</url>
+          <line>73</line>
+          <option name="timeStamp" value="23" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/dialog/MoveToDialog.java</url>
+          <line>28</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/activities/BeChefActivity.java</url>
+          <line>93</line>
+          <option name="timeStamp" value="27" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/activities/BeChefActivity.java</url>
+          <line>100</line>
+          <option name="timeStamp" value="29" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/BeChefPresenter.java</url>
+          <line>75</line>
+          <option name="timeStamp" value="30" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/detail/DetailFragment.java</url>
+          <line>63</line>
+          <option name="timeStamp" value="31" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/adapters/DiscoverChildAdapter.java</url>
+          <line>101</line>
+          <option name="timeStamp" value="32" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/discoverChild/DiscoverChildFragment.java</url>
+          <line>103</line>
+          <option name="timeStamp" value="33" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/BeChefPresenter.java</url>
+          <line>120</line>
+          <option name="timeStamp" value="34" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/BeChefPresenter.java</url>
+          <line>122</line>
+          <option name="timeStamp" value="37" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/app/src/main/java/com/paula/android/bechef/BeChefPresenter.java</url>
+          <line>126</line>
+          <option name="timeStamp" value="38" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="app">
+        <watch expression="discoverItem.getVideoId()" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="masterDetails">
     <states>

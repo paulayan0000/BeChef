@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.customChild.CustomChildPresenter;
@@ -62,7 +63,7 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
 
     private class DefaultViewHolder extends RecyclerView.ViewHolder {
         private TextView mTvItemTitle, mTvTags, mTvTimeCount;
-        private ImageButton mIbtnChoose;
+        private ImageButton mIbtnChoose, mIbtnAction;
         private ImageView mIvImage;
 
         private DefaultViewHolder(@NonNull View itemView) {
@@ -71,6 +72,7 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
             mTvTags = itemView.findViewById(R.id.textview_tags);
             mTvTimeCount = itemView.findViewById(R.id.textview_time_count);
             mIbtnChoose = itemView.findViewById(R.id.imagebutton_choose_box);
+            mIbtnAction = itemView.findViewById(R.id.imagebotton_action);
             mIvImage = itemView.findViewById(R.id.imageview_thumbnail);
         }
 
@@ -85,6 +87,7 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
 
             if (mIsSelectable) {
                 mIbtnChoose.setVisibility(View.VISIBLE);
+                mIbtnAction.setVisibility(View.GONE);
                 mIbtnChoose.setSelected(baseItem.getSelected());
                 mIbtnChoose.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -98,9 +101,18 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
                 });
             } else {
                 mIbtnChoose.setVisibility(View.GONE);
+                mIbtnAction.setVisibility(View.VISIBLE);
                 baseItem.setSelected(false);
                 clearChosenItems();
             }
+
+            mIbtnAction.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // TODO: pop item action dialog
+                    Toast.makeText(mContext, "no. " + getAdapterPosition() + " item action", Toast.LENGTH_LONG).show();
+                }
+            });
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

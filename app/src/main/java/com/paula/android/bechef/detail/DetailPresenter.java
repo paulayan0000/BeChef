@@ -12,6 +12,7 @@ import com.paula.android.bechef.data.LoadDataCallback;
 import com.paula.android.bechef.data.LoadDataTask;
 import com.paula.android.bechef.data.dao.BookmarkItemDao;
 import com.paula.android.bechef.data.database.ItemDatabase;
+import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 
 import java.util.HashMap;
@@ -22,20 +23,20 @@ import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 public class DetailPresenter implements DetailContract.Presenter {
     private static final String LOG_TAG = DetailPresenter.class.getSimpleName();
     private final DetailContract.View mDetailView;
-    private Object mContent;
-    private boolean mLoading = false;
+    private Object mDataContent;
 
-    public DetailPresenter(DetailContract.View detailView, Object content) {
+    public DetailPresenter(DetailContract.View detailView, Object dataContent) {
         mDetailView = checkNotNull(detailView, "detailView cannot be null!");
         mDetailView.setPresenter(this);
-        mContent = content;
+        mDataContent = dataContent;
     }
 
     @Override
     public void start() {
-        if (mContent instanceof String) {
+        if (mDataContent instanceof String) {
             new LoadDataTask<>(new LoadDataCallback<BookmarkItemDao>() {
                 private BookmarkItem mBookmarkItem = null;
+
                 @Override
                 public BookmarkItemDao getDao() {
                     return ItemDatabase.getBookmarkInstance(mDetailView.getContext()).bookmarkDao();
@@ -43,66 +44,72 @@ public class DetailPresenter implements DetailContract.Presenter {
 
                 @Override
                 public void doInBackground(BookmarkItemDao dao) {
-                    mBookmarkItem = dao.getItemWithVideoId((String) mContent);
+                    mBookmarkItem = dao.getItemWithVideoId((String) mDataContent);
                 }
 
                 @Override
                 public void onCompleted() {
                     if (mBookmarkItem != null) {
+                        mDataContent = mBookmarkItem;
                         mDetailView.showDetailUi(mBookmarkItem);
                     } else {
                         Map<String, String> queryParameters = new HashMap<>();
                         queryParameters.put("pageToken", "");
-                        queryParameters.put("id", (String) mContent);
+                        queryParameters.put("id", (String) mDataContent);
                         loadVideo(queryParameters);
                     }
                 }
             }).execute();
 
         } else {
-            mDetailView.showDetailUi(mContent);
+            mDetailView.showDetailUi(mDataContent);
         }
     }
 
     private void loadVideo(Map<String, String> queryParameters) {
-        if (!mLoading) {
-            mLoading = true;
-            queryParameters.put("part", "snippet,contentDetails,statistics");
-            queryParameters.put("maxResults", "10");
+        queryParameters.put("part", "snippet,contentDetails,statistics");
+        queryParameters.put("maxResults", "10");
 
-            new GetYouTubeDataTask(queryParameters, new GetYouTubeDataCallback() {
-                private Exception error;
+        new GetYouTubeDataTask(queryParameters, new GetYouTubeDataCallback() {
+            private Exception error;
 
-                @Override
-                public GetSearchList doInBackground(Map<String, String> queryParameters) {
-                    GetSearchList bean = null;
-                    try {
-                        bean = BeChefApiHelper.GetYoutubeVideos(queryParameters);
-                    } catch (Exception e) {
-                        error = e;
-                    }
-                    return bean;
+            @Override
+            public GetSearchList doInBackground(Map<String, String> queryParameters) {
+                GetSearchList bean = null;
+                try {
+                    bean = BeChefApiHelper.GetYoutubeVideos(queryParameters);
+                } catch (Exception e) {
+                    error = e;
                 }
+                return bean;
+            }
 
-                @Override
-                public void onCompleted(GetSearchList bean) {
-                    if (bean != null && error == null) {
-                        mDetailView.showDetailUi(bean.getDiscoverItems().get(0));
-                        mLoading = false;
-                    } else {
-                        onError(error);
-                    }
+            @Override
+            public void onCompleted(GetSearchList bean) {
+                if (bean != null && error == null) {
+                    mDataContent = bean.getDiscoverItems().get(0);
+                    mDetailView.showDetailUi(mDataContent);
+                } else {
+                    onError(error);
                 }
+            }
 
-                @Override
-                public void onError(Exception e) {
-                    Log.d(LOG_TAG, "Error: " + e.getMessage());
-                    if (e instanceof NoResourceException)
-                        Toast.makeText(mDetailView.getContext(),
-                                "此資源不存在！", Toast.LENGTH_LONG).show();
-                    mLoading = false;
-                }
-            }).execute();
-        }
+            @Override
+            public void onError(Exception e) {
+                Log.d(LOG_TAG, "Error: " + e.getMessage());
+                if (e instanceof NoResourceException)
+                    Toast.makeText(mDetailView.getContext(),
+                            "此資源不存在！", Toast.LENGTH_LONG).show();
+            }
+        }).execute();
+    }
+
+    public void transDetailUi(BaseItem baseItem) {
+        mDataContent = baseItem;
+        mDetailView.showDetailUi(baseItem);
+    }
+
+    public Object getDataContent() {
+        return mDataContent;
     }
 }

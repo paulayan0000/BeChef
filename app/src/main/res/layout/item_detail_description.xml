@@ -17,7 +17,8 @@
     <ImageView
         android:id="@+id/imageview_thumbnail_foreground"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:scaleType="center"
         android:src="@drawable/ic_play_circle_filled"
         app:layout_constraintTop_toTopOf="@id/imageview_thumbnail"
         app:layout_constraintBottom_toBottomOf="@id/imageview_thumbnail"/>
