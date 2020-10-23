@@ -20,7 +20,6 @@ import com.paula.android.bechef.receipt.ReceiptPresenter;
 
 import java.util.ArrayList;
 
-
 public class MoveToDialog<T, E> extends AddToBookmarkDialog {
     private CustomMainPresenter<T, E> mPresenter;
     private String mTabName;
@@ -28,6 +27,11 @@ public class MoveToDialog<T, E> extends AddToBookmarkDialog {
     public MoveToDialog(CustomMainPresenter<T,E> presenter) {
         super(presenter.getOtherTabs());
         mPresenter = presenter;
+    }
+
+    @Override
+    protected String getTitleText() {
+        return "移動至...";
     }
 
     @Override

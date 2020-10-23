@@ -12,6 +12,8 @@ public class Constants {
     // Recycler view type
     public static final int VIEWTYPE_NORMAL = 0;
     public static final int VIEWTYPE_LOADING = 1;
+    public static final int VIEWTYPE_DETAIL = 2;
+    public static final int VIEWTYPE_EDIT = 3;
 
     // Table name
     public static final String BOOKMARK_ITEM_TABLE = "bookmark-item-table";

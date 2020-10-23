@@ -20,6 +20,10 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
+    <style name="MyDialogTheme1">
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
     <style name="RatingBar">
         <item name="colorControlNormal">@color/colorPrimary</item>
         <item name="colorControlActivated">@color/colorPrimary</item>

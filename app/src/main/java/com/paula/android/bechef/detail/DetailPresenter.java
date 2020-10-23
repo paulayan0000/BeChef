@@ -60,7 +60,6 @@ public class DetailPresenter implements DetailContract.Presenter {
                     }
                 }
             }).execute();
-
         } else {
             mDetailView.showDetailUi(mDataContent);
         }
@@ -111,5 +110,10 @@ public class DetailPresenter implements DetailContract.Presenter {
 
     public Object getDataContent() {
         return mDataContent;
+    }
+
+    @Override
+    public void refreshData(BaseItem baseItem) {
+        mDetailView.updateUi(baseItem);
     }
 }

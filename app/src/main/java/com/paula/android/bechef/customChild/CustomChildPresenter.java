@@ -6,10 +6,13 @@ import com.paula.android.bechef.utils.Constants;
 
 import java.util.ArrayList;
 
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class CustomChildPresenter<E> implements ChildContract.CustomChildPresenter {
-    protected int mTabUid;
+    public int mTabUid;
     protected ArrayList<E> mDataArrayList = new ArrayList<>();
     protected int mDataFilterType = Constants.FILTER_WITH_TIME_DESC;
     protected ChildContract.CustomChildView<CustomChildPresenter, E> mCustomChildFragment;
@@ -42,5 +45,9 @@ public class CustomChildPresenter<E> implements ChildContract.CustomChildPresent
     @Override
     public void start() {
         loadSpecificItems(Constants.FILTER_WITH_TIME_DESC);
+    }
+
+    public FragmentManager getFragmentManager() {
+        return ((Fragment) mCustomChildFragment).getChildFragmentManager();
     }
 }

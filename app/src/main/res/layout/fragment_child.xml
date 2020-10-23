@@ -7,7 +7,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintlayout_info"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/small_icon_size"
+        android:layout_height="@dimen/normal_icon_size"
         android:orientation="horizontal"
         android:background="@color/white"
         app:layout_constraintTop_toTopOf="parent">
@@ -28,8 +28,8 @@
 
         <ImageButton
             android:id="@+id/imagebutton_filter"
-            android:layout_width="@dimen/small_icon_size"
-            android:layout_height="@dimen/small_icon_size"
+            android:layout_width="@dimen/normal_icon_size"
+            android:layout_height="@dimen/normal_icon_size"
             android:src="@drawable/ic_filter_list"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

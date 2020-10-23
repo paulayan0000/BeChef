@@ -65,6 +65,7 @@ public class BaseItem {
 
     @Ignore
     public BaseItem(BaseItem baseItem) {
+        uid = baseItem.getUid();
         mTabUid = baseItem.getTabUid();
         mTitle = baseItem.getTitle();
         mImageUrl = baseItem.getImageUrl();
@@ -74,19 +75,6 @@ public class BaseItem {
         mCreatedTime = baseItem.getCreatedTime();
         mDescription = baseItem.getDescription();
         mVideoId = baseItem.getVideoId();
-    }
-
-    @Ignore
-    public BaseItem(DiscoverItem discoverItem) {
-        mTabUid = discoverItem.getTabUid();
-        mTitle = discoverItem.getTitle();
-        mImageUrl = discoverItem.getImageUrl();
-        mRating = discoverItem.getRating();
-        mTags = discoverItem.getTags();
-        mInTodayId = discoverItem.getInTodayId();
-        mCreatedTime = discoverItem.getCreatedTime();
-        mDescription = discoverItem.getDescription();
-        mVideoId = discoverItem.getVideoId();
     }
 
     public Boolean getSelected() {

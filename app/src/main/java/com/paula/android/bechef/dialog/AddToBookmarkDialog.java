@@ -1,13 +1,10 @@
 package com.paula.android.bechef.dialog;
 
-import android.content.Context;
-import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -23,8 +20,6 @@ import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.BookmarkTab;
-import com.paula.android.bechef.detail.DetailContract;
-import com.paula.android.bechef.detail.DetailFragment;
 import com.paula.android.bechef.detail.DetailPresenter;
 import com.paula.android.bechef.utils.Constants;
 
@@ -33,14 +28,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-
-public class AddToBookmarkDialog extends DialogFragment implements View.OnClickListener {
+public class AddToBookmarkDialog extends BeChefDialog {
     private DetailPresenter mDetailPresenter;
-    protected Context mContext;
     private EditText mEtTabName;
+    private ImageButton mIbtnClear;
     int mChosenTab = 0;
     private float mChosenRating = 0;
     private ArrayList<String> mTabNames = new ArrayList<>();
@@ -51,7 +42,7 @@ public class AddToBookmarkDialog extends DialogFragment implements View.OnClickL
         setTabs(baseTabs);
     }
 
-    public AddToBookmarkDialog(ArrayList<?> baseTabs) {
+    AddToBookmarkDialog(ArrayList<?> baseTabs) {
         setTabs(baseTabs);
     }
 
@@ -64,23 +55,22 @@ public class AddToBookmarkDialog extends DialogFragment implements View.OnClickL
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.MyDialogTheme);
+    protected int getLayoutResource() {
+        return R.layout.add_to_bookmark_dialog;
     }
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.add_to_bookmark_dialog, container, false);
-        mContext = view.getContext();
+    protected String getTitleText() {
+        return "加入書籤...";
+    }
 
-        view.findViewById(R.id.negative_button).setOnClickListener(this);
-        view.findViewById(R.id.positive_button).setOnClickListener(this);
-
+    @Override
+    public void setView(View view) {
         setRatingBar(view);
 
         mEtTabName = view.findViewById(R.id.edittext_new_tab_name);
+        mIbtnClear = view.findViewById(R.id.imagebutton_clear);
+        mIbtnClear.setOnClickListener(this);
 
         Spinner spinnerTab = view.findViewById(R.id.spinner_tab_name);
         spinnerTab.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item, mTabNames));
@@ -95,8 +85,6 @@ public class AddToBookmarkDialog extends DialogFragment implements View.OnClickL
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-
-        return view;
     }
 
     protected void setRatingBar(View view) {
@@ -111,22 +99,17 @@ public class AddToBookmarkDialog extends DialogFragment implements View.OnClickL
 
     private void showTabNameEditText(boolean isShown) {
         mEtTabName.setVisibility(isShown ? View.VISIBLE : View.GONE);
+        mIbtnClear.setVisibility(isShown ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.negative_button:
-                dismiss();
-                break;
-            case R.id.positive_button:
-                final String tabName = mEtTabName.getText().toString();
-                if (mChosenTab == 0 && "".equals(tabName)) {
-                    Toast.makeText(mContext, "書籤名不可為空白", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                manipulateData(tabName);
+    protected void setPositiveButton() {
+        final String tabName = mEtTabName.getText().toString();
+        if (mChosenTab == 0 && "".equals(tabName)) {
+            Toast.makeText(mContext, "書籤名不可為空白", Toast.LENGTH_SHORT).show();
+            return;
         }
+        manipulateData(tabName);
     }
 
     protected void manipulateData(final String tabName) {
@@ -158,6 +141,11 @@ public class AddToBookmarkDialog extends DialogFragment implements View.OnClickL
                 mDetailPresenter.transDetailUi(mBookmarkItem);
             }
         }).execute();
+    }
+
+    @Override
+    protected void setOtherButtons(int viewId) {
+        if (viewId == R.id.imagebutton_clear) mEtTabName.setText("");
     }
 
     private BookmarkItem getBookmarkItem(int tabUid) {

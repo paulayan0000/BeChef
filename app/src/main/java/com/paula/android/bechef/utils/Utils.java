@@ -1,6 +1,7 @@
 package com.paula.android.bechef.utils;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 
 import java.io.File;
 import java.text.ParseException;
@@ -8,6 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import androidx.core.graphics.drawable.DrawableCompat;
 
 public class Utils {
     private final static long minute = 60 * 1000; // 1分鐘

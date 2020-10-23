@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.activities.BeChefActivity;
@@ -21,6 +20,7 @@ import com.paula.android.bechef.data.entity.BookmarkTab;
 import com.paula.android.bechef.data.entity.DiscoverItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.dialog.AddToBookmarkDialog;
+import com.paula.android.bechef.dialog.EditReceiptItemDialog;
 
 import java.util.ArrayList;
 
@@ -38,30 +38,36 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     private RecyclerView mRvDetail;
     private ImageButton mIbtnMore;
     private boolean mIsBottomShown;
+    private DetailAdapter mDetailAdapter;
 
-    private DetailFragment(boolean isBottomShown) {
-        mIsBottomShown = isBottomShown;
+    private DetailFragment() {
     }
 
-    public static DetailFragment newInstance(boolean isBottomShown) {
-        return new DetailFragment(isBottomShown);
+    public static DetailFragment newInstance() {
+        return new DetailFragment();
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getActivity() != null) ((BeChefActivity) getActivity()).showBottomNavigationView(false);
+//    @Override
+//    public void onCreate(@Nullable Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//        if (getActivity() != null) ((BeChefActivity) getActivity()).showBottomNavigationView(false);
+//    }
+
+    public void setBottomShown(boolean bottomShown) {
+        mIsBottomShown = bottomShown;
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_detail, container, false);
+//        if (getArguments() != null) mIsBottomShown = (boolean) getArguments().get("isBottomShown");
+
         mContext = root.getContext();
         root.findViewById(R.id.imagebutton_toolbar_back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (getActivity() != null) getActivity().onBackPressed();
+                ((BeChefActivity) mContext).onBackPressed();
             }
         });
         mIbtnMore = root.findViewById(R.id.imagebutton_toolbar_more);
@@ -71,9 +77,10 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onStart() {
+        super.onStart();
         mPresenter.start();
+        ((BeChefActivity) mContext).showBottomNavigationView(false);
     }
 
     @Override
@@ -83,34 +90,36 @@ public class DetailFragment extends Fragment implements DetailContract.View {
 
     @Override
     public void showDetailUi(final Object content) {
-        DetailAdapter detailAdapter;
         if (content instanceof DiscoverItem) {
-            detailAdapter = new DetailAdapter((DiscoverItem) content, mPresenter);
+            mDetailAdapter = new DetailAdapter((DiscoverItem) content);
             mIbtnMore.setBackgroundResource(R.drawable.ic_bookmark_white);
         }
         else if (content instanceof BookmarkItem) {
-            detailAdapter = new DetailAdapter((BookmarkItem) content, mPresenter);
+            mDetailAdapter = new DetailAdapter((BookmarkItem) content);
             mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
         }
         else {
-            detailAdapter = new DetailAdapter((ReceiptItem) content, mPresenter);
+            mDetailAdapter = new DetailAdapter((ReceiptItem) content);
             mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
         }
-        mRvDetail.setAdapter(detailAdapter);
+        mRvDetail.setAdapter(mDetailAdapter);
 
         mIbtnMore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (content instanceof DiscoverItem)
-                    addToBookmark((DiscoverItem) content);
-                else
+                    addToBookmark();
+                else if (content instanceof ReceiptItem) {
                     // TODO: pop item action dialog
-                    Toast.makeText(mContext, "item " + ((BaseItem) content).getUid(), Toast.LENGTH_SHORT).show();
+                    EditReceiptItemDialog editReceiptItemDialog
+                            = new EditReceiptItemDialog(mDetailAdapter.getBaseItem(), mPresenter);
+                    editReceiptItemDialog.show(getChildFragmentManager(), "edit");
+                }
             }
         });
     }
 
-    private void addToBookmark(final DiscoverItem discoverItem) {
+    private void addToBookmark() {
         new LoadDataTask<>(new LoadDataCallback<BookmarkTabDao>() {
             private ArrayList<BookmarkTab> mBookmarkTabs = new ArrayList<>();
             @Override
@@ -132,9 +141,20 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     }
 
     @Override
-    public void onDestroy() {
-        if (getActivity() != null)
-            ((BeChefActivity) getActivity()).showBottomNavigationView(mIsBottomShown);
-        super.onDestroy();
+    public void onStop() {
+        super.onStop();
+        ((BeChefActivity) mContext).showBottomNavigationView(mIsBottomShown);
     }
+
+    @Override
+    public void updateUi(BaseItem baseItem) {
+        mDetailAdapter.updateData(baseItem);
+    }
+
+    //    @Override
+//    public void onDestroy() {
+//        super.onDestroy();
+//        Log.d("BechefPresenter", "detail ondestroy");
+//        ((BeChefActivity) mContext).showBottomNavigationView(mIsBottomShown);
+//    }
 }

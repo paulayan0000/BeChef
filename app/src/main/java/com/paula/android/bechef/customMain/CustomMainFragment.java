@@ -1,6 +1,7 @@
 package com.paula.android.bechef.customMain;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -86,6 +87,7 @@ public class CustomMainFragment<T, E> extends BaseMainFragment implements BaseCo
     @Override
     public void showSelectable(boolean selectable) {
         if (mIsSelectable == selectable) return;
+        Log.d("BechefPresenter", "set selectable");
 
         mIsSelectable = selectable;
         // Set toolbar and viewpager behavior

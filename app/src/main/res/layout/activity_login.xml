@@ -22,7 +22,7 @@
         android:id="@+id/signinbutton_google"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/margin_googlesignin_signinbutton_bottom"
+        android:layout_marginBottom="@dimen/margin_google_sign_in_button_bottom"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

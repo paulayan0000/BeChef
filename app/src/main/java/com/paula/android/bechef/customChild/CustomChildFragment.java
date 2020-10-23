@@ -122,4 +122,6 @@ public class CustomChildFragment<E> extends BaseMainFragment implements ChildCon
     public ArrayList<E> getChosenItems() {
         return mDefaultChildAdapter.getChosenItems();
     }
+
+
 }

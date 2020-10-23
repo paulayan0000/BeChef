@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,11 +36,18 @@ public class BaseMainFragment extends Fragment implements View.OnClickListener {
         mAppBarLayout = view.findViewById(R.id.appbar);
         mLayoutParams = (AppBarLayout.LayoutParams) view.findViewById(R.id.toolbar).getLayoutParams();
         ((TextView) view.findViewById(R.id.textview_toolbar_title)).setText(getTitleText());
+        ImageButton ibtnNew = view.findViewById(R.id.imagebutton_new);
+        ibtnNew.setOnClickListener(this);
+        ibtnNew.setVisibility(getNewVisibility());
         view.findViewById(R.id.imagebutton_edit).setOnClickListener(this);
         view.findViewById(R.id.imagebutton_find).setOnClickListener(this);
         view.findViewById(R.id.imagebutton_toolbar_menu).setOnClickListener(this);
         setViewPagerAndTab(view);
         return view;
+    }
+
+    protected int getNewVisibility() {
+        return View.GONE;
     }
 
     private void setViewPagerAndTab(View view) {
@@ -72,6 +80,9 @@ public class BaseMainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.imagebutton_new:
+                if (!mIsSelectable) createNewData();
+                break;
             case R.id.imagebutton_edit:
                 if (!mIsSelectable) Toast.makeText(getContext(), "edit", Toast.LENGTH_SHORT).show();
                 break;
@@ -82,6 +93,9 @@ public class BaseMainFragment extends Fragment implements View.OnClickListener {
                 if (!mIsSelectable) Toast.makeText(getContext(), "menu", Toast.LENGTH_SHORT).show();
                 break;
         }
+    }
+
+    protected void createNewData() {
     }
 
     public void showToolbar() {

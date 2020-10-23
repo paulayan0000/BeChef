@@ -25,4 +25,6 @@ public interface ReceiptItemDao extends BaseDao<ReceiptItem> {
     @Query("SELECT * FROM receipt_item WHERE tab_uid = :tabUid ORDER BY rating DESC")
     LiveData<List<ReceiptItem>> getAllWithRatingDescLive(int tabUid);
 
+    @Query("SELECT * FROM receipt_item WHERE uid = :uid")
+    LiveData<ReceiptItem> getItemWithUid(int uid);
 }

@@ -7,11 +7,12 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.customChild.CustomChildPresenter;
 import com.paula.android.bechef.data.entity.BaseItem;
+import com.paula.android.bechef.data.entity.ReceiptItem;
+import com.paula.android.bechef.dialog.EditReceiptItemDialog;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
 
     private class DefaultViewHolder extends RecyclerView.ViewHolder {
         private TextView mTvItemTitle, mTvTags, mTvTimeCount;
-        private ImageButton mIbtnChoose, mIbtnAction;
+        private ImageButton mIbtnChoose, mIbtnEdit;
         private ImageView mIvImage;
 
         private DefaultViewHolder(@NonNull View itemView) {
@@ -72,13 +73,14 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
             mTvTags = itemView.findViewById(R.id.textview_tags);
             mTvTimeCount = itemView.findViewById(R.id.textview_time_count);
             mIbtnChoose = itemView.findViewById(R.id.imagebutton_choose_box);
-            mIbtnAction = itemView.findViewById(R.id.imagebotton_action);
+            mIbtnEdit = itemView.findViewById(R.id.imagebutton_edit);
             mIvImage = itemView.findViewById(R.id.imageview_thumbnail);
         }
 
         void bindView(final T data) {
             final BaseItem baseItem = (BaseItem) data;
-            mTvTimeCount.setText(baseItem.getCreatedTime() + " • " + baseItem.getRating() + "分");
+            String rating = baseItem.getRating() == 0.0 ? "--" : String.valueOf(baseItem.getRating());
+            mTvTimeCount.setText(baseItem.getCreatedTime() + " • " + rating + "分");
             mTvItemTitle.setText(baseItem.getTitle());
             if ("".equals(baseItem.getTags()))
                 mTvTags.setVisibility(View.GONE);
@@ -87,7 +89,7 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
 
             if (mIsSelectable) {
                 mIbtnChoose.setVisibility(View.VISIBLE);
-                mIbtnAction.setVisibility(View.GONE);
+                mIbtnEdit.setVisibility(View.GONE);
                 mIbtnChoose.setSelected(baseItem.getSelected());
                 mIbtnChoose.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -101,16 +103,17 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
                 });
             } else {
                 mIbtnChoose.setVisibility(View.GONE);
-                mIbtnAction.setVisibility(View.VISIBLE);
+                mIbtnEdit.setVisibility(View.VISIBLE);
                 baseItem.setSelected(false);
                 clearChosenItems();
             }
 
-            mIbtnAction.setOnClickListener(new View.OnClickListener() {
+            if (data instanceof ReceiptItem) mIbtnEdit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     // TODO: pop item action dialog
-                    Toast.makeText(mContext, "no. " + getAdapterPosition() + " item action", Toast.LENGTH_LONG).show();
+                    EditReceiptItemDialog editReceiptItemDialog = new EditReceiptItemDialog((ReceiptItem) mDataArrayList.get(getAdapterPosition()));
+                    editReceiptItemDialog.show(mChildPresenter.getFragmentManager(), "edit");
                 }
             });
 
@@ -128,12 +131,14 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
                     return false;
                 }
             });
+            String imageUrl = baseItem.getImageUrl();
+//            if (!"".equals(baseItem.getImageUrl())) {
+                Picasso.with(mContext)
+                        .load(imageUrl.isEmpty() ? null : imageUrl)
+                        .error(R.drawable.all_picture_placeholder)
+                        .placeholder(R.drawable.all_picture_placeholder)
+                        .into(mIvImage);
 
-            Picasso.with(mContext)
-                    .load(baseItem.getImageUrl())
-                    .error(R.drawable.all_picture_placeholder)
-                    .placeholder(R.drawable.all_picture_placeholder)
-                    .into(mIvImage);
         }
     }
 

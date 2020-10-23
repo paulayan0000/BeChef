@@ -24,6 +24,7 @@ public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     clickCallback.onPositiveButtonClick();
+                    dialog.dismiss();
                 }
             });
             setNegativeButton("否", new DialogInterface.OnClickListener() {

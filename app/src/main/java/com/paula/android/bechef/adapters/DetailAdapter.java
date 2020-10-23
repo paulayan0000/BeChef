@@ -10,17 +10,19 @@ import android.widget.Toast;
 
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.data.entity.DiscoverItem;
-import com.paula.android.bechef.data.Material;
+import com.paula.android.bechef.data.MaterialGroup;
 import com.paula.android.bechef.data.Step;
 import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
-import com.paula.android.bechef.detail.DetailContract;
+import com.paula.android.bechef.dialog.EditCompleteCallback;
+import com.paula.android.bechef.utils.Constants;
 import com.squareup.picasso.Picasso;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -32,18 +34,16 @@ public class DetailAdapter extends RecyclerView.Adapter {
     private static final int HEAD = 0;
     private static final int BODY = 1;
     private static final int FOOT = 2;
-    private static final int IMAGE_ITEM_LIMIT = 3;
+    public static final int IMAGE_ITEM_LIMIT = 3;
 
-    private DetailContract.Presenter mDetailPresenter;
     private Context mContext;
     private BaseItem mBaseItem;
     private ReceiptItem mReceiptItem;
     private String mTimeAndCount;
     private int mMaterialSize;
 
-    public DetailAdapter(BaseItem baseItem, DetailContract.Presenter presenter) {
+    public DetailAdapter(BaseItem baseItem) {
         mBaseItem = baseItem;
-        mDetailPresenter = presenter;
         if (mBaseItem instanceof DiscoverItem) {
             DiscoverItem discoverItem = (DiscoverItem) baseItem;
             mTimeAndCount = getFormatDate(discoverItem.getPublishedAt()) + " • "
@@ -52,29 +52,37 @@ public class DetailAdapter extends RecyclerView.Adapter {
             BookmarkItem bookmarkItem = (BookmarkItem) baseItem;
             mTimeAndCount = bookmarkItem.getCreatedTime() + " • " + bookmarkItem.getRating() + "分";
         } else {
-            mReceiptItem = (ReceiptItem) baseItem;
-            mTimeAndCount = mReceiptItem.getCreatedTime() + " • " + mReceiptItem.getRating()
-                    + "分\n耗時 : " + mReceiptItem.getDuration() + " • 份量 : "
-                    + mReceiptItem.getWeight() + "人份 • " + mReceiptItem.getRating() + "分";
-            mMaterialSize = mReceiptItem.getMaterials().size();
+            updateReceiptData(baseItem);
         }
+    }
+
+    private void updateReceiptData(BaseItem baseItem) {
+        mReceiptItem = (ReceiptItem) baseItem;
+        String rating =  mReceiptItem.getRating() == 0.0 ? "--" : String.valueOf(mReceiptItem.getRating());
+        String duration = "".equals(mReceiptItem.getDuration()) ? "--" : mReceiptItem.getDuration();
+        String weight = mReceiptItem.getWeight() <= 0 ? "--" : String.valueOf(mReceiptItem.getWeight());
+        mTimeAndCount = mReceiptItem.getCreatedTime() + " • " + rating
+                + "分\n耗時 : " + duration + " • 份量 : "
+                + weight + "人份";
+        mMaterialSize = mReceiptItem.getMaterialGroups().size();
+    }
+
+    public BaseItem getBaseItem() {
+        return mBaseItem;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
-        View view;
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         switch (viewType) {
             case FOOT:
-                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_detail_steps, parent, false);
-                return new StepsViewHolder(view);
+                return new StepsViewHolder(inflater.inflate(R.layout.item_detail_steps, parent, false));
             case BODY:
-                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_detail_materials, parent, false);
-                return new MaterialsViewHolder(view);
+                return new MaterialsViewHolder(inflater.inflate(R.layout.item_detail_materials, parent, false));
             default:
-                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_detail_description, parent, false);
-                return new DescriptionViewHolder(view);
+                return new DescriptionViewHolder(inflater.inflate(R.layout.item_detail_descriptions, parent, false));
         }
     }
 
@@ -84,9 +92,9 @@ public class DetailAdapter extends RecyclerView.Adapter {
             ((DescriptionViewHolder) holder).bindView();
         } else if (holder instanceof MaterialsViewHolder) {
             ((MaterialsViewHolder) holder).showDivider(position == 1, position == mMaterialSize);
-            ((MaterialsViewHolder) holder).bindView(mReceiptItem.getMaterials().get(position - 1));
+            ((MaterialsViewHolder) holder).bindView(position);
         } else {
-            ((StepsViewHolder) holder).bindView(mReceiptItem.getSteps().get(position - mMaterialSize - 1));
+            ((StepsViewHolder) holder).bindView(position);
         }
     }
 
@@ -100,8 +108,14 @@ public class DetailAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemCount() {
         if (mBaseItem instanceof ReceiptItem)
-            return mReceiptItem.getSteps().size() + mReceiptItem.getMaterials().size() + 1;
+            return mReceiptItem.getSteps().size() + mReceiptItem.getMaterialGroups().size() + 1;
         else return 1;
+    }
+
+    public void updateData(BaseItem baseItem) {
+        mBaseItem = baseItem;
+        updateReceiptData(mBaseItem);
+        notifyDataSetChanged();
     }
 
     private class DescriptionViewHolder extends RecyclerView.ViewHolder {
@@ -121,8 +135,9 @@ public class DetailAdapter extends RecyclerView.Adapter {
         }
 
         void bindView() {
+            String imageUrl = mBaseItem.getImageUrl();
             Picasso.with(mContext)
-                    .load(mBaseItem.getImageUrl())
+                    .load(imageUrl.isEmpty() ? null : imageUrl)
                     .error(R.drawable.all_picture_placeholder)
                     .placeholder(R.drawable.all_picture_placeholder)
                     .into(mIvThumbnail);
@@ -159,6 +174,43 @@ public class DetailAdapter extends RecyclerView.Adapter {
         }
     }
 
+    private class MaterialsViewHolder extends RecyclerView.ViewHolder {
+        private TextView mTvType, mTvName;
+        private View mVTopDivider, mVBottomDivider;
+
+        MaterialsViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mTvType = itemView.findViewById(R.id.textview_material_type);
+            mTvName = itemView.findViewById(R.id.textview_materail_name);
+            mVTopDivider = itemView.findViewById(R.id.view_top_divider);
+            mVBottomDivider = itemView.findViewById(R.id.view_bottom_divider);
+        }
+
+        void showDivider(boolean showTop, boolean showBottom) {
+            mVTopDivider.setVisibility(showTop ? View.VISIBLE : View.GONE);
+            mVBottomDivider.setVisibility(showBottom ? View.VISIBLE : View.GONE);
+        }
+
+        void bindView(int position) {
+            MaterialGroup materialGroup = mReceiptItem.getMaterialGroups().get(position - 1);
+            mTvType.setText(materialGroup.getGroupName());
+
+            StringBuilder materialName = new StringBuilder();
+            ArrayList<String> contents = materialGroup.getMaterialContents();
+            int contentsSize = contents.size();
+            for (int i = 0; i < contentsSize; i++) {
+                materialName.append(" • ").append(contents.get(i));
+                if (i != contentsSize - 1) materialName.append("\n");
+            }
+            if (!"".contentEquals(materialName)) {
+                mTvName.setText(materialName.toString());
+                mTvName.setVisibility(View.VISIBLE);
+            } else {
+                mTvName.setVisibility(View.GONE);
+            }
+        }
+    }
+
     private class StepsViewHolder extends RecyclerView.ViewHolder {
         private TextView mTvNumber, mTvDescription;
         private RecyclerView mRecyclerView;
@@ -170,8 +222,10 @@ public class DetailAdapter extends RecyclerView.Adapter {
             mRecyclerView = itemView.findViewById(R.id.recyclerview_step_image);
         }
 
-        void bindView(Step step) {
-            mTvNumber.setText(String.valueOf(step.getStepNumber()));
+        void bindView(int position) {
+            int currentIndex = position - mMaterialSize - 1;
+            Step step = mReceiptItem.getSteps().get(currentIndex);
+            mTvNumber.setText(String.valueOf(currentIndex + 1));
             mTvDescription.setText(step.getStepDescription());
 
             int imageCount = step.getImageUrls().size();
@@ -183,31 +237,6 @@ public class DetailAdapter extends RecyclerView.Adapter {
                 mRecyclerView.setLayoutManager(layoutManager);
                 mRecyclerView.setAdapter(stepImageAdapter);
             }
-        }
-    }
-
-    private class MaterialsViewHolder extends RecyclerView.ViewHolder {
-        private TextView mTvType, mTvName, mTvAmount;
-
-        MaterialsViewHolder(@NonNull View itemView) {
-            super(itemView);
-            mTvType = itemView.findViewById(R.id.textview_material_type);
-            mTvName = itemView.findViewById(R.id.textview_materail_name);
-            mTvAmount = itemView.findViewById(R.id.textview_material_amount);
-        }
-
-        void showDivider(boolean showTop, boolean showBottom) {
-            if (showTop) itemView.findViewById(R.id.view_top_divider).setVisibility(View.VISIBLE);
-            if (showBottom)
-                itemView.findViewById(R.id.view_bottom_divider).setVisibility(View.VISIBLE);
-        }
-
-        void bindView(Material material) {
-            if (material.getMaterialIndex() == 0) mTvType.setVisibility(View.VISIBLE);
-            String materialType = material.getMaterialType();
-            mTvType.setText(materialType.equals("") ? "預備食材" : materialType);
-            mTvName.setText(" • " + material.getMaterialName());
-            mTvAmount.setText(material.getMaterialAmount());
         }
     }
 

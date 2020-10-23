@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.paula.android.bechef.BeChefContract;
@@ -35,6 +36,12 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
         } else {
             popLogin();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!((BeChefPresenter) mPresenter).isDetailShown())
+            super.onBackPressed();
     }
 
     @Override
