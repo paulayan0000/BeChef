@@ -6,7 +6,7 @@ import com.paula.android.bechef.customMain.CustomMainFragment;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.data.entity.ReceiptTab;
-import com.paula.android.bechef.dialog.EditReceiptItemDialog;
+import com.paula.android.bechef.dialog.EditItemDialog;
 import com.paula.android.bechef.receiptChild.ReceiptChildFragment;
 import com.paula.android.bechef.utils.Constants;
 
@@ -41,8 +41,8 @@ public class ReceiptFragment extends CustomMainFragment<ReceiptTab, ReceiptItem>
         if (childFragment != null) {
             newItem.setTabUid(((ReceiptChildFragment) childFragment).getTabUid());
             newItem.setCreatedTime(new SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(new Date()));
-            EditReceiptItemDialog editReceiptItemDialog = new EditReceiptItemDialog(newItem);
-            editReceiptItemDialog.show(getChildFragmentManager(), "new");
+            EditItemDialog editItemDialog = new EditItemDialog(newItem);
+            editItemDialog.show(getChildFragmentManager(), "new");
         }
     }
 

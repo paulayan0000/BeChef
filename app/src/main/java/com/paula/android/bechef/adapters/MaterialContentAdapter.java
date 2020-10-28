@@ -12,15 +12,19 @@ import com.paula.android.bechef.dialog.BeChefTextWatcher;
 import com.paula.android.bechef.dialog.EditTextChangeCallback;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class MaterialContentAdapter extends RecyclerView.Adapter implements EditTextChangeCallback {
+import static androidx.recyclerview.widget.ItemTouchHelper.Callback.makeMovementFlags;
+
+public class MaterialContentAdapter extends RecyclerView.Adapter implements EditTextChangeCallback, ItemTouchHelperAdapter {
     private Context mContext;
     private ArrayList<String> mMaterialContents;
 
-    public MaterialContentAdapter(ArrayList<String> materialContents) {
+    MaterialContentAdapter(ArrayList<String> materialContents) {
         mMaterialContents = materialContents;
         if (materialContents.size() == 0) {
             mMaterialContents.add("");
@@ -48,6 +52,36 @@ public class MaterialContentAdapter extends RecyclerView.Adapter implements Edit
     @Override
     public void afterTextChanged(int position, String textContent) {
         mMaterialContents.set(position, textContent);
+    }
+
+    @Override
+    public boolean onItemMoved(int fromPosition, int toPosition) {
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(mMaterialContents, i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(mMaterialContents, i, i - 1);
+            }
+        }
+        notifyItemMoved(fromPosition, toPosition);
+        return true;
+    }
+
+    @Override
+    public void onItemSwiped(int position) {
+        mMaterialContents.remove(position);
+        notifyRemoved(position);
+    }
+
+    @Override
+    public int getItemMovementFlags() {
+        if (mMaterialContents.size() <= 1)
+            return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.ACTION_STATE_IDLE);
+        else
+            return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+                    ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
     }
 
     private class ContentViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -80,18 +114,13 @@ public class MaterialContentAdapter extends RecyclerView.Adapter implements Edit
             switch (v.getId()) {
                 case R.id.imagebutton_add:
                     mMaterialContents.add(currentIndex + 1, "");
-                    notifyItemInserted(currentIndex + 1);
-                    notifyItemRangeChanged(currentIndex, mMaterialContents.size() - currentIndex);
+                    notifyAdded(currentIndex);
                     break;
                 case R.id.imagebutton_remove:
                     if (mMaterialContents.size() == 1) return;
                     mMaterialContents.remove(currentIndex);
-                    if (mMaterialContents.size() == 1) {
-                        notifyItemRangeChanged(0, 2);
-                    } else {
-                        notifyItemRemoved(currentIndex);
-                        notifyItemRangeChanged(currentIndex, mMaterialContents.size() - currentIndex);
-                    }
+                    if (mMaterialContents.size() == 1) notifyItemRangeChanged(0, 2);
+                    else notifyRemoved(currentIndex);
                     break;
                 case R.id.imagebutton_clear:
                     mMaterialContents.set(currentIndex, "");
@@ -99,5 +128,14 @@ public class MaterialContentAdapter extends RecyclerView.Adapter implements Edit
                     break;
             }
         }
+    }
+    private void notifyAdded(int currentPosition) {
+        notifyItemInserted(currentPosition + 1);
+        notifyItemRangeChanged(currentPosition, getItemCount() - currentPosition - 1);
+    }
+
+    private void notifyRemoved(int currentPosition) {
+        notifyItemRemoved(currentPosition);
+        notifyItemRangeChanged(currentPosition, getItemCount() - currentPosition);
     }
 }

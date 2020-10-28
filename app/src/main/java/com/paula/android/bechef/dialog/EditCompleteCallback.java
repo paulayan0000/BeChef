@@ -1,9 +1,13 @@
 package com.paula.android.bechef.dialog;
 
-import com.paula.android.bechef.data.entity.ReceiptItem;
+import com.paula.android.bechef.data.entity.BaseItem;
 
 public interface EditCompleteCallback {
-    void onEditComplete(ReceiptItem receiptItem);
+    String getDialogTag();
+
+    void onEditComplete(BaseItem baseItem);
+
     void onInsertComplete(int position);
+
     void onChooseImages(int editAdapterPosition, int stepImagePosition);
 }

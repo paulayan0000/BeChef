@@ -4,10 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.api.beans.GetSearchList;
@@ -47,7 +45,7 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
-        if (viewType == Constants.VIEWTYPE_NORMAL) {
+        if (viewType == Constants.VIEW_TYPE_NORMAL) {
             View view = LayoutInflater.from(mContext).inflate(R.layout.item_discover_recycler, parent, false);
             return new DiscoverViewHolder(view);
         } else {
@@ -58,7 +56,7 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        return (position < mDiscoverItems.size()) ? Constants.VIEWTYPE_NORMAL : Constants.VIEWTYPE_LOADING;
+        return (position < mDiscoverItems.size()) ? Constants.VIEW_TYPE_NORMAL : Constants.VIEW_TYPE_LOADING;
     }
 
     @Override
@@ -85,6 +83,12 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
             mIvThumbnail = itemView.findViewById(R.id.imageview_thumbnail);
             mTvVideoTitle = itemView.findViewById(R.id.textview_video_title);
             mTvVideoTime = itemView.findViewById(R.id.textview_video_time);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mPresenter.openDetail(mDiscoverItems.get(getAdapterPosition()).getVideoId(), true);
+                }
+            });
         }
 
         void bindView(final DiscoverItem discoverItem) {
@@ -96,12 +100,6 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
                     .error(R.drawable.all_picture_placeholder)
                     .placeholder(R.drawable.all_picture_placeholder)
                     .into(mIvThumbnail);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mPresenter.openDetail(discoverItem.getVideoId(), true);
-                }
-            });
         }
     }
 

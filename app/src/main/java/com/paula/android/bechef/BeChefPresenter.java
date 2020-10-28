@@ -180,30 +180,6 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         mDetailFragment.setBottomShown(isBottomShown);
         mDetailPresenter = new DetailPresenter(mDetailFragment, content);
         transaction.commit();
-//        ((BeChefActivity) mMainView).showBottomNavigationView(false);
-
-
-//        if (mDiscoverFragment != null && !mDiscoverFragment.isHidden()) {
-//            transaction.hide(mDiscoverFragment);
-//            transaction.addToBackStack(DISCOVER);
-//        }
-//        if (mBookmarkFragment != null && !mBookmarkFragment.isHidden()) {
-//            transaction.hide(mBookmarkFragment);
-//            transaction.addToBackStack(BOOKMARK);
-//        }
-//        if (mReceiptFragment != null && !mReceiptFragment.isHidden()) {
-//            transaction.hide(mReceiptFragment);
-//            transaction.addToBackStack(RECEIPT);
-//        }
-//
-//        DetailFragment detailFragment = DetailFragment.newInstance();
-//        Bundle bundle = new Bundle();
-//        bundle.putBoolean("isBottomShown", isBottomShown);
-//        mDetailFragment.setArguments(bundle);
-//        transaction.add(R.id.linearlayout_main_container, mDetailFragment, DETAIL);
-//        transaction.commit();
-//
-//        DetailPresenter detailPresenter = new DetailPresenter(detailFragment, content);
     }
 
     @Override

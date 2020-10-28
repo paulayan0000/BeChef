@@ -31,6 +31,28 @@
         app:layout_constraintStart_toEndOf="@id/imagebutton_add"
         app:layout_constraintTop_toTopOf="@id/edittext_step_description" />
 
+    <ImageButton
+        android:id="@+id/imagebutton_move_up"
+        android:layout_width="@dimen/normal_icon_size"
+        android:layout_height="@dimen/normal_icon_size"
+        android:background="@color/white"
+        android:padding="8dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_move_up"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imagebutton_add" />
+
+    <ImageButton
+        android:id="@+id/imagebutton_move_down"
+        android:layout_width="@dimen/normal_icon_size"
+        android:layout_height="@dimen/normal_icon_size"
+        android:background="@color/white"
+        android:padding="8dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_move_down"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imagebutton_move_up" />
+
     <TextView
         android:id="@+id/textview_step_number"
         android:layout_width="wrap_content"
@@ -74,9 +96,9 @@
         android:id="@+id/recyclerview_step_image"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="@id/edittext_step_description"
-        app:layout_constraintEnd_toEndOf="@id/edittext_step_description"
-        app:layout_constraintTop_toBottomOf="@id/edittext_step_description"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/edittext_step_description"
+        app:layout_constraintStart_toEndOf="@+id/imagebutton_add"
+        app:layout_constraintTop_toBottomOf="@id/edittext_step_description" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

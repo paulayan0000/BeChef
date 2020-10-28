@@ -12,11 +12,15 @@ import com.paula.android.bechef.dialog.EditCompleteCallback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class StepImageAdapter extends RecyclerView.Adapter {
+import static androidx.recyclerview.widget.ItemTouchHelper.Callback.makeMovementFlags;
+
+public class StepImageAdapter extends RecyclerView.Adapter implements ItemTouchHelperAdapter {
     private Context mContext;
     private ArrayList<String> mImageUrls;
     private int mViewType;
@@ -57,7 +61,36 @@ public class StepImageAdapter extends RecyclerView.Adapter {
         return mViewType;
     }
 
-    private class StepImageViewHolder extends RecyclerView.ViewHolder {
+    @Override
+    public boolean onItemMoved(int fromPosition, int toPosition) {
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(mImageUrls, i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(mImageUrls, i, i - 1);
+            }
+        }
+        notifyItemMoved(fromPosition, toPosition);
+        return true;
+    }
+
+    @Override
+    public void onItemSwiped(int position) {
+
+    }
+
+    @Override
+    public int getItemMovementFlags() {
+        if (mImageUrls.size() <= 1)
+            return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.ACTION_STATE_IDLE);
+        else
+            return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+                    ItemTouchHelper.ACTION_STATE_IDLE);
+    }
+
+    private class StepImageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView mIvStepImage;
         private ImageButton mIbtnAdd;
 
@@ -66,24 +99,11 @@ public class StepImageAdapter extends RecyclerView.Adapter {
             mIvStepImage = itemView.findViewById(R.id.imageview_step_image);
             ImageView ivForeground = itemView.findViewById(R.id.imageview_step_image_forground);
             if (mViewType != -1) {
-                itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mCompleteCallback.onChooseImages(mViewType, getAdapterPosition());
-                    }
-                });
+                itemView.setOnClickListener(this);
                 ivForeground.setVisibility(View.VISIBLE);
             }
             mIbtnAdd = itemView.findViewById(R.id.imagebutton_add);
-            itemView.findViewById(R.id.imagebutton_add).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int position = getAdapterPosition();
-                    mImageUrls.add(position + 1, "");
-                    notifyItemInserted(position + 1);
-                    notifyItemRangeChanged(position + 1, getItemCount() - position - 1);
-                }
-            });
+            itemView.findViewById(R.id.imagebutton_add).setOnClickListener(this);
         }
 
         void bindView(String imageUrl) {
@@ -95,6 +115,19 @@ public class StepImageAdapter extends RecyclerView.Adapter {
                     .error(R.drawable.all_picture_placeholder)
                     .placeholder(R.drawable.all_picture_placeholder)
                     .into(mIvStepImage);
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (v.getId() == R.id.imagebutton_add) {
+                int position = getAdapterPosition();
+                mImageUrls.add(position + 1, "");
+                notifyItemInserted(position + 1);
+                notifyItemRangeChanged(position + 1, getItemCount() - position - 1);
+            } else {
+                mCompleteCallback.onChooseImages(mViewType, getAdapterPosition());
+            }
+
         }
     }
 }

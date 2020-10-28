@@ -11,8 +11,9 @@ import android.widget.TextView;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.customChild.CustomChildPresenter;
 import com.paula.android.bechef.data.entity.BaseItem;
+import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
-import com.paula.android.bechef.dialog.EditReceiptItemDialog;
+import com.paula.android.bechef.dialog.EditItemDialog;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
-    private class DefaultViewHolder extends RecyclerView.ViewHolder {
+    private class DefaultViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView mTvItemTitle, mTvTags, mTvTimeCount;
         private ImageButton mIbtnChoose, mIbtnEdit;
         private ImageView mIvImage;
@@ -72,9 +73,19 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
             mTvItemTitle = itemView.findViewById(R.id.textview_title);
             mTvTags = itemView.findViewById(R.id.textview_tags);
             mTvTimeCount = itemView.findViewById(R.id.textview_time_count);
-            mIbtnChoose = itemView.findViewById(R.id.imagebutton_choose_box);
-            mIbtnEdit = itemView.findViewById(R.id.imagebutton_edit);
             mIvImage = itemView.findViewById(R.id.imageview_thumbnail);
+            mIbtnChoose = itemView.findViewById(R.id.imagebutton_choose_box);
+            mIbtnChoose.setOnClickListener(this);
+            mIbtnEdit = itemView.findViewById(R.id.imagebutton_edit);
+            mIbtnEdit.setOnClickListener(this);
+            itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    mChildPresenter.transToSelectable();
+                    return false;
+                }
+            });
         }
 
         void bindView(final T data) {
@@ -91,16 +102,6 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
                 mIbtnChoose.setVisibility(View.VISIBLE);
                 mIbtnEdit.setVisibility(View.GONE);
                 mIbtnChoose.setSelected(baseItem.getSelected());
-                mIbtnChoose.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        boolean isSelected = !v.isSelected();
-                        v.setSelected(isSelected);
-                        baseItem.setSelected(isSelected);
-                        if (isSelected) mChosenDataArrayList.add(data);
-                        else mChosenDataArrayList.remove(data);
-                    }
-                });
             } else {
                 mIbtnChoose.setVisibility(View.GONE);
                 mIbtnEdit.setVisibility(View.VISIBLE);
@@ -108,36 +109,39 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
                 clearChosenItems();
             }
 
-            if (data instanceof ReceiptItem) mIbtnEdit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // TODO: pop item action dialog
-                    EditReceiptItemDialog editReceiptItemDialog = new EditReceiptItemDialog((ReceiptItem) mDataArrayList.get(getAdapterPosition()));
-                    editReceiptItemDialog.show(mChildPresenter.getFragmentManager(), "edit");
-                }
-            });
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mChildPresenter.openDetail(data, mIsSelectable);
-                }
-            });
-
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    mChildPresenter.transToSelectable();
-                    return false;
-                }
-            });
             String imageUrl = baseItem.getImageUrl();
-//            if (!"".equals(baseItem.getImageUrl())) {
-                Picasso.with(mContext)
-                        .load(imageUrl.isEmpty() ? null : imageUrl)
-                        .error(R.drawable.all_picture_placeholder)
-                        .placeholder(R.drawable.all_picture_placeholder)
-                        .into(mIvImage);
+            Picasso.with(mContext)
+                    .load(imageUrl.isEmpty() ? null : imageUrl)
+                    .error(R.drawable.all_picture_placeholder)
+                    .placeholder(R.drawable.all_picture_placeholder)
+                    .into(mIvImage);
+        }
+
+        @Override
+        public void onClick(View v) {
+            T data = mDataArrayList.get(getAdapterPosition());
+            switch (v.getId()) {
+                case R.id.imagebutton_choose_box:
+                    boolean isSelected = !v.isSelected();
+                    v.setSelected(isSelected);
+                    ((BaseItem) data).setSelected(isSelected);
+                    if (isSelected) mChosenDataArrayList.add(data);
+                    else mChosenDataArrayList.remove(data);
+                    break;
+                case R.id.imagebutton_edit:
+                    if (data instanceof ReceiptItem) {
+                        EditItemDialog editItemDialog = new EditItemDialog((ReceiptItem) mDataArrayList.get(getAdapterPosition()));
+                        editItemDialog.show(mChildPresenter.getFragmentManager(), "edit_receipt");
+                    } else if (data instanceof BookmarkItem) {
+                        EditItemDialog editItemDialog = new EditItemDialog((BookmarkItem) mDataArrayList.get(getAdapterPosition()));
+                        editItemDialog.show(mChildPresenter.getFragmentManager(), "edit_bookmark");
+                    }
+                    break;
+                default:
+                    mChildPresenter.openDetail(data, mIsSelectable);
+                    break;
+
+            }
 
         }
     }

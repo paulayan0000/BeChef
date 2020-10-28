@@ -30,7 +30,6 @@ public class ReceiptChildPresenter extends CustomChildPresenter<ReceiptItem> {
                     }
                 });
                 break;
-
             case Constants.FILTER_WITH_TIME_DESC:
                 ItemDatabase.getReceiptInstance(mCustomChildFragment.getContext()).receiptDao()
                         .getAllWithTimeDescLive(mTabUid).observe((LifecycleOwner) mCustomChildFragment, new Observer<List<ReceiptItem>>() {
@@ -40,7 +39,6 @@ public class ReceiptChildPresenter extends CustomChildPresenter<ReceiptItem> {
                     }
                 });
                 break;
-
             case Constants.FILTER_WITH_RATING_ASC:
                 ItemDatabase.getReceiptInstance(mCustomChildFragment.getContext()).receiptDao()
                         .getAllWithRatingAscLive(mTabUid).observe((LifecycleOwner) mCustomChildFragment, new Observer<List<ReceiptItem>>() {
@@ -50,7 +48,6 @@ public class ReceiptChildPresenter extends CustomChildPresenter<ReceiptItem> {
                     }
                 });
                 break;
-
             case Constants.FILTER_WITH_RATING_DESC:
                 ItemDatabase.getReceiptInstance(mCustomChildFragment.getContext()).receiptDao()
                         .getAllWithRatingDescLive(mTabUid).observe((LifecycleOwner) mCustomChildFragment, new Observer<List<ReceiptItem>>() {

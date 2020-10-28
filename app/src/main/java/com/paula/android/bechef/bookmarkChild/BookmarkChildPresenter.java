@@ -30,7 +30,6 @@ public class BookmarkChildPresenter extends CustomChildPresenter<BookmarkItem> {
                     }
                 });
                 break;
-
             case Constants.FILTER_WITH_TIME_DESC:
                 ItemDatabase.getBookmarkInstance(mCustomChildFragment.getContext()).bookmarkDao()
                         .getAllWithTimeDescLive(mTabUid).observe((LifecycleOwner) mCustomChildFragment, new Observer<List<BookmarkItem>>() {
@@ -40,7 +39,6 @@ public class BookmarkChildPresenter extends CustomChildPresenter<BookmarkItem> {
                     }
                 });
                 break;
-
             case Constants.FILTER_WITH_RATING_ASC:
                 ItemDatabase.getBookmarkInstance(mCustomChildFragment.getContext()).bookmarkDao()
                         .getAllWithRatingAscLive(mTabUid).observe((LifecycleOwner) mCustomChildFragment, new Observer<List<BookmarkItem>>() {
@@ -50,7 +48,6 @@ public class BookmarkChildPresenter extends CustomChildPresenter<BookmarkItem> {
                     }
                 });
                 break;
-
             case Constants.FILTER_WITH_RATING_DESC:
                 ItemDatabase.getBookmarkInstance(mCustomChildFragment.getContext()).bookmarkDao()
                         .getAllWithRatingDescLive(mTabUid).observe((LifecycleOwner) mCustomChildFragment, new Observer<List<BookmarkItem>>() {

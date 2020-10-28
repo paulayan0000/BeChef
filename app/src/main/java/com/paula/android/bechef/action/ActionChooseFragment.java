@@ -73,61 +73,9 @@ public class ActionChooseFragment<T, E> extends Fragment implements View.OnClick
                 };
                 break;
             case R.id.textview_action_move:
-                message = null;
-//                final ArrayList<?> baseTabs = mPresenter.getOtherTabs();
-//                MoveToDialog moveToDialog = new MoveToDialog<>(baseTabs, mPresenter.getChosenItems());
                 MoveToDialog moveToDialog = new MoveToDialog<>(mPresenter);
                 moveToDialog.show(getChildFragmentManager(), "move");
                 return;
-//                itemsCallback = new AlertDialogItemsCallback() {
-//                    @Override
-//                    public String[] getItems() {
-//                        String[] tabTitleArray = new String[baseTabs.size() + 1];
-//                        tabTitleArray[0] = " + 新增標籤";
-//                        for (int i = 0; i < baseTabs.size(); i++) {
-//                            tabTitleArray[i + 1] = ((BaseTab) baseTabs.get(i)).getTabName();
-//                        }
-//                        return tabTitleArray;
-//                    }
-//
-//                    @Override
-//                    public DialogInterface.OnClickListener getItemOnClickListener() {
-//                        return new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, final int which) {
-//                                // TODO: 新增書籤
-//                                if (which == 0) {
-//                                    Toast.makeText(getContext(), "新增標籤對話框", Toast.LENGTH_SHORT).show();
-//                                } else {
-//                                    new LoadDataTask<>(new LoadDataCallback<ItemDatabase>() {
-//                                        @Override
-//                                        public ItemDatabase getDao() {
-//                                            if (mPresenter instanceof BookmarkPresenter)
-//                                                return ItemDatabase.getBookmarkInstance(mContext);
-//                                            else
-//                                                return ItemDatabase.getReceiptInstance(mContext);
-//                                        }
-//
-//                                        @Override
-//                                        public void doInBackground(ItemDatabase database) {
-//                                            int tabUid = ((BaseTab) baseTabs.get(which - 1)).getUid();
-//                                            if (mPresenter instanceof BookmarkPresenter)
-//                                                updateBookmarkTabUid(database.bookmarkDao(), tabUid);
-//                                            else
-//                                                updateReceiptTabUid(database.receiptDao(), tabUid);
-//                                        }
-//
-//                                        @Override
-//                                        public void onCompleted() {
-//                                            mPresenter.leaveChooseDialog();
-//                                        }
-//                                    }).execute();
-//                                }
-//                            }
-//                        };
-//                    }
-//                };
-//                break;
             case R.id.textview_action_delete:
                 clickCallback = new AlertDialogClickCallback() {
                     @Override
@@ -167,18 +115,4 @@ public class ActionChooseFragment<T, E> extends Fragment implements View.OnClick
                 .create()
                 .show();
     }
-
-//    private void updateBookmarkTabUid(BookmarkItemDao dao, int newTabUid) {
-//        ArrayList<BookmarkItem> chosenItems = ((BookmarkPresenter) mPresenter).getChosenItems();
-//        for (BookmarkItem chosenItem : chosenItems) {
-//            dao.setNewTabUid(chosenItem.getUid(), newTabUid);
-//        }
-//    }
-//
-//    private void updateReceiptTabUid(ReceiptItemDao dao, int newTabUid) {
-//        ArrayList<ReceiptItem> chosenItems = ((ReceiptPresenter) mPresenter).getChosenItems();
-//        for (ReceiptItem chosenItem : chosenItems) {
-//            dao.setNewTabUid(chosenItem.getUid(), newTabUid);
-//        }
-//    }
 }

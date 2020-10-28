@@ -9,11 +9,16 @@ public class Constants {
     public static final int LOGIN_SUCCESS = 0x11;
     public static final int LOGIN_EXIT = 0x12;
 
-    // Recycler view type
-    public static final int VIEWTYPE_NORMAL = 0;
-    public static final int VIEWTYPE_LOADING = 1;
-    public static final int VIEWTYPE_DETAIL = 2;
-    public static final int VIEWTYPE_EDIT = 3;
+    // RecyclerView
+    public static final int VIEW_TYPE_NORMAL = 0;
+    public static final int VIEW_TYPE_LOADING = 1;
+
+    public static final int VIEW_TYPE_IMAGE = -1;
+    public static final int VIEW_TYPE_HEAD = 0;
+    public static final int VIEW_TYPE_BODY = 1;
+    public static final int VIEW_TYPE_FOOT = 2;
+    public static final int IMAGE_ITEM_LIMIT = 3;
+    public static final int DESCRIPTION_SIZE = 6;
 
     // Table name
     public static final String BOOKMARK_ITEM_TABLE = "bookmark-item-table";

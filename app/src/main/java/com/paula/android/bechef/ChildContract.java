@@ -16,8 +16,6 @@ public interface ChildContract extends BaseContract {
 
         void updateItems(ArrayList<E> items);
 
-        void refreshData();
-
         ArrayList<E> getChosenItems();
     }
 

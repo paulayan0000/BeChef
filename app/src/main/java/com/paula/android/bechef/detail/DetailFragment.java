@@ -20,7 +20,7 @@ import com.paula.android.bechef.data.entity.BookmarkTab;
 import com.paula.android.bechef.data.entity.DiscoverItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.dialog.AddToBookmarkDialog;
-import com.paula.android.bechef.dialog.EditReceiptItemDialog;
+import com.paula.android.bechef.dialog.EditItemDialog;
 
 import java.util.ArrayList;
 
@@ -107,14 +107,17 @@ public class DetailFragment extends Fragment implements DetailContract.View {
         mIbtnMore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (content instanceof DiscoverItem)
+                if (content instanceof DiscoverItem) {
                     addToBookmark();
-                else if (content instanceof ReceiptItem) {
-                    // TODO: pop item action dialog
-                    EditReceiptItemDialog editReceiptItemDialog
-                            = new EditReceiptItemDialog(mDetailAdapter.getBaseItem(), mPresenter);
-                    editReceiptItemDialog.show(getChildFragmentManager(), "edit");
+                    return;
                 }
+                EditItemDialog editItemDialog
+                        = new EditItemDialog(mDetailAdapter.getBaseItem(), mPresenter);
+                if (content instanceof ReceiptItem)
+                    editItemDialog.show(getChildFragmentManager(), "edit_receipt");
+                else
+                    editItemDialog.show(getChildFragmentManager(), "edit_bookmark");
+
             }
         });
     }

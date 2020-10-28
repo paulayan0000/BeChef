@@ -41,7 +41,6 @@ public class ReceiptItem extends BaseItem {
     @Ignore
     public ReceiptItem(ReceiptItem receiptItem) {
         super(receiptItem);
-        super.setUid(receiptItem.getUid());
         mSteps = new ArrayList<>();
         ArrayList<Step> oldSteps = receiptItem.getSteps();
         Step newStep;
@@ -58,6 +57,14 @@ public class ReceiptItem extends BaseItem {
         }
         mDuration = receiptItem.getDuration();
         mWeight = receiptItem.getWeight();
+    }
+
+    @Ignore
+    public ReceiptItem(BookmarkItem bookmarkItem) {
+        super(bookmarkItem);
+        mSteps = new ArrayList<>();
+        mMaterialGroups = new ArrayList<>();
+        mDuration = "";
     }
 
     @Ignore

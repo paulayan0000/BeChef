@@ -35,7 +35,6 @@ public class CustomChildFragment<E> extends BaseMainFragment implements ChildCon
     private DefaultChildAdapter<E> mDefaultChildAdapter;
     private TextView mTvInfoDescription;
     private ImageButton mIbtnFilter;
-    private int mCurrentFileterIndex = 0;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -54,14 +53,16 @@ public class CustomChildFragment<E> extends BaseMainFragment implements ChildCon
             @Override
             public void onClick(View v) {
                 String[] itemString = new String[]{"時間由新至舊", "時間由舊至新", "評分由高至低", "評分由低至高"};
-                itemString[mCurrentFileterIndex] = " * " + itemString[mCurrentFileterIndex];
+                int currentFilterIndex = mCustomChildPresenter.getDataFilterType();
+                itemString[currentFilterIndex] = " * " + itemString[currentFilterIndex];
                 new BeChefAlertDialogBuilder(mContext).setTitle("排序依...")
                         .setItems(itemString,
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        if (which != mCurrentFileterIndex) {
-                                            mCurrentFileterIndex = which;
+                                        int currentFilterIndex = mCustomChildPresenter.getDataFilterType();
+                                        if (which != currentFilterIndex) {
+                                            mCustomChildPresenter.setDataFilterType(which);
                                             mCustomChildPresenter.loadSpecificItems(which);
                                         }
                                     }
@@ -111,11 +112,6 @@ public class CustomChildFragment<E> extends BaseMainFragment implements ChildCon
     public void updateItems(ArrayList<E> newData) {
         mDefaultChildAdapter.updateData(newData);
         mTvInfoDescription.setText("共 " + newData.size() + " 道");
-    }
-
-    @Override
-    public void refreshData() {
-        mCustomChildPresenter.loadItems();
     }
 
     @Override
