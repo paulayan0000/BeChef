@@ -22,7 +22,4 @@ public interface BaseDao<T> {
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateItem(T item);
-
-    @Update(onConflict = OnConflictStrategy.REPLACE)
-    void updateItems(T... items);
 }

@@ -8,8 +8,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.paula.android.bechef.R;
-import com.paula.android.bechef.dialog.BeChefTextWatcher;
-import com.paula.android.bechef.dialog.EditTextChangeCallback;
+import com.paula.android.bechef.utils.BeChefTextWatcher;
+import com.paula.android.bechef.utils.EditTextChangeCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -111,6 +111,7 @@ public class MaterialContentAdapter extends RecyclerView.Adapter implements Edit
         @Override
         public void onClick(View v) {
             int currentIndex = getAdapterPosition();
+            if (currentIndex < 0) return;
             switch (v.getId()) {
                 case R.id.imagebutton_add:
                     mMaterialContents.add(currentIndex + 1, "");
@@ -131,7 +132,7 @@ public class MaterialContentAdapter extends RecyclerView.Adapter implements Edit
     }
     private void notifyAdded(int currentPosition) {
         notifyItemInserted(currentPosition + 1);
-        notifyItemRangeChanged(currentPosition, getItemCount() - currentPosition - 1);
+        notifyItemRangeChanged(currentPosition, getItemCount() - currentPosition);
     }
 
     private void notifyRemoved(int currentPosition) {

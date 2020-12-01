@@ -29,7 +29,7 @@ public class ReceiptItem extends BaseItem {
     private int mWeight = -1;
 
     public ReceiptItem(ArrayList<Step> steps, ArrayList<MaterialGroup> materialGroups, String duration, int weight,
-                       int tabUid, String title, String imageUrl, double rating, String tags,
+                       long tabUid, String title, String imageUrl, double rating, String tags,
                        int inTodayId, String createdTime, String description, String videoId) {
         super(tabUid, title, imageUrl, rating, tags, inTodayId, createdTime, description, videoId);
         mSteps = steps;

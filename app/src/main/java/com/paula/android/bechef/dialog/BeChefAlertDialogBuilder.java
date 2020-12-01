@@ -10,24 +10,30 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
-    private Context mContext;
+    protected Context mContext;
 
     public BeChefAlertDialogBuilder(@NonNull Context context) {
-        super(context, R.style.MyDialogTheme);
+        super(context, R.style.SmallDialogTheme);
+        mContext = context;
+        setCancelable(true);
+    }
+
+    BeChefAlertDialogBuilder(@NonNull Context context, int style) {
+        super(context, style);
         mContext = context;
         setCancelable(true);
     }
 
     public BeChefAlertDialogBuilder setButtons(final AlertDialogClickCallback clickCallback) {
         if (clickCallback != null) {
-            setPositiveButton("是", new DialogInterface.OnClickListener() {
+            setPositiveButton(getPositiveWord(), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     clickCallback.onPositiveButtonClick();
                     dialog.dismiss();
                 }
             });
-            setNegativeButton("否", new DialogInterface.OnClickListener() {
+            setNegativeButton(getNegativeWord(), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.cancel();
@@ -35,6 +41,14 @@ public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
             });
         }
         return this;
+    }
+
+    protected String getNegativeWord() {
+        return "否";
+    }
+
+    protected String getPositiveWord() {
+        return "是";
     }
 
     public BeChefAlertDialogBuilder setCustomItems(AlertDialogItemsCallback itemsCallback) {
@@ -56,6 +70,10 @@ public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
                 positiveButton.setTextColor(mContext.getResources().getColor(R.color.colorPrimary));
             }
         });
+        setCustomView(alertDialog);
         return alertDialog;
+    }
+
+    protected void setCustomView(AlertDialog alertDialog) {
     }
 }

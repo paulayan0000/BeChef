@@ -17,7 +17,7 @@ import java.util.Locale;
 
 import androidx.fragment.app.Fragment;
 
-public class ReceiptFragment extends CustomMainFragment<ReceiptTab, ReceiptItem> {
+public class ReceiptFragment extends CustomMainFragment<ReceiptTab> {
     public static ReceiptFragment newInstance() {
         return new ReceiptFragment();
     }
@@ -28,16 +28,16 @@ public class ReceiptFragment extends CustomMainFragment<ReceiptTab, ReceiptItem>
     }
 
     @Override
-    public ArrayList<ReceiptItem> getChosenItems() {
-        Fragment childFragment = getChildFragment(mCurrentTabIndex);
-        if (childFragment != null) return ((ReceiptChildFragment)childFragment).getChosenItems();
+    public ArrayList<Long> getChosenUids() {
+        Fragment childFragment = getChildFragment(getCurrentTabIndex());
+        if (childFragment != null) return ((ReceiptChildFragment)childFragment).getChosenUids();
         return new ArrayList<>();
     }
 
     @Override
     protected void createNewData() {
         ReceiptItem newItem = new ReceiptItem();
-        Fragment childFragment = getChildFragment(mCurrentTabIndex);
+        Fragment childFragment = getChildFragment(getCurrentTabIndex());
         if (childFragment != null) {
             newItem.setTabUid(((ReceiptChildFragment) childFragment).getTabUid());
             newItem.setCreatedTime(new SimpleDateFormat(Constants.DATE_FORMAT, Locale.getDefault()).format(new Date()));

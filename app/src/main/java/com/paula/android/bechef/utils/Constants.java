@@ -20,6 +20,10 @@ public class Constants {
     public static final int IMAGE_ITEM_LIMIT = 3;
     public static final int DESCRIPTION_SIZE = 6;
 
+    public static final int VIEW_TYPE_DISCOVER = 0;
+    public static final int VIEW_TYPE_BOOKMARK = 1;
+    public static final int VIEW_TYPE_RECEIPT = 2;
+
     // Table name
     public static final String BOOKMARK_ITEM_TABLE = "bookmark-item-table";
     public static final String BOOKMARK_TAB_TABLE = "bookmark-tab-table";
@@ -33,5 +37,5 @@ public class Constants {
     public static final int FILTER_WITH_RATING_DESC = 2;
     public static final int FILTER_WITH_RATING_ASC = 3;
 
-    public static final String DATE_FORMAT = "yyyy年MM月dd日";
+    public static final String DATE_FORMAT = "yyyy年MM月dd日";;
 }

@@ -9,12 +9,12 @@ import androidx.fragment.app.FragmentManager;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class CustomChildPresenter<E> implements ChildContract.CustomChildPresenter {
-    public int mTabUid;
+public class CustomChildPresenter<I> implements ChildContract.CustomChildPresenter {
+    public long mTabUid;
     protected int mDataFilterType = Constants.FILTER_WITH_TIME_DESC;
-    protected ChildContract.CustomChildView<CustomChildPresenter, E> mCustomChildFragment;
+    protected ChildContract.CustomChildView<CustomChildPresenter, I> mCustomChildFragment;
 
-    public CustomChildPresenter(ChildContract.CustomChildView<CustomChildPresenter, E> customChildFragment, BaseTab baseTab) {
+    public CustomChildPresenter(ChildContract.CustomChildView<CustomChildPresenter, I> customChildFragment, BaseTab baseTab) {
         mCustomChildFragment = checkNotNull(customChildFragment, "customChildView cannot be null!");
         customChildFragment.setPresenter(this);
         mTabUid = baseTab.getUid();
@@ -30,13 +30,7 @@ public class CustomChildPresenter<E> implements ChildContract.CustomChildPresent
         mCustomChildFragment.showSelectableUi(true);
     }
 
-    @Override
     public void loadSpecificItems(int type) {
-    }
-
-    @Override
-    public void loadItems() {
-        loadSpecificItems(mDataFilterType);
     }
 
     @Override

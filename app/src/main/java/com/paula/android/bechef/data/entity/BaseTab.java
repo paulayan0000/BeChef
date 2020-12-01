@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey;
 
 public class BaseTab {
     @PrimaryKey(autoGenerate = true)
-    private int uid = 0;
+    private long uid = 0;
 
     @ColumnInfo(name = "tab_name")
     @NonNull
@@ -16,11 +16,11 @@ public class BaseTab {
         mTabName = tabName;
     }
 
-    public int getUid() {
+    public long getUid() {
         return uid;
     }
 
-    public void setUid(int uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
 

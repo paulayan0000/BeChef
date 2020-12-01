@@ -2,13 +2,13 @@ package com.paula.android.bechef;
 
 import android.content.Context;
 
+import com.paula.android.bechef.data.entity.BaseTab;
+
 import java.util.ArrayList;
 
-import androidx.fragment.app.FragmentManager;
-
 public interface BaseContract {
-    interface BaseView<T> {
-        void setPresenter(T presenter);
+    interface BaseView<P> {
+        void setPresenter(P presenter);
 
         Context getContext();
     }
@@ -17,23 +17,18 @@ public interface BaseContract {
         void start();
     }
 
-    interface CustomView<T> extends BaseView<T> {
-        ArrayList<?> getChosenItems();
+    interface MainPresenter extends BasePresenter {
+        ArrayList<BaseTab> getTabs();
+    }
 
+    interface CustomView<P> extends BaseView<P> {
         int getCurrentTabIndex();
 
         void showSelectable(boolean selectable);
+
+        ArrayList<Long> getChosenUids();
     }
 
-    interface CustomPresenter<E> extends BasePresenter {
-        void leaveChooseDialog();
-
-        int getChosenItemsCount();
-
-        ArrayList<E> getChosenItems();
-
-        ArrayList<?> getOtherTabs();
-
-        void transToAction(boolean isTrans, FragmentManager childFragmentManager);
+    interface CustomPresenter extends MainPresenter {
     }
 }

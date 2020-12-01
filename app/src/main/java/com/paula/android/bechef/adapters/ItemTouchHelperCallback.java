@@ -28,11 +28,13 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     @Override
     public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+        if (viewHolder.getAdapterPosition() < 0 || target.getAdapterPosition() < 0) return false;
         return mAdapter.onItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
     }
 
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+        if (viewHolder.getAdapterPosition() < 0) return;
         mAdapter.onItemSwiped(viewHolder.getAdapterPosition());
     }
 }

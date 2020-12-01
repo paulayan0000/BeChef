@@ -28,11 +28,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class CustomChildFragment<E> extends BaseMainFragment implements ChildContract.CustomChildView<CustomChildPresenter, E>{
+public class CustomChildFragment<I> extends BaseMainFragment implements ChildContract.CustomChildView<CustomChildPresenter, I>{
     protected CustomChildPresenter mCustomChildPresenter;
     protected CustomMainFragment mCustomMainFragment;
     protected Context mContext;
-    private DefaultChildAdapter<E> mDefaultChildAdapter;
+    private DefaultChildAdapter<I> mDefaultChildAdapter;
     private TextView mTvInfoDescription;
     private ImageButton mIbtnFilter;
 
@@ -44,7 +44,7 @@ public class CustomChildFragment<E> extends BaseMainFragment implements ChildCon
         RecyclerView recyclerView = view.findViewById(R.id.recyclerview_discover_main);
         recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         if (recyclerView.getItemDecorationCount() == 0) recyclerView.addItemDecoration(dec);
-        mDefaultChildAdapter = new DefaultChildAdapter<>(mIsSelectable, new ArrayList<E>(), mCustomChildPresenter);
+        mDefaultChildAdapter = new DefaultChildAdapter<>(mIsSelectable, new ArrayList<I>(), mCustomChildPresenter);
         recyclerView.setAdapter(mDefaultChildAdapter);
 
         mTvInfoDescription = view.findViewById(R.id.textview_info_description);
@@ -109,15 +109,12 @@ public class CustomChildFragment<E> extends BaseMainFragment implements ChildCon
     }
 
     @Override
-    public void updateItems(ArrayList<E> newData) {
-        mDefaultChildAdapter.updateData(newData);
-        mTvInfoDescription.setText("共 " + newData.size() + " 道");
+    public void updateItems(ArrayList<I> items) {
+        mDefaultChildAdapter.updateData(items);
+        mTvInfoDescription.setText("共 " + items.size() + " 道");
     }
 
-    @Override
-    public ArrayList<E> getChosenItems() {
-        return mDefaultChildAdapter.getChosenItems();
+    public ArrayList<Long> getChosenUids() {
+        return mDefaultChildAdapter.getChosenUids();
     }
-
-
 }

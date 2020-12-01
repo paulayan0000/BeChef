@@ -16,7 +16,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 public class FragmentAdapter extends FragmentStateAdapter {
     private Fragment mFragment;
-    private ArrayList<?> mTabArrayList;
+    private ArrayList<BaseTab> mTabArrayList;
 
     public FragmentAdapter(@NonNull Fragment fragment, ArrayList<BaseTab> tabArrayList) {
         super(fragment);
@@ -43,14 +43,19 @@ public class FragmentAdapter extends FragmentStateAdapter {
         return mTabArrayList.size();
     }
 
-    public ArrayList<?> getTabArrayList() {
+    public ArrayList<BaseTab> getTabArrayList() {
         return mTabArrayList;
     }
 
-    public void updateData(ArrayList<?> tabArrayList) {
+    public void updateData(ArrayList<BaseTab> tabArrayList) {
         if (tabArrayList != null) {
             mTabArrayList = tabArrayList;
             notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return mTabArrayList.get(position).getUid();
     }
 }

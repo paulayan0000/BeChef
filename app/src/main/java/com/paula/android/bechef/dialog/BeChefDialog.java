@@ -21,7 +21,7 @@ public class BeChefDialog extends DialogFragment implements View.OnClickListener
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.MyDialogTheme);
+        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.SmallDialogTheme);
     }
 
     @Nullable

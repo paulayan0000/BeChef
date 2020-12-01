@@ -20,6 +20,7 @@ import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.detail.DetailContract;
+import com.paula.android.bechef.utils.EditCallback;
 import com.paula.android.bechef.utils.Utils;
 
 import java.io.File;
@@ -33,7 +34,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import static android.app.Activity.RESULT_OK;
 import static com.paula.android.bechef.utils.Constants.DESCRIPTION_SIZE;
 
-public class EditItemDialog extends DialogFragment implements View.OnClickListener, AlertDialogClickCallback, EditCompleteCallback {
+public class EditItemDialog extends DialogFragment implements View.OnClickListener, AlertDialogClickCallback, EditCallback<BaseItem> {
     private static final int IMAGE_PICK = 0;
     private Context mContext;
     private ReceiptItem mReceiptItem;
@@ -61,7 +62,7 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.MyDialogTheme1);
+        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.FullDialogTheme);
     }
 
     @Nullable
@@ -137,7 +138,7 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
     }
 
     @Override
-    public void onEditComplete(BaseItem baseItem) {
+    public void onSaveDataComplete(BaseItem baseItem) {
         if (mDetailPresenter != null) mDetailPresenter.refreshData(baseItem);
         dismiss();
     }

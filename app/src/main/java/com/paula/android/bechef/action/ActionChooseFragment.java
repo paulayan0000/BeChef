@@ -21,13 +21,14 @@ import com.paula.android.bechef.dialog.AlertDialogClickCallback;
 import com.paula.android.bechef.dialog.AlertDialogItemsCallback;
 import com.paula.android.bechef.dialog.BeChefAlertDialogBuilder;
 import com.paula.android.bechef.dialog.MoveToDialog;
-import com.paula.android.bechef.receipt.ReceiptPresenter;
 
-public class ActionChooseFragment<T, E> extends Fragment implements View.OnClickListener {
-    private CustomMainPresenter<T, E> mPresenter;
+import java.util.ArrayList;
+
+public class ActionChooseFragment<T> extends Fragment implements View.OnClickListener {
+    private CustomMainPresenter<T> mPresenter;
     private Context mContext;
 
-    public ActionChooseFragment(CustomMainPresenter<T, E> presenter) {
+    public ActionChooseFragment(CustomMainPresenter<T> presenter) {
         mPresenter = presenter;
     }
 
@@ -73,7 +74,8 @@ public class ActionChooseFragment<T, E> extends Fragment implements View.OnClick
                 };
                 break;
             case R.id.textview_action_move:
-                MoveToDialog moveToDialog = new MoveToDialog<>(mPresenter);
+                MoveToDialog<T> moveToDialog = new MoveToDialog<>(mPresenter);
+                moveToDialog.setTabs(mPresenter.getOtherTabs());
                 moveToDialog.show(getChildFragmentManager(), "move");
                 return;
             case R.id.textview_action_delete:
@@ -91,10 +93,11 @@ public class ActionChooseFragment<T, E> extends Fragment implements View.OnClick
 
                             @Override
                             public void doInBackground(ItemDatabase database) {
+                                ArrayList<Long> chosenUids = mPresenter.getChosenUids();
                                 if (mPresenter instanceof BookmarkPresenter)
-                                    database.bookmarkDao().deleteItems(((BookmarkPresenter) mPresenter).getChosenItems());
+                                    for (long uid : chosenUids) database.bookmarkDao().deleteItemWithUid(uid);
                                 else
-                                    database.receiptDao().deleteItems(((ReceiptPresenter) mPresenter).getChosenItems());
+                                    for (long uid : chosenUids) database.receiptDao().deleteItemWithUid(uid);
                             }
 
                             @Override

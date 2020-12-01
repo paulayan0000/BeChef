@@ -37,16 +37,14 @@ public class AddToBookmarkDialog extends BeChefDialog {
     private ArrayList<String> mTabNames = new ArrayList<>();
     ArrayList<?> mBaseTabs;
 
-    public AddToBookmarkDialog(ArrayList<?> baseTabs, DetailPresenter presenter) {
+    public AddToBookmarkDialog(DetailPresenter presenter) {
         mDetailPresenter = presenter;
-        setTabs(baseTabs);
     }
 
-    AddToBookmarkDialog(ArrayList<?> baseTabs) {
-        setTabs(baseTabs);
+    AddToBookmarkDialog() {
     }
 
-    private void setTabs(ArrayList<?> baseTabs) {
+    public void setTabs(ArrayList<?> baseTabs) {
         mBaseTabs = baseTabs;
         mTabNames.add(0, "新增書籤");
         for (Object baseTab : mBaseTabs) {
@@ -149,7 +147,7 @@ public class AddToBookmarkDialog extends BeChefDialog {
         if (viewId == R.id.imagebutton_clear) mEtTabName.setText("");
     }
 
-    private BookmarkItem getBookmarkItem(int tabUid) {
+    private BookmarkItem getBookmarkItem(long tabUid) {
         BookmarkItem bookmarkItem = new BookmarkItem((BaseItem) mDetailPresenter.getDataContent());
         bookmarkItem.setRating(mChosenRating);
         bookmarkItem.setTabUid(tabUid);

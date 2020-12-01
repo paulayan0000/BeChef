@@ -19,11 +19,12 @@ import com.paula.android.bechef.data.LoadDataTask;
 import com.paula.android.bechef.data.MaterialGroup;
 import com.paula.android.bechef.data.Step;
 import com.paula.android.bechef.data.database.ItemDatabase;
+import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
-import com.paula.android.bechef.dialog.BeChefTextWatcher;
-import com.paula.android.bechef.dialog.EditCompleteCallback;
-import com.paula.android.bechef.dialog.EditTextChangeCallback;
+import com.paula.android.bechef.utils.BeChefTextWatcher;
+import com.paula.android.bechef.utils.EditCallback;
+import com.paula.android.bechef.utils.EditTextChangeCallback;
 import com.paula.android.bechef.utils.Utils;
 import com.squareup.picasso.Picasso;
 
@@ -51,7 +52,7 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
 
     private ReceiptItem mReceiptItem;
     private Context mContext;
-    private EditCompleteCallback mCompleteCallback;
+    private EditCallback<BaseItem> mCompleteCallback;
     private String mDialogTag;
     private RecyclerView.ItemDecoration dec = new RecyclerView.ItemDecoration() {
         @Override
@@ -62,7 +63,7 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
         }
     };
 
-    public EditItemAdapter(ReceiptItem receiptItem, EditCompleteCallback completeCallback) {
+    public EditItemAdapter(ReceiptItem receiptItem, EditCallback<BaseItem> completeCallback) {
         mReceiptItem = receiptItem;
         mCompleteCallback = completeCallback;
         mDialogTag = mCompleteCallback.getDialogTag();
@@ -201,9 +202,9 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
             public void onCompleted() {
                 // TODO: hide saving mask view
                 if (mBookmarkItem != null)
-                    mCompleteCallback.onEditComplete(mBookmarkItem);
+                    mCompleteCallback.onSaveDataComplete(mBookmarkItem);
                 else
-                    mCompleteCallback.onEditComplete(mReceiptItem);
+                    mCompleteCallback.onSaveDataComplete(mReceiptItem);
             }
         }).execute();
     }
@@ -296,6 +297,7 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
                 @Override
                 public void onClick(View v) {
                     int position = getAdapterPosition();
+                    if (position < 0) return;
                     mReceiptItem.setParams(position - 1, "");
                     notifyItemChanged(position);
                 }
@@ -383,6 +385,7 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
         @Override
         public void onClick(View v) {
             int currentPosition = getAdapterPosition();
+            if (currentPosition < 0) return;
             int currentIndex = currentPosition - DESCRIPTION_SIZE - 1;
             ArrayList<MaterialGroup> materialGroups = mReceiptItem.getMaterialGroups();
             switch (v.getId()) {
@@ -456,10 +459,10 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
             touchHelper.attachToRecyclerView(mRecyclerView);
         }
 
-
         @Override
         public void onClick(View v) {
             int currentPosition = getAdapterPosition();
+            if (currentPosition < 0) return;
             int currentIndex = currentPosition - DESCRIPTION_SIZE - 1 - mReceiptItem.getMaterialGroups().size();
             ArrayList<Step> steps = mReceiptItem.getSteps();
             switch (v.getId()) {

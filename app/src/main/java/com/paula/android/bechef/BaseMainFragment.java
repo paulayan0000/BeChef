@@ -21,13 +21,13 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
-public class BaseMainFragment extends Fragment implements View.OnClickListener {
+public class BaseMainFragment<T> extends Fragment implements View.OnClickListener {
     protected Context mContext;
     protected AppBarLayout mAppBarLayout;
     protected ViewPager2 mViewPager;
-    private FragmentAdapter mDefaultMainAdapter;
     protected AppBarLayout.LayoutParams mLayoutParams;
     protected boolean mIsSelectable = false;
+    protected FragmentAdapter mDefaultMainAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,19 +55,16 @@ public class BaseMainFragment extends Fragment implements View.OnClickListener {
         mViewPager = view.findViewById(R.id.viewpager_main_container);
         mDefaultMainAdapter = new FragmentAdapter(this, new ArrayList<BaseTab>());
         mViewPager.setAdapter(mDefaultMainAdapter);
-        setOnPageChangeCallback();
 
         TabLayoutMediator.TabConfigurationStrategy tabConfigurationStrategy = new TabLayoutMediator.TabConfigurationStrategy() {
             @Override
             public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-                tab.setText(((BaseTab) mDefaultMainAdapter.getTabArrayList().get(position)).getTabName());
+                BaseTab baseTab = mDefaultMainAdapter.getTabArrayList().get(position);
+                tab.setText(baseTab.getTabName());
                 customOnConfigureTab(tab, position);
             }
         };
         new TabLayoutMediator(tabLayout, mViewPager, true, tabConfigurationStrategy).attach();
-    }
-
-    protected void setOnPageChangeCallback() {
     }
 
     protected int getTitleText() {
@@ -84,7 +81,7 @@ public class BaseMainFragment extends Fragment implements View.OnClickListener {
                 if (!mIsSelectable) createNewData();
                 break;
             case R.id.imagebutton_edit:
-                if (!mIsSelectable) Toast.makeText(getContext(), "edit", Toast.LENGTH_SHORT).show();
+                if (!mIsSelectable) editTab();
                 break;
             case R.id.imagebutton_find:
                 if (!mIsSelectable) Toast.makeText(getContext(), "find", Toast.LENGTH_SHORT).show();
@@ -95,15 +92,17 @@ public class BaseMainFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    protected void editTab() {
+    }
+
     protected void createNewData() {
     }
 
     public void showToolbar() {
-        mAppBarLayout.setExpanded(true, true);
+        if (mAppBarLayout != null) mAppBarLayout.setExpanded(true, true);
     }
 
-    public void showDefaultUi(ArrayList<?> tabs) {
+    public void showDefaultUi(ArrayList<BaseTab> tabs) {
         mDefaultMainAdapter.updateData(tabs);
     }
-
 }

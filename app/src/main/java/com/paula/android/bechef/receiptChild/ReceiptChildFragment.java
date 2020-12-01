@@ -16,7 +16,7 @@ public class ReceiptChildFragment extends CustomChildFragment<ReceiptItem> {
         return new ReceiptChildFragment(receiptTab, fragment);
     }
 
-    public int getTabUid() {
+    public long getTabUid() {
         return mCustomChildPresenter.mTabUid;
     }
 }

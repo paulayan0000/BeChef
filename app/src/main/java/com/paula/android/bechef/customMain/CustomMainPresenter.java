@@ -3,6 +3,7 @@ package com.paula.android.bechef.customMain;
 import com.paula.android.bechef.BaseContract;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.action.ActionChooseFragment;
+import com.paula.android.bechef.data.entity.BaseTab;
 
 import java.util.ArrayList;
 
@@ -11,18 +12,18 @@ import androidx.fragment.app.FragmentTransaction;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class CustomMainPresenter<T, E> implements BaseContract.CustomPresenter {
-    protected CustomMainFragment<T, E> mCustomView;
-    private ArrayList<T> mTabs;
-    private ActionChooseFragment<T, E> mActionChooseFragment;
+public class CustomMainPresenter<T> implements BaseContract.CustomPresenter {
+    protected CustomMainFragment<T> mCustomView;
+    private ArrayList<BaseTab> mTabs;
+    private ActionChooseFragment mActionChooseFragment;
     private FragmentTransaction mTransaction;
 
-    public CustomMainPresenter(CustomMainFragment<T, E> customView) {
+    public CustomMainPresenter(CustomMainFragment<T> customView) {
         mCustomView = checkNotNull(customView, "customView cannot be null!");
         mCustomView.setPresenter(this);
     }
 
-    public void transToAction(boolean isTrans, FragmentManager fragmentManager) {
+    void transToAction(boolean isTrans, FragmentManager fragmentManager) {
         if (fragmentManager != null) mTransaction = fragmentManager.beginTransaction();
 
         if (isTrans && mActionChooseFragment != null) {
@@ -40,27 +41,43 @@ public class CustomMainPresenter<T, E> implements BaseContract.CustomPresenter {
     }
 
     public int getChosenItemsCount() {
-        return getChosenItems().size();
+        return getChosenUids().size();
     }
 
-    public ArrayList<E> getChosenItems() {
-        return mCustomView.getChosenItems();
+    public ArrayList<Long> getChosenUids() {
+        return mCustomView.getChosenUids();
     }
 
-    public ArrayList<?> getOtherTabs() {
-        ArrayList<T> otherTabs = new ArrayList<>(mTabs);
-        otherTabs.remove(getCurrentTabIndex());
+    public ArrayList<BaseTab> getOtherTabs() {
+        return getOtherTabs(getCurrentTabIndex());
+    }
+
+    public ArrayList<BaseTab> getOtherTabs(int removedIndex) {
+        ArrayList<BaseTab> otherTabs = new ArrayList<>(mTabs);
+        otherTabs.remove(removedIndex);
         return otherTabs;
     }
 
-    public int getCurrentTabIndex() {
+    public void setTabs(ArrayList<BaseTab> tabs) {
+        mTabs = tabs;
+    }
+
+    public ArrayList<BaseTab> getTabs() {
+        return mTabs;
+    }
+
+    private int getCurrentTabIndex() {
         return mCustomView.getCurrentTabIndex();
     }
 
     public void start() {
     }
 
-    public void setTabs(ArrayList<T> tabs) {
-        mTabs = tabs;
+    public FragmentManager getFragmentManager() {
+        return mCustomView.getChildFragmentManager();
+    }
+
+    public void dismissEditDialog() {
+        if (mCustomView.mEditTabAlertDialog != null) mCustomView.mEditTabAlertDialog.dismiss();
     }
 }

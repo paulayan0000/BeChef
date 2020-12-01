@@ -12,20 +12,17 @@ import com.paula.android.bechef.data.dao.ReceiptItemDao;
 import com.paula.android.bechef.data.database.ItemDatabase;
 import com.paula.android.bechef.data.database.TabDatabase;
 import com.paula.android.bechef.data.entity.BaseTab;
-import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.BookmarkTab;
-import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.data.entity.ReceiptTab;
 import com.paula.android.bechef.receipt.ReceiptPresenter;
 
 import java.util.ArrayList;
 
-public class MoveToDialog<T, E> extends AddToBookmarkDialog {
-    private CustomMainPresenter<T, E> mPresenter;
+public class MoveToDialog<T> extends AddToBookmarkDialog {
+    private CustomMainPresenter<T> mPresenter;
     private String mTabName;
 
-    public MoveToDialog(CustomMainPresenter<T,E> presenter) {
-        super(presenter.getOtherTabs());
+    public MoveToDialog(CustomMainPresenter<T> presenter) {
         mPresenter = presenter;
     }
 
@@ -43,6 +40,8 @@ public class MoveToDialog<T, E> extends AddToBookmarkDialog {
     @Override
     protected void manipulateData(String tabName) {
         mTabName = tabName;
+        // TODO:
+        String dialogTag = getTag();
         new LoadDataTask<>(new LoadDataCallback<ItemDatabase>() {
             private TabDatabase mTabDatabase;
 
@@ -51,17 +50,18 @@ public class MoveToDialog<T, E> extends AddToBookmarkDialog {
                 if (mPresenter instanceof BookmarkPresenter) {
                     if (mChosenTab == 0) mTabDatabase = TabDatabase.getBookmarkInstance(mContext);
                     return ItemDatabase.getBookmarkInstance(mContext);
-                } else {
+                } else if (mPresenter instanceof ReceiptPresenter) {
                     if (mChosenTab == 0) mTabDatabase = TabDatabase.getReceiptInstance(mContext);
                     return ItemDatabase.getReceiptInstance(getContext());
                 }
+                return null;
             }
 
             @Override
             public void doInBackground(ItemDatabase database) {
                 if (mPresenter instanceof BookmarkPresenter)
                     updateBookmarkTabUid(database.bookmarkDao(), mTabDatabase);
-                else
+                else if (mPresenter instanceof ReceiptPresenter)
                     updateReceiptTabUid(database.receiptDao(), mTabDatabase);
             }
 
@@ -69,6 +69,7 @@ public class MoveToDialog<T, E> extends AddToBookmarkDialog {
             public void onCompleted() {
                 dismiss();
                 mPresenter.leaveChooseDialog();
+                mPresenter.dismissEditDialog();
             }
         }).execute();
     }
@@ -80,10 +81,8 @@ public class MoveToDialog<T, E> extends AddToBookmarkDialog {
         } else {
             tabUid = ((BaseTab) mBaseTabs.get(mChosenTab - 1)).getUid();
         }
-        ArrayList<BookmarkItem> chosenItems = ((BookmarkPresenter) mPresenter).getChosenItems();
-        for (BookmarkItem chosenItem : chosenItems) {
-            dao.setNewTabUid(chosenItem.getUid(), tabUid);
-        }
+        ArrayList<Long> chosenUids = mPresenter.getChosenUids();
+        for (long uid : chosenUids) dao.setNewTabUid(uid, tabUid);
     }
 
     private void updateReceiptTabUid(ReceiptItemDao dao, TabDatabase tabDatabase) {
@@ -93,9 +92,7 @@ public class MoveToDialog<T, E> extends AddToBookmarkDialog {
         } else {
             tabUid = ((BaseTab) mBaseTabs.get(mChosenTab - 1)).getUid();
         }
-        ArrayList<ReceiptItem> chosenItems = ((ReceiptPresenter) mPresenter).getChosenItems();
-        for (ReceiptItem chosenItem : chosenItems) {
-            dao.setNewTabUid(chosenItem.getUid(), tabUid);
-        }
+        ArrayList<Long> chosenUids = mPresenter.getChosenUids();
+        for (long uid : chosenUids) dao.setNewTabUid(uid, tabUid);
     }
 }

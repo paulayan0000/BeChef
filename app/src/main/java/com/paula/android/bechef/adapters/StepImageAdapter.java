@@ -8,7 +8,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.paula.android.bechef.R;
-import com.paula.android.bechef.dialog.EditCompleteCallback;
+import com.paula.android.bechef.utils.EditCallback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -24,9 +24,9 @@ public class StepImageAdapter extends RecyclerView.Adapter implements ItemTouchH
     private Context mContext;
     private ArrayList<String> mImageUrls;
     private int mViewType;
-    private EditCompleteCallback mCompleteCallback;
+    private EditCallback mCompleteCallback;
 
-    StepImageAdapter(ArrayList<String> imageUrls, int viewType, EditCompleteCallback completeCallback) {
+    StepImageAdapter(ArrayList<String> imageUrls, int viewType, EditCallback completeCallback) {
         mImageUrls = imageUrls;
         mViewType = viewType;
         if (imageUrls.size() == 0) imageUrls.add("");
@@ -119,15 +119,15 @@ public class StepImageAdapter extends RecyclerView.Adapter implements ItemTouchH
 
         @Override
         public void onClick(View v) {
+            int position = getAdapterPosition();
+            if (position < 0) return;
             if (v.getId() == R.id.imagebutton_add) {
-                int position = getAdapterPosition();
                 mImageUrls.add(position + 1, "");
                 notifyItemInserted(position + 1);
                 notifyItemRangeChanged(position + 1, getItemCount() - position - 1);
-            } else {
-                mCompleteCallback.onChooseImages(mViewType, getAdapterPosition());
+                return;
             }
-
+            mCompleteCallback.onChooseImages(mViewType, position);
         }
     }
 }

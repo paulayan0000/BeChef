@@ -3,7 +3,7 @@ package com.paula.android.bechef;
 import java.util.ArrayList;
 
 public interface ChildContract extends BaseContract {
-    interface ChildView<T> extends BaseView<T> {
+    interface ChildView<P> extends BaseView<P> {
         void showDetailUi(Object content, boolean isBottomShown);
     }
 
@@ -11,19 +11,13 @@ public interface ChildContract extends BaseContract {
         void openDetail(Object content, boolean isBottomShown);
     }
 
-    interface CustomChildView<T, E> extends ChildView<T> {
+    interface CustomChildView<P, I> extends ChildView<P> {
         void showSelectableUi(boolean isSelectable);
 
-        void updateItems(ArrayList<E> items);
-
-        ArrayList<E> getChosenItems();
+        void updateItems(ArrayList<I> items);
     }
 
     interface CustomChildPresenter extends ChildPresenter {
         void transToSelectable();
-
-        void loadSpecificItems(int type);
-
-        void loadItems();
     }
 }

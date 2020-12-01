@@ -1,7 +1,6 @@
 package com.paula.android.bechef.customMain;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -13,26 +12,27 @@ import com.paula.android.bechef.BaseMainFragment;
 import com.paula.android.bechef.customChild.CustomChildFragment;
 import com.paula.android.bechef.dialog.AlertDialogClickCallback;
 import com.paula.android.bechef.dialog.BeChefAlertDialogBuilder;
+import com.paula.android.bechef.dialog.EditTabAlertDialogBuilder;
 
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.viewpager2.widget.ViewPager2;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class CustomMainFragment<T, E> extends BaseMainFragment implements BaseContract.CustomView<CustomMainPresenter> {
-    private CustomMainPresenter mCustomPresenter;
-    protected int mCurrentTabIndex = 0;
+public class CustomMainFragment<T> extends BaseMainFragment<T> implements BaseContract.CustomView<CustomMainPresenter<T>> {
+    private CustomMainPresenter<T> mCustomPresenter;
+    AlertDialog mEditTabAlertDialog;
 
     public CustomMainFragment() {
         mCustomPresenter = new CustomMainPresenter<>(this);
     }
 
     @Override
-    public void setPresenter(CustomMainPresenter presenter) {
+    public void setPresenter(CustomMainPresenter<T> presenter) {
         mCustomPresenter = checkNotNull(presenter);
     }
 
@@ -40,17 +40,6 @@ public class CustomMainFragment<T, E> extends BaseMainFragment implements BaseCo
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mCustomPresenter.start();
-    }
-
-    @Override
-    protected void setOnPageChangeCallback() {
-        mViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                mCurrentTabIndex = position;
-            }
-        });
     }
 
     @Override
@@ -84,10 +73,8 @@ public class CustomMainFragment<T, E> extends BaseMainFragment implements BaseCo
         });
     }
 
-    @Override
     public void showSelectable(boolean selectable) {
         if (mIsSelectable == selectable) return;
-        Log.d("BechefPresenter", "set selectable");
 
         mIsSelectable = selectable;
         // Set toolbar and viewpager behavior
@@ -102,7 +89,7 @@ public class CustomMainFragment<T, E> extends BaseMainFragment implements BaseCo
         mViewPager.setUserInputEnabled(!mIsSelectable);
 
         mCustomPresenter.transToAction(mIsSelectable, getChildFragmentManager());
-        Fragment childFragment = getChildFragment(mCurrentTabIndex);
+        Fragment childFragment = getChildFragment(getCurrentTabIndex());
         if (!mIsSelectable && childFragment != null)
             ((CustomChildFragment) childFragment).showSelectableUi(false);
         ((BeChefActivity) mContext).showBottomNavigationView(!mIsSelectable);
@@ -113,10 +100,17 @@ public class CustomMainFragment<T, E> extends BaseMainFragment implements BaseCo
     }
 
     public int getCurrentTabIndex() {
-        return mCurrentTabIndex;
+        return mViewPager.getCurrentItem();
     }
 
-    public ArrayList<E> getChosenItems() {
+    public ArrayList<Long> getChosenUids() {
         return new ArrayList<>();
+    }
+
+    @Override
+    protected void editTab() {
+        EditTabAlertDialogBuilder builder = new EditTabAlertDialogBuilder(mContext, mCustomPresenter);
+        mEditTabAlertDialog = builder.create();
+        mEditTabAlertDialog.show();
     }
 }

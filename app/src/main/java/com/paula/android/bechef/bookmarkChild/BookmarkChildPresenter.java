@@ -13,6 +13,7 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 
 public class BookmarkChildPresenter extends CustomChildPresenter<BookmarkItem> {
+
     BookmarkChildPresenter(BookmarkChildFragment bookmarkChildFragment, BaseTab baseTab) {
         super(bookmarkChildFragment, baseTab);
     }

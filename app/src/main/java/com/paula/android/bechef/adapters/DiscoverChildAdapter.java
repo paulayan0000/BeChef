@@ -36,7 +36,6 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
         if (!mNextPageToken.equals(newBean.getNextPageToken())) {
             mDiscoverItems.addAll(newBean.getDiscoverItems());
             mNextPageToken = newBean.getNextPageToken();
-
             notifyItemRangeInserted(getItemCount(), newBean.getDiscoverItems().size());
         }
     }
@@ -86,6 +85,7 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if (getAdapterPosition() < 0) return;
                     mPresenter.openDetail(mDiscoverItems.get(getAdapterPosition()).getVideoId(), true);
                 }
             });

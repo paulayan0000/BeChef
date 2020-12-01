@@ -3,7 +3,7 @@ package com.paula.android.bechef.receipt;
 import com.paula.android.bechef.customMain.CustomMainFragment;
 import com.paula.android.bechef.customMain.CustomMainPresenter;
 import com.paula.android.bechef.data.database.TabDatabase;
-import com.paula.android.bechef.data.entity.ReceiptItem;
+import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.data.entity.ReceiptTab;
 
 import java.util.ArrayList;
@@ -11,10 +11,10 @@ import java.util.List;
 
 import androidx.lifecycle.Observer;
 
-public class ReceiptPresenter extends CustomMainPresenter<ReceiptTab, ReceiptItem> {
-    private ArrayList<ReceiptTab> mReceiptTabs = new ArrayList<>();
+public class ReceiptPresenter extends CustomMainPresenter<ReceiptTab> {
+    private ArrayList<BaseTab> mReceiptTabs = new ArrayList<>();
 
-    public ReceiptPresenter(CustomMainFragment<ReceiptTab, ReceiptItem> customView) {
+    public ReceiptPresenter(CustomMainFragment<ReceiptTab> customView) {
         super(customView);
     }
 
@@ -31,7 +31,7 @@ public class ReceiptPresenter extends CustomMainPresenter<ReceiptTab, ReceiptIte
                         mReceiptTabs.clear();
                         mReceiptTabs.addAll(receiptTabs);
                         setTabs(mReceiptTabs);
-                        mCustomView.showDefaultUi(new ArrayList<>(receiptTabs));
+                        mCustomView.showDefaultUi(mReceiptTabs);
                     }
                 });
     }

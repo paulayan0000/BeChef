@@ -21,18 +21,17 @@ import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
+public class DefaultChildAdapter<I> extends RecyclerView.Adapter {
     private CustomChildPresenter mChildPresenter;
     private Context mContext;
     private Boolean mIsSelectable;
-    private ArrayList<T> mDataArrayList;
-    private ArrayList<T> mChosenDataArrayList;
+    private ArrayList<I> mBaseItems;
+    private ArrayList<Long> mChosenUids = new ArrayList<>();
 
-    public DefaultChildAdapter(Boolean isSelectable, ArrayList<T> bean, CustomChildPresenter presenter) {
+    public DefaultChildAdapter(Boolean isSelectable, ArrayList<I> baseItems, CustomChildPresenter presenter) {
         mIsSelectable = isSelectable;
-        mDataArrayList = bean;
+        mBaseItems = baseItems;
         mChildPresenter = presenter;
-        mChosenDataArrayList = new ArrayList<>();
     }
 
     @NonNull
@@ -45,21 +44,21 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ((DefaultViewHolder) holder).bindView(mDataArrayList.get(position));
+        ((DefaultViewHolder) holder).bindView((BaseItem) mBaseItems.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return mDataArrayList.size();
-    }
-
-    public void updateData(ArrayList<T> newData) {
-        mDataArrayList = newData;
-        notifyDataSetChanged();
+        return mBaseItems.size();
     }
 
     public void setSelectable(Boolean isSelectable) {
         mIsSelectable = isSelectable;
+        notifyDataSetChanged();
+    }
+
+    public void updateData(ArrayList<I> items) {
+        mBaseItems = items;
         notifyDataSetChanged();
     }
 
@@ -88,8 +87,7 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
             });
         }
 
-        void bindView(final T data) {
-            final BaseItem baseItem = (BaseItem) data;
+        void bindView(BaseItem baseItem) {
             String rating = baseItem.getRating() == 0.0 ? "--" : String.valueOf(baseItem.getRating());
             mTvTimeCount.setText(baseItem.getCreatedTime() + " • " + rating + "分");
             mTvItemTitle.setText(baseItem.getTitle());
@@ -101,7 +99,7 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
             if (mIsSelectable) {
                 mIbtnChoose.setVisibility(View.VISIBLE);
                 mIbtnEdit.setVisibility(View.GONE);
-                mIbtnChoose.setSelected(baseItem.getSelected());
+                mIbtnChoose.setSelected(mChosenUids.contains(baseItem.getUid()));
             } else {
                 mIbtnChoose.setVisibility(View.GONE);
                 mIbtnEdit.setVisibility(View.VISIBLE);
@@ -119,39 +117,37 @@ public class DefaultChildAdapter<T> extends RecyclerView.Adapter {
 
         @Override
         public void onClick(View v) {
-            T data = mDataArrayList.get(getAdapterPosition());
+            if (getAdapterPosition() < 0) return;
+            BaseItem data = (BaseItem) mBaseItems.get(getAdapterPosition());
             switch (v.getId()) {
                 case R.id.imagebutton_choose_box:
                     boolean isSelected = !v.isSelected();
                     v.setSelected(isSelected);
-                    ((BaseItem) data).setSelected(isSelected);
-                    if (isSelected) mChosenDataArrayList.add(data);
-                    else mChosenDataArrayList.remove(data);
+                    data.setSelected(isSelected);
+                    if (isSelected) mChosenUids.add(data.getUid());
+                    else mChosenUids.remove(data.getUid());
                     break;
                 case R.id.imagebutton_edit:
                     if (data instanceof ReceiptItem) {
-                        EditItemDialog editItemDialog = new EditItemDialog((ReceiptItem) mDataArrayList.get(getAdapterPosition()));
+                        EditItemDialog editItemDialog = new EditItemDialog((ReceiptItem) data);
                         editItemDialog.show(mChildPresenter.getFragmentManager(), "edit_receipt");
                     } else if (data instanceof BookmarkItem) {
-                        EditItemDialog editItemDialog = new EditItemDialog((BookmarkItem) mDataArrayList.get(getAdapterPosition()));
+                        EditItemDialog editItemDialog = new EditItemDialog((BookmarkItem) data);
                         editItemDialog.show(mChildPresenter.getFragmentManager(), "edit_bookmark");
                     }
                     break;
                 default:
                     mChildPresenter.openDetail(data, mIsSelectable);
                     break;
-
             }
-
         }
     }
 
-    public ArrayList<T> getChosenItems() {
-        return mChosenDataArrayList;
+    public ArrayList<Long> getChosenUids() {
+        return mChosenUids;
     }
 
     private void clearChosenItems() {
-        if (mChosenDataArrayList != null)
-            mChosenDataArrayList.clear();
+        if (mChosenUids != null) mChosenUids.clear();
     }
 }

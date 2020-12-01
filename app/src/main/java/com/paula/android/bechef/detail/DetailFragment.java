@@ -137,8 +137,9 @@ public class DetailFragment extends Fragment implements DetailContract.View {
 
             @Override
             public void onCompleted() {
-                AddToBookmarkDialog addToBookmarkDialog = new AddToBookmarkDialog(mBookmarkTabs, (DetailPresenter) mPresenter);
-                addToBookmarkDialog.show(getChildFragmentManager(), "edit");
+                AddToBookmarkDialog addToBookmarkDialog = new AddToBookmarkDialog((DetailPresenter) mPresenter);
+                addToBookmarkDialog.setTabs(mBookmarkTabs);
+                addToBookmarkDialog.show(getChildFragmentManager(), "add");
             }
         }).execute();
     }

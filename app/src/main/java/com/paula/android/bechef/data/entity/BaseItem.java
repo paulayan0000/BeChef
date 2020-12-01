@@ -11,10 +11,10 @@ public class BaseItem {
     private Boolean mIsSelected = false;
 
     @PrimaryKey(autoGenerate = true)
-    private int uid = 0;
+    private long uid = 0;
 
     @ColumnInfo(name = "tab_uid")
-    private int mTabUid = 0;
+    private long mTabUid = 0;
 
     @ColumnInfo(name = "title")
     private String mTitle;
@@ -40,7 +40,7 @@ public class BaseItem {
     @ColumnInfo(name = "video_id")
     private String mVideoId;
 
-    public BaseItem(int tabUid, String title, String imageUrl, double rating, String tags,
+    public BaseItem(long tabUid, String title, String imageUrl, double rating, String tags,
                     int inTodayId, String createdTime, String description, String videoId) {
         mTabUid = tabUid;
         mTitle = title;
@@ -85,19 +85,19 @@ public class BaseItem {
         mIsSelected = selected;
     }
 
-    public int getUid() {
+    public long getUid() {
         return uid;
     }
 
-    public void setUid(int uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
 
-    public int getTabUid() {
+    public long getTabUid() {
         return mTabUid;
     }
 
-    public void setTabUid(int tabUid) {
+    public void setTabUid(long tabUid) {
         mTabUid = tabUid;
     }
 
