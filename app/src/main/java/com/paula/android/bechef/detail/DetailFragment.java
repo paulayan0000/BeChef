@@ -2,11 +2,15 @@ package com.paula.android.bechef.detail;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayerFragmentX;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.activities.BeChefActivity;
 import com.paula.android.bechef.adapters.DetailAdapter;
@@ -21,12 +25,14 @@ import com.paula.android.bechef.data.entity.DiscoverItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.dialog.AddToBookmarkDialog;
 import com.paula.android.bechef.dialog.EditItemDialog;
+import com.paula.android.bechef.utils.Constants;
 
 import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -39,6 +45,11 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     private ImageButton mIbtnMore;
     private boolean mIsBottomShown;
     private DetailAdapter mDetailAdapter;
+
+
+    private YouTubePlayerFragmentX mYouTubePlayerFragment;
+    private YouTubePlayer mYouTubePlayer;
+    private FragmentManager mFragmentManager;
 
     private DetailFragment() {
     }
@@ -70,9 +81,13 @@ public class DetailFragment extends Fragment implements DetailContract.View {
                 ((BeChefActivity) mContext).onBackPressed();
             }
         });
+
         mIbtnMore = root.findViewById(R.id.imagebutton_toolbar_more);
         mRvDetail = root.findViewById(R.id.recyclerview_detail);
         mRvDetail.setLayoutManager(new LinearLayoutManager(mContext));
+
+        mFragmentManager = getChildFragmentManager();
+        mYouTubePlayerFragment = (YouTubePlayerFragmentX) mFragmentManager.findFragmentById(R.id.youtube_player_fragment);
         return root;
     }
 
@@ -93,14 +108,35 @@ public class DetailFragment extends Fragment implements DetailContract.View {
         if (content instanceof DiscoverItem) {
             mDetailAdapter = new DetailAdapter((DiscoverItem) content);
             mIbtnMore.setBackgroundResource(R.drawable.ic_bookmark_white);
-        }
-        else if (content instanceof BookmarkItem) {
+
+            if (mYouTubePlayerFragment != null) {
+                mYouTubePlayerFragment.initialize(Constants.DEVELOPER_KEY, new YouTubePlayer.OnInitializedListener() {
+                    @Override
+                    public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer player,
+                                                        boolean wasRestored) {
+                        if (!wasRestored) {
+                            mYouTubePlayer = player;
+                            //set the player style default
+                            mYouTubePlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
+                            //cue the 1st video by default
+                            mYouTubePlayer.cueVideo(((DiscoverItem) content).getVideoId());
+                        }
+                    }
+
+                    @Override
+                    public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
+                        Log.e("DetailFragment", "Youtube Player View initialization failed");
+                    }
+                });
+            }
+        } else if (content instanceof BookmarkItem) {
             mDetailAdapter = new DetailAdapter((BookmarkItem) content);
             mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
-        }
-        else {
+            mFragmentManager.beginTransaction().hide(mYouTubePlayerFragment).commit();
+        } else {
             mDetailAdapter = new DetailAdapter((ReceiptItem) content);
             mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
+            mFragmentManager.beginTransaction().hide(mYouTubePlayerFragment).commit();
         }
         mRvDetail.setAdapter(mDetailAdapter);
 

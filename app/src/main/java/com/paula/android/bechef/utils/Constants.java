@@ -37,5 +37,6 @@ public class Constants {
     public static final int FILTER_WITH_RATING_DESC = 2;
     public static final int FILTER_WITH_RATING_ASC = 3;
 
-    public static final String DATE_FORMAT = "yyyy年MM月dd日";;
+    public static final String DATE_FORMAT = "yyyy年MM月dd日";
+    public static final String DEVELOPER_KEY = "AIzaSyAajGSZR9eHL_IKeV34fd_nN58tYUVf5FQ";
 }

@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.data.entity.DiscoverItem;
@@ -122,7 +121,7 @@ public class DetailAdapter extends RecyclerView.Adapter {
 
     private class DescriptionViewHolder extends RecyclerView.ViewHolder {
         private TextView mTvDescription, mTvTags, mTvTitle, mTvTimeCount;
-        private ImageView mIvThumbnail, mIvThumbnailForeground;
+        private ImageView mIvThumbnail;
         private View mViewDivider;
 
         private DescriptionViewHolder(@NonNull View itemView) {
@@ -133,28 +132,23 @@ public class DetailAdapter extends RecyclerView.Adapter {
             mViewDivider = itemView.findViewById(R.id.view_divider);
             mTvDescription = itemView.findViewById(R.id.textview_info_description);
             mIvThumbnail = itemView.findViewById(R.id.imageview_thumbnail);
-            mIvThumbnailForeground = itemView.findViewById(R.id.imageview_thumbnail_foreground);
-            mIvThumbnailForeground.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // TODO: open fullscreen landscape YouTubePlayerView
-                    Toast.makeText(mContext, mBaseItem.getVideoId(), Toast.LENGTH_SHORT).show();
-                }
-            });
         }
 
         void bindView() {
-            String imageUrl = mBaseItem.getImageUrl();
-            Picasso.with(mContext)
-                    .load(imageUrl.isEmpty() ? null : imageUrl)
-                    .error(R.drawable.all_picture_placeholder)
-                    .placeholder(R.drawable.all_picture_placeholder)
-                    .into(mIvThumbnail);
+            if (mBaseItem instanceof DiscoverItem) {
+                mIvThumbnail.setVisibility(View.GONE);
+            } else {
+                String imageUrl = mBaseItem.getImageUrl();
+                Picasso.with(mContext)
+                        .load(imageUrl.isEmpty() ? null : imageUrl)
+                        .error(R.drawable.all_picture_placeholder)
+                        .placeholder(R.drawable.all_picture_placeholder)
+                        .into(mIvThumbnail);
+            }
             setTextView(mTvTags, mBaseItem.getTags());
             mTvTitle.setText(mBaseItem.getTitle());
             mTvTimeCount.setText(mTimeAndCount);
             setDescription();
-            if (mBaseItem.getVideoId().isEmpty()) mIvThumbnailForeground.setVisibility(View.GONE);
         }
 
         private void setTextView(TextView textView, String textContent) {
