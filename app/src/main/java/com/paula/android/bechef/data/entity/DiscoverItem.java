@@ -4,12 +4,16 @@ public class DiscoverItem extends BaseItem {
     private String mPublishedAt;
     private String mDuration;
     private String mViewCount;
+    private String mChannelId;
+    private boolean mIsInBeChef;
 
     public DiscoverItem() {
         super();
         mPublishedAt = "";
         mDuration = "";
         mViewCount = "";
+        mChannelId = "";
+        mIsInBeChef = true;
     }
 
     public String getPublishedAt() {
@@ -34,5 +38,21 @@ public class DiscoverItem extends BaseItem {
 
     public void setViewCount(String viewCount) {
         mViewCount = viewCount;
+    }
+
+    public String getChannelId() {
+        return mChannelId;
+    }
+
+    public void setChannelId(String channelId) {
+        mChannelId = channelId;
+    }
+
+    public boolean isInBeChef() {
+        return mIsInBeChef;
+    }
+
+    public void setInBeChef(boolean inBeChef) {
+        mIsInBeChef = inBeChef;
     }
 }

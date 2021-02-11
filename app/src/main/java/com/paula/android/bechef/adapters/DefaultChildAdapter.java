@@ -8,12 +8,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.paula.android.bechef.ChildContract;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.customChild.CustomChildPresenter;
 import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.dialog.EditItemDialog;
+import com.paula.android.bechef.search.SearchPresenter;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class DefaultChildAdapter<I> extends RecyclerView.Adapter {
-    private CustomChildPresenter mChildPresenter;
+    private CustomChildPresenter mChildPresenter = null;
     private Context mContext;
     private Boolean mIsSelectable;
     private ArrayList<I> mBaseItems;

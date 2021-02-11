@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
@@ -19,8 +20,7 @@ import com.paula.android.bechef.data.LoadDataTask;
 import com.paula.android.bechef.data.dao.BookmarkTabDao;
 import com.paula.android.bechef.data.database.TabDatabase;
 import com.paula.android.bechef.data.entity.BaseItem;
-import com.paula.android.bechef.data.entity.BookmarkItem;
-import com.paula.android.bechef.data.entity.BookmarkTab;
+import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.data.entity.DiscoverItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.dialog.AddToBookmarkDialog;
@@ -45,7 +45,6 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     private ImageButton mIbtnMore;
     private boolean mIsBottomShown;
     private DetailAdapter mDetailAdapter;
-
 
     private YouTubePlayerFragmentX mYouTubePlayerFragment;
     private YouTubePlayer mYouTubePlayer;
@@ -78,6 +77,7 @@ public class DetailFragment extends Fragment implements DetailContract.View {
         root.findViewById(R.id.imagebutton_toolbar_back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mPresenter.stopAllAsyncTasks();
                 ((BeChefActivity) mContext).onBackPressed();
             }
         });
@@ -85,6 +85,8 @@ public class DetailFragment extends Fragment implements DetailContract.View {
         mIbtnMore = root.findViewById(R.id.imagebutton_toolbar_more);
         mRvDetail = root.findViewById(R.id.recyclerview_detail);
         mRvDetail.setLayoutManager(new LinearLayoutManager(mContext));
+        mDetailAdapter = new DetailAdapter(null);
+        mRvDetail.setAdapter(mDetailAdapter);
 
         mFragmentManager = getChildFragmentManager();
         mYouTubePlayerFragment = (YouTubePlayerFragmentX) mFragmentManager.findFragmentById(R.id.youtube_player_fragment);
@@ -98,17 +100,30 @@ public class DetailFragment extends Fragment implements DetailContract.View {
         ((BeChefActivity) mContext).showBottomNavigationView(false);
     }
 
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        if (mYouTubePlayer != null) {
+//            mYouTubePlayer.release();
+//            mYouTubePlayer = null;
+//        }
+//    }
+
     @Override
     public void setPresenter(DetailContract.Presenter presenter) {
         mPresenter = checkNotNull(presenter);
     }
 
     @Override
-    public void showDetailUi(final Object content) {
-        if (content instanceof DiscoverItem) {
-            mDetailAdapter = new DetailAdapter((DiscoverItem) content);
-            mIbtnMore.setBackgroundResource(R.drawable.ic_bookmark_white);
-
+    public void showDetailUi(final BaseItem content) {
+        mDetailAdapter.setLoading(false);
+        if (content instanceof DiscoverItem && "".equals(content.getVideoId())) {
+            // TODO: channel detail UI
+            Toast.makeText(mContext, "detail of channel: " + ((DiscoverItem) content).getChannelId(), Toast.LENGTH_SHORT).show();
+        } else if (!(content instanceof ReceiptItem)) {
+            mDetailAdapter.updateData(content);
+            if (content instanceof DiscoverItem) mIbtnMore.setBackgroundResource(R.drawable.ic_bookmark_white);
+            mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
             if (mYouTubePlayerFragment != null) {
                 mYouTubePlayerFragment.initialize(Constants.DEVELOPER_KEY, new YouTubePlayer.OnInitializedListener() {
                     @Override
@@ -116,10 +131,10 @@ public class DetailFragment extends Fragment implements DetailContract.View {
                                                         boolean wasRestored) {
                         if (!wasRestored) {
                             mYouTubePlayer = player;
-                            //set the player style default
                             mYouTubePlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
-                            //cue the 1st video by default
-                            mYouTubePlayer.cueVideo(((DiscoverItem) content).getVideoId());
+                            mYouTubePlayer.cueVideo(content.getVideoId());
+//                            mFragmentManager.beginTransaction().show(mYouTubePlayerFragment).commit();
+                            mFragmentManager.beginTransaction().show(mYouTubePlayerFragment).commitAllowingStateLoss();
                         }
                     }
 
@@ -129,16 +144,11 @@ public class DetailFragment extends Fragment implements DetailContract.View {
                     }
                 });
             }
-        } else if (content instanceof BookmarkItem) {
-            mDetailAdapter = new DetailAdapter((BookmarkItem) content);
-            mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
-            mFragmentManager.beginTransaction().hide(mYouTubePlayerFragment).commit();
         } else {
-            mDetailAdapter = new DetailAdapter((ReceiptItem) content);
+            mDetailAdapter.updateData(content);
             mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
             mFragmentManager.beginTransaction().hide(mYouTubePlayerFragment).commit();
         }
-        mRvDetail.setAdapter(mDetailAdapter);
 
         mIbtnMore.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,18 +159,19 @@ public class DetailFragment extends Fragment implements DetailContract.View {
                 }
                 EditItemDialog editItemDialog
                         = new EditItemDialog(mDetailAdapter.getBaseItem(), mPresenter);
-                if (content instanceof ReceiptItem)
-                    editItemDialog.show(getChildFragmentManager(), "edit_receipt");
-                else
-                    editItemDialog.show(getChildFragmentManager(), "edit_bookmark");
-
+                editItemDialog.show(getChildFragmentManager(), "edit");
             }
         });
     }
 
+    @Override
+    public void showErrorUi(String errorMsg) {
+        mDetailAdapter.updateData(errorMsg);
+    }
+
     private void addToBookmark() {
         new LoadDataTask<>(new LoadDataCallback<BookmarkTabDao>() {
-            private ArrayList<BookmarkTab> mBookmarkTabs = new ArrayList<>();
+            private ArrayList<BaseTab> mBookmarkTabs = new ArrayList<>();
             @Override
             public BookmarkTabDao getDao() {
                 return TabDatabase.getBookmarkInstance(mContext).bookmarkDao();
@@ -189,6 +200,11 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     @Override
     public void updateUi(BaseItem baseItem) {
         mDetailAdapter.updateData(baseItem);
+    }
+
+    @Override
+    public void showLoading(boolean isLoading) {
+        mDetailAdapter.setLoading(isLoading);
     }
 
     //    @Override

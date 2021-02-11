@@ -55,6 +55,7 @@
                 android:layout_width="@dimen/title_height"
                 android:layout_height="match_parent"
                 android:padding="8dp"
+                android:iconifiedByDefault="true"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_search"
                 android:background="@color/colorPrimary"
@@ -95,6 +96,7 @@
                 app:tabMode="scrollable"
                 android:paddingHorizontal="16dp"
                 android:paddingBottom="1dp"
+                app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget"
                 app:tabSelectedTextColor="@android:color/white"
                 app:tabInlineLabel="true"
                 app:tabTextColor="@color/bottom_navigation_item_normal" />

@@ -15,6 +15,7 @@ import com.paula.android.bechef.data.Step;
 import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
+import com.paula.android.bechef.utils.Constants;
 import com.paula.android.bechef.utils.Utils;
 import com.squareup.picasso.Picasso;
 
@@ -32,31 +33,36 @@ import static com.paula.android.bechef.utils.Constants.IMAGE_ITEM_LIMIT;
 import static com.paula.android.bechef.utils.Constants.VIEW_TYPE_BODY;
 import static com.paula.android.bechef.utils.Constants.VIEW_TYPE_FOOT;
 import static com.paula.android.bechef.utils.Constants.VIEW_TYPE_HEAD;
+import static com.paula.android.bechef.utils.Constants.VIEW_TYPE_LOADING;
+import static com.paula.android.bechef.utils.Constants.VIEW_TYPE_NO_RESULT;
 
 public class DetailAdapter extends RecyclerView.Adapter {
-
     private Context mContext;
     private BaseItem mBaseItem;
     private ReceiptItem mReceiptItem;
     private String mTimeAndCount;
     private int mMaterialSize;
+    private boolean mIsLoading;
+    private String mErrorMsg = "";
 
     public DetailAdapter(BaseItem baseItem) {
         mBaseItem = baseItem;
-        if (mBaseItem instanceof DiscoverItem) {
-            DiscoverItem discoverItem = (DiscoverItem) baseItem;
-            mTimeAndCount = getFormatDate(discoverItem.getPublishedAt()) + " • "
-                    + "觀看次數 : " + getFormatCount(discoverItem.getViewCount()) + "次";
-        } else {
-            updateItemData(baseItem);
-        }
+        updateItemData(baseItem);
     }
 
     private void updateItemData(BaseItem baseItem) {
-        if (baseItem instanceof BookmarkItem) {
+//        if (baseItem == null) {
+//            mTimeAndCount = "";
+//            return;
+//        }
+        if (baseItem instanceof DiscoverItem) {
+            DiscoverItem discoverItem = (DiscoverItem) baseItem;
+            mTimeAndCount = getFormatDate(discoverItem.getPublishedAt()) + " • "
+                    + "觀看次數 : " + getFormatCount(discoverItem.getViewCount()) + "次";
+        } else if (baseItem instanceof BookmarkItem) {
             BookmarkItem bookmarkItem = (BookmarkItem) baseItem;
             mTimeAndCount = bookmarkItem.getCreatedTime() + " • " + bookmarkItem.getRating() + "分";
-        } else {
+        } else if (baseItem instanceof ReceiptItem) {
             mReceiptItem = (ReceiptItem) baseItem;
             String rating = mReceiptItem.getRating() == 0.0 ? "--" : String.valueOf(mReceiptItem.getRating());
             String duration = "".equals(mReceiptItem.getDuration()) ? "--" : mReceiptItem.getDuration();
@@ -65,6 +71,8 @@ public class DetailAdapter extends RecyclerView.Adapter {
                     + "分\n耗時 : " + duration + " • 份量 : "
                     + weight + "人份";
             mMaterialSize = mReceiptItem.getMaterialGroups().size();
+//        } else {
+//            mTimeAndCount = "";
         }
     }
 
@@ -78,6 +86,10 @@ public class DetailAdapter extends RecyclerView.Adapter {
         mContext = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(mContext);
         switch (viewType) {
+            case VIEW_TYPE_NO_RESULT:
+                return new NoResultViewHolder(inflater.inflate(R.layout.item_search_no_result, parent, false));
+            case VIEW_TYPE_LOADING:
+                return new LoadingViewHolder(inflater.inflate(R.layout.item_all_loading, parent, false));
             case VIEW_TYPE_FOOT:
                 return new StepsViewHolder(inflater.inflate(R.layout.item_detail_steps, parent, false));
             case VIEW_TYPE_BODY:
@@ -94,13 +106,21 @@ public class DetailAdapter extends RecyclerView.Adapter {
         } else if (holder instanceof MaterialsViewHolder) {
             ((MaterialsViewHolder) holder).showDivider(position == 1, position == mMaterialSize);
             ((MaterialsViewHolder) holder).bindView(position);
-        } else {
+        } else if (holder instanceof StepsViewHolder) {
             ((StepsViewHolder) holder).bindView(position);
+        } else if (holder instanceof NoResultViewHolder) {
+            ((NoResultViewHolder) holder).bindView();
         }
+    }
+
+    public void setLoading(boolean loading) {
+        mIsLoading = loading;
+        notifyDataSetChanged();
     }
 
     @Override
     public int getItemViewType(int position) {
+        if (mBaseItem == null) return mIsLoading ? VIEW_TYPE_LOADING : VIEW_TYPE_NO_RESULT;
         if (position == 0) return VIEW_TYPE_HEAD;
         if (position <= mMaterialSize) return VIEW_TYPE_BODY;
         return VIEW_TYPE_FOOT;
@@ -108,15 +128,29 @@ public class DetailAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
+        if (mBaseItem == null) return 1;
         if (mBaseItem instanceof ReceiptItem)
             return mReceiptItem.getSteps().size() + mReceiptItem.getMaterialGroups().size() + 1;
         else return 1;
+    }
+
+    public void updateData(String errorMsg) {
+        mBaseItem = null;
+        mErrorMsg = errorMsg;
+        mIsLoading = false;
+        notifyDataSetChanged();
     }
 
     public void updateData(BaseItem baseItem) {
         mBaseItem = baseItem;
         updateItemData(mBaseItem);
         notifyDataSetChanged();
+    }
+
+    private class LoadingViewHolder extends RecyclerView.ViewHolder {
+        private LoadingViewHolder(View itemView) {
+            super(itemView);
+        }
     }
 
     private class DescriptionViewHolder extends RecyclerView.ViewHolder {
@@ -135,9 +169,10 @@ public class DetailAdapter extends RecyclerView.Adapter {
         }
 
         void bindView() {
-            if (mBaseItem instanceof DiscoverItem) {
+            if (!(mBaseItem instanceof ReceiptItem)) {
                 mIvThumbnail.setVisibility(View.GONE);
             } else {
+                mIvThumbnail.setVisibility(View.VISIBLE);
                 String imageUrl = mBaseItem.getImageUrl();
                 Picasso.with(mContext)
                         .load(imageUrl.isEmpty() ? null : imageUrl)
@@ -230,6 +265,17 @@ public class DetailAdapter extends RecyclerView.Adapter {
                 mRecyclerView.setAdapter(stepImageAdapter);
                 mRecyclerView.addItemDecoration(dec);
             }
+        }
+    }
+
+    private class NoResultViewHolder extends RecyclerView.ViewHolder {
+        private TextView mTvNoResult;
+        private NoResultViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mTvNoResult = itemView.findViewById(R.id.textview_no_result);
+        }
+        public void bindView() {
+            mTvNoResult.setText(mErrorMsg);
         }
     }
 

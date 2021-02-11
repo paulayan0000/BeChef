@@ -32,7 +32,7 @@
         android:background="@color/bottom_navigation_background"
         app:itemIconTint="@drawable/nav_itembutton"
         app:itemHorizontalTranslationEnabled="false"
-        app:menu="@menu/navigation"
+        app:menu="@menu/menu_navigation"
         android:animateLayoutChanges="false"
         app:layout_constraintBottom_toBottomOf="parent"/>
 

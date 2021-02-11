@@ -68,7 +68,7 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.edit_item_dialog, container, false);
+        View view = inflater.inflate(R.layout.dialog_edit_item, container, false);
         mContext = view.getContext();
         view.findViewById(R.id.imagebutton_toolbar_back).setOnClickListener(this);
         view.findViewById(R.id.imagebutton_toolbar_complete).setOnClickListener(this);

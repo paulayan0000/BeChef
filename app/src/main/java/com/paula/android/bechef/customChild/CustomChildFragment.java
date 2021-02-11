@@ -117,4 +117,6 @@ public class CustomChildFragment<I> extends BaseMainFragment implements ChildCon
     public ArrayList<Long> getChosenUids() {
         return mDefaultChildAdapter.getChosenUids();
     }
+
+
 }

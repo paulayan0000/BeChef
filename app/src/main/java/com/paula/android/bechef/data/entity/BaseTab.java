@@ -32,4 +32,10 @@ public class BaseTab {
     public void setTabName(String tabName) {
         mTabName = tabName;
     }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return mTabName;
+    }
 }

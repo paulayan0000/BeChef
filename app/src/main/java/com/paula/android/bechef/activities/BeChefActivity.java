@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.paula.android.bechef.BaseContract;
 import com.paula.android.bechef.BeChefContract;
 import com.paula.android.bechef.BeChefPresenter;
 import com.paula.android.bechef.R;
@@ -39,7 +40,7 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
 
     @Override
     public void onBackPressed() {
-        if (!((BeChefPresenter) mPresenter).isDetailShown())
+//        if (!((BeChefPresenter) mPresenter).isDetailShown())
             super.onBackPressed();
     }
 
@@ -119,6 +120,10 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
 
     public void transToDetail(Object content, boolean isBottomShown) {
         mPresenter.transToDetail(content, isBottomShown);
+    }
+
+    public void transToFind(BaseContract.MainPresenter presenter) {
+        mPresenter.transToSearch(presenter);
     }
 
     public void showBottomNavigationView(Boolean isShow) {

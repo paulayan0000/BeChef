@@ -13,6 +13,7 @@ public class LoadDataTask<T> extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
+        if (this.isCancelled()) return null;
         mCallback.doInBackground(mDao);
         return null;
     }

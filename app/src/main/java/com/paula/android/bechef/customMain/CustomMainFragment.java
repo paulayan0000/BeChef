@@ -23,7 +23,7 @@ import androidx.fragment.app.Fragment;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class CustomMainFragment<T> extends BaseMainFragment<T> implements BaseContract.CustomView<CustomMainPresenter<T>> {
+public class CustomMainFragment<T> extends BaseMainFragment implements BaseContract.CustomView<CustomMainPresenter<T>> {
     private CustomMainPresenter<T> mCustomPresenter;
     AlertDialog mEditTabAlertDialog;
 
@@ -96,7 +96,7 @@ public class CustomMainFragment<T> extends BaseMainFragment<T> implements BaseCo
     }
 
     protected Fragment getChildFragment(int tabIndex) {
-        return getChildFragmentManager().findFragmentByTag("f" + tabIndex);
+        return getChildFragmentManager().findFragmentByTag("f" + mDefaultMainAdapter.getItemId(tabIndex));
     }
 
     public int getCurrentTabIndex() {
@@ -112,5 +112,14 @@ public class CustomMainFragment<T> extends BaseMainFragment<T> implements BaseCo
         EditTabAlertDialogBuilder builder = new EditTabAlertDialogBuilder(mContext, mCustomPresenter);
         mEditTabAlertDialog = builder.create();
         mEditTabAlertDialog.show();
+    }
+
+    @Override
+    protected void find() {
+        ((BeChefActivity) mContext).transToFind(mCustomPresenter);
+    }
+
+    public void showDetailUi(Object content) {
+        ((BeChefActivity) mContext).transToDetail(content, false);
     }
 }

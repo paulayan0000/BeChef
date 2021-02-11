@@ -33,4 +33,22 @@ public interface BookmarkItemDao extends BaseDao<BookmarkItem> {
 
     @Query("DELETE FROM bookmark_item WHERE tab_uid = :tabUid")
     void deleteItemWithTabUid(long tabUid);
+
+//    @Query("SELECT * FROM bookmark_item WHERE title LIKE '%' || :keyword || '%'")
+//    List<BookmarkItem> searchAllRelatedTitles(String keyword);
+//
+//    @Query("SELECT * FROM bookmark_item WHERE tags LIKE '%' || :keyword || '%'")
+//    List<BookmarkItem> searchAllRelatedTags(String keyword);
+//
+//    @Query("SELECT * FROM bookmark_item WHERE description LIKE '%' || :keyword || '%'")
+//    List<BookmarkItem> searchAllRelatedDescriptions(String keyword);
+
+    @Query("SELECT * FROM bookmark_item WHERE (tab_uid = :tabUid OR :tabUid = 0) AND title LIKE '%' || :keyword || '%'")
+    List<BookmarkItem> searchRelatedTitles(String keyword, long tabUid);
+
+    @Query("SELECT * FROM bookmark_item WHERE (tab_uid = :tabUid OR :tabUid = 0) AND tags LIKE '%' || :keyword || '%'")
+    List<BookmarkItem> searchRelatedTags(String keyword, long tabUid);
+
+    @Query("SELECT * FROM bookmark_item WHERE (tab_uid = :tabUid OR :tabUid = 0) AND description LIKE '%' || :keyword || '%'")
+    List<BookmarkItem> searchRelatedDescriptions(String keyword, long tabUid);
 }

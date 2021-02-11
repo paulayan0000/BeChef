@@ -19,6 +19,8 @@ public interface BaseContract {
 
     interface MainPresenter extends BasePresenter {
         ArrayList<BaseTab> getTabs();
+
+        void openDetail(Object data);
     }
 
     interface CustomView<P> extends BaseView<P> {

@@ -7,10 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.paula.android.bechef.ChildContract;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.api.beans.GetSearchList;
-import com.paula.android.bechef.discoverChild.DiscoverChildFragmentContract;
 import com.paula.android.bechef.data.entity.DiscoverItem;
+import com.paula.android.bechef.discoverChild.DiscoverChildPresenter;
 import com.paula.android.bechef.utils.Constants;
 import com.paula.android.bechef.utils.Utils;
 import com.squareup.picasso.Picasso;
@@ -21,55 +22,85 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class DiscoverChildAdapter extends RecyclerView.Adapter {
-    private DiscoverChildFragmentContract.Presenter mPresenter;
+    private ChildContract.ChildPresenter mPresenter;
     private ArrayList<DiscoverItem> mDiscoverItems;
     private String mNextPageToken;
     private Context mContext;
+    private boolean mIsLoading;
+    private String mErrorMsg = "";
 
-    public DiscoverChildAdapter(GetSearchList bean, DiscoverChildFragmentContract.Presenter presenter) {
+    public DiscoverChildAdapter(GetSearchList bean, ChildContract.ChildPresenter presenter) {
         mDiscoverItems = bean.getDiscoverItems();
         mNextPageToken = bean.getNextPageToken();
         mPresenter = presenter;
+        mIsLoading = false;
     }
 
     public void updateData(GetSearchList newBean) {
-        if (!mNextPageToken.equals(newBean.getNextPageToken())) {
+        mErrorMsg = newBean.getErrorMsg();
+
+//        if (!mNextPageToken.equals(newBean.getNextPageToken())) {
             mDiscoverItems.addAll(newBean.getDiscoverItems());
             mNextPageToken = newBean.getNextPageToken();
             notifyItemRangeInserted(getItemCount(), newBean.getDiscoverItems().size());
-        }
+//        }
+    }
+
+    public void clearData(){
+        mErrorMsg = "";
+        mDiscoverItems.clear();
+        mNextPageToken = "";
+        notifyDataSetChanged();
+    }
+
+    public int getBaseItemCounts() {
+        return mDiscoverItems.size();
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
-        if (viewType == Constants.VIEW_TYPE_NORMAL) {
-            View view = LayoutInflater.from(mContext).inflate(R.layout.item_discover_recycler, parent, false);
+        View view;
+        if (viewType == Constants.VIEW_TYPE_NO_RESULT) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_search_no_result, parent, false);
+            return new NoResultViewHolder(view);
+        } else if (viewType == Constants.VIEW_TYPE_NORMAL) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_discover_recycler, parent, false);
             return new DiscoverViewHolder(view);
         } else {
-            View view = LayoutInflater.from(mContext).inflate(R.layout.item_all_loading, parent, false);
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_all_loading, parent, false);
             return new LoadingViewHolder(view);
         }
     }
 
     @Override
     public int getItemViewType(int position) {
+//        return (mIsLoading ? Constants.VIEW_TYPE_LOADING : Constants.VIEW_TYPE_NORMAL);
+//        return (position < mDiscoverItems.size()) ? Constants.VIEW_TYPE_NORMAL : Constants.VIEW_TYPE_LOADING;
+        if (mDiscoverItems.size() == 0 && !mIsLoading) return Constants.VIEW_TYPE_NO_RESULT;
         return (position < mDiscoverItems.size()) ? Constants.VIEW_TYPE_NORMAL : Constants.VIEW_TYPE_LOADING;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (mDiscoverItems.size() > 0 && holder instanceof DiscoverChildAdapter.DiscoverViewHolder) {
-            DiscoverViewHolder viewHolder = (DiscoverViewHolder) holder;
-            viewHolder.bindView(mDiscoverItems.get(position));
+            ((DiscoverViewHolder) holder).bindView(mDiscoverItems.get(position));
+        } else if (holder instanceof NoResultViewHolder){
+            ((NoResultViewHolder) holder).bindView();
         }
     }
 
     @Override
     public int getItemCount() {
+//        if (mDiscoverItems.size() == 0) return mIsLoading ? 1 : 0;
         if (mDiscoverItems.size() == 0) return 1;
         return !"".equals(mNextPageToken) ? mDiscoverItems.size() + 1 : mDiscoverItems.size();
+    }
+
+    public void setLoading(boolean loading) {
+        mIsLoading = loading;
+        notifyDataSetChanged();
     }
 
     private class DiscoverViewHolder extends RecyclerView.ViewHolder {
@@ -86,7 +117,10 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
                 @Override
                 public void onClick(View v) {
                     if (getAdapterPosition() < 0) return;
-                    mPresenter.openDetail(mDiscoverItems.get(getAdapterPosition()).getVideoId(), true);
+                    if (mPresenter instanceof DiscoverChildPresenter)
+                        mPresenter.openDetail(mDiscoverItems.get(getAdapterPosition()).getVideoId(), true);
+                    else
+                        mPresenter.openDetail(mDiscoverItems.get(getAdapterPosition()), true);
                 }
             });
         }
@@ -106,6 +140,17 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
     private class LoadingViewHolder extends RecyclerView.ViewHolder {
         private LoadingViewHolder(View itemView) {
             super(itemView);
+        }
+    }
+
+    private class NoResultViewHolder extends RecyclerView.ViewHolder {
+        private TextView mTvNoResult;
+        private NoResultViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mTvNoResult = itemView.findViewById(R.id.textview_no_result);
+        }
+        public void bindView() {
+            mTvNoResult.setText(mErrorMsg);
         }
     }
 }

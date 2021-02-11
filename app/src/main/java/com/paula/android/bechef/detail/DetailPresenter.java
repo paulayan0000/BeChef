@@ -1,7 +1,7 @@
 package com.paula.android.bechef.detail;
 
+import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.paula.android.bechef.api.BeChefApiHelper;
 import com.paula.android.bechef.api.GetYouTubeDataTask;
@@ -14,6 +14,8 @@ import com.paula.android.bechef.data.dao.BookmarkItemDao;
 import com.paula.android.bechef.data.database.ItemDatabase;
 import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
+import com.paula.android.bechef.data.entity.DiscoverItem;
+import com.paula.android.bechef.data.entity.ReceiptItem;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,8 +24,10 @@ import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class DetailPresenter implements DetailContract.Presenter {
     private static final String LOG_TAG = DetailPresenter.class.getSimpleName();
-    private final DetailContract.View mDetailView;
+    private DetailContract.View mDetailView;
     private Object mDataContent;
+    private LoadDataTask<BookmarkItemDao> mLoadDataTask;
+    private GetYouTubeDataTask mGetYouTubeDataTask;
 
     public DetailPresenter(DetailContract.View detailView, Object dataContent) {
         mDetailView = checkNotNull(detailView, "detailView cannot be null!");
@@ -34,7 +38,9 @@ public class DetailPresenter implements DetailContract.Presenter {
     @Override
     public void start() {
         if (mDataContent instanceof String) {
-            new LoadDataTask<>(new LoadDataCallback<BookmarkItemDao>() {
+            if (checkTaskIsCanceled(mLoadDataTask)) mLoadDataTask = null;
+            mDetailView.showLoading(true);
+            mLoadDataTask = new LoadDataTask<>(new LoadDataCallback<BookmarkItemDao>() {
                 private BookmarkItem mBookmarkItem = null;
 
                 @Override
@@ -51,7 +57,7 @@ public class DetailPresenter implements DetailContract.Presenter {
                 public void onCompleted() {
                     if (mBookmarkItem != null) {
                         mDataContent = mBookmarkItem;
-                        mDetailView.showDetailUi(mBookmarkItem);
+                        mDetailView.showDetailUi((BookmarkItem) mDataContent);
                     } else {
                         Map<String, String> queryParameters = new HashMap<>();
                         queryParameters.put("pageToken", "");
@@ -59,17 +65,31 @@ public class DetailPresenter implements DetailContract.Presenter {
                         loadVideo(queryParameters);
                     }
                 }
-            }).execute();
+            });
+            if (!mLoadDataTask.isCancelled()) mLoadDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } else if (mDataContent instanceof DiscoverItem) {
+            mDetailView.showDetailUi((DiscoverItem) mDataContent);
+        } else if (mDataContent instanceof BookmarkItem) {
+            mDetailView.showDetailUi((BookmarkItem) mDataContent);
         } else {
-            mDetailView.showDetailUi(mDataContent);
+            mDetailView.showDetailUi((ReceiptItem) mDataContent);
         }
+    }
+
+    private boolean checkTaskIsCanceled(AsyncTask task) {
+        if (task != null && !task.isCancelled() && task.getStatus() == AsyncTask.Status.RUNNING) {
+            task.cancel(true);
+            return true;
+        }
+        return false;
     }
 
     private void loadVideo(Map<String, String> queryParameters) {
         queryParameters.put("part", "snippet,contentDetails,statistics");
         queryParameters.put("maxResults", "10");
 
-        new GetYouTubeDataTask(queryParameters, new GetYouTubeDataCallback() {
+        if (checkTaskIsCanceled(mGetYouTubeDataTask)) mGetYouTubeDataTask = null;
+        mGetYouTubeDataTask = new GetYouTubeDataTask(queryParameters, new GetYouTubeDataCallback() {
             private Exception error;
 
             @Override
@@ -87,7 +107,7 @@ public class DetailPresenter implements DetailContract.Presenter {
             public void onCompleted(GetSearchList bean) {
                 if (bean != null && error == null) {
                     mDataContent = bean.getDiscoverItems().get(0);
-                    mDetailView.showDetailUi(mDataContent);
+                    mDetailView.showDetailUi((DiscoverItem) mDataContent);
                 } else {
                     onError(error);
                 }
@@ -97,10 +117,12 @@ public class DetailPresenter implements DetailContract.Presenter {
             public void onError(Exception e) {
                 Log.d(LOG_TAG, "Error: " + e.getMessage());
                 if (e instanceof NoResourceException)
-                    Toast.makeText(mDetailView.getContext(),
-                            "此資源不存在！", Toast.LENGTH_LONG).show();
+                    mDetailView.showErrorUi("此資源不存在！");
+                else
+                    mDetailView.showErrorUi("發生錯誤\n請檢查網路連線！");
             }
-        }).execute();
+        });
+        if (!mGetYouTubeDataTask.isCancelled()) mGetYouTubeDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public void transDetailUi(BaseItem baseItem) {
@@ -112,8 +134,18 @@ public class DetailPresenter implements DetailContract.Presenter {
         return mDataContent;
     }
 
+    public void setDataContent(Object dataContent) {
+        mDataContent = dataContent;
+    }
+
     @Override
     public void refreshData(BaseItem baseItem) {
         mDetailView.updateUi(baseItem);
+    }
+
+    @Override
+    public void stopAllAsyncTasks() {
+        if (checkTaskIsCanceled(mLoadDataTask)) mLoadDataTask = null;
+        if (checkTaskIsCanceled(mGetYouTubeDataTask)) mGetYouTubeDataTask = null;
     }
 }

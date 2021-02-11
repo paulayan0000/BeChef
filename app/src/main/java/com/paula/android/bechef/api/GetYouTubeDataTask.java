@@ -8,7 +8,6 @@ import com.paula.android.bechef.api.callbacks.GetYouTubeDataCallback;
 import java.util.Map;
 
 public class GetYouTubeDataTask extends AsyncTask<Void, Void, GetSearchList> {
-
     private GetYouTubeDataCallback mCallback;
     private Map<String, String> mQueryParameters;
 
@@ -19,6 +18,7 @@ public class GetYouTubeDataTask extends AsyncTask<Void, Void, GetSearchList> {
 
     @Override
     protected GetSearchList doInBackground(Void... voids) {
+        if (this.isCancelled()) return null;
         return mCallback.doInBackground(mQueryParameters);
     }
 

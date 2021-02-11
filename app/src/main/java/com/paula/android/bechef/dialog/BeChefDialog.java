@@ -17,11 +17,16 @@ import androidx.fragment.app.DialogFragment;
 
 public class BeChefDialog extends DialogFragment implements View.OnClickListener {
     protected Context mContext;
+    protected boolean mIsPositiveHidden = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.SmallDialogTheme);
+        setStyle(DialogFragment.STYLE_NO_TITLE, getCustomStyle());
+    }
+
+    public int getCustomStyle() {
+        return R.style.SmallDialogTheme;
     }
 
     @Nullable
@@ -30,9 +35,12 @@ public class BeChefDialog extends DialogFragment implements View.OnClickListener
         View view = inflater.inflate(R.layout.bechef_dialog, container, false);
         mContext = view.getContext();
 
+        view.findViewById(R.id.textview_dialog_title)
+                .setVisibility("".equals(getTitleText()) ? View.GONE : View.VISIBLE);
         ((TextView) view.findViewById(R.id.textview_dialog_title)).setText(getTitleText());
         view.findViewById(R.id.button_negative).setOnClickListener(this);
-        view.findViewById(R.id.button_positive).setOnClickListener(this);
+        if (mIsPositiveHidden) view.findViewById(R.id.button_positive).setVisibility(View.GONE);
+        else view.findViewById(R.id.button_positive).setOnClickListener(this);
 
         ConstraintLayout mainLayout = view.findViewById(R.id.constraintlayout_dialog_container);
         inflater.inflate(getLayoutResource(), mainLayout, true);

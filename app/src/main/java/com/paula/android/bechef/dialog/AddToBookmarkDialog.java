@@ -34,8 +34,8 @@ public class AddToBookmarkDialog extends BeChefDialog {
     private ImageButton mIbtnClear;
     int mChosenTab = 0;
     private float mChosenRating = 0;
-    private ArrayList<String> mTabNames = new ArrayList<>();
-    ArrayList<?> mBaseTabs;
+    private ArrayList<BaseTab> mTabs = new ArrayList<>();
+    ArrayList<BaseTab> mBaseTabs;
 
     public AddToBookmarkDialog(DetailPresenter presenter) {
         mDetailPresenter = presenter;
@@ -44,17 +44,15 @@ public class AddToBookmarkDialog extends BeChefDialog {
     AddToBookmarkDialog() {
     }
 
-    public void setTabs(ArrayList<?> baseTabs) {
+    public void setTabs(ArrayList<BaseTab> baseTabs) {
         mBaseTabs = baseTabs;
-        mTabNames.add(0, "新增書籤");
-        for (Object baseTab : mBaseTabs) {
-            mTabNames.add(((BaseTab) baseTab).getTabName());
-        }
+        mTabs.addAll(baseTabs);
+        mTabs.add(0, new BaseTab("新增書籤"));
     }
 
     @Override
     protected int getLayoutResource() {
-        return R.layout.add_to_bookmark_dialog;
+        return R.layout.dialog_add_to_bookmark;
     }
 
     @Override
@@ -71,7 +69,7 @@ public class AddToBookmarkDialog extends BeChefDialog {
         mIbtnClear.setOnClickListener(this);
 
         Spinner spinnerTab = view.findViewById(R.id.spinner_tab_name);
-        spinnerTab.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item, mTabNames));
+        spinnerTab.setAdapter(new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_dropdown_item, mTabs));
         spinnerTab.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

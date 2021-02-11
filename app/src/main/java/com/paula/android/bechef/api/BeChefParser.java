@@ -17,6 +17,8 @@ class BeChefParser {
         if (obj.has("error")) {
             throw new YoutubeException("YoutubeException: "
                     + getDataString(obj.getJSONObject("error"), "message"));
+        } else {
+            beanGetSearchList.setErrorMsg("");
         }
 
         beanGetSearchList.setNextPageToken(obj
@@ -42,9 +44,13 @@ class BeChefParser {
             case "youtube#video": // api type: video
                 discoverItem.setVideoId(getDataString(jsonObject, "id"));
                 break;
-            case "youtube#searchResult": // api type: search
+            case "youtube#searchResult": // api type: search (video or channel)
                 try {
-                    discoverItem.setVideoId(jsonObject.getJSONObject("id").getString("videoId"));
+                    String idKind = jsonObject.getJSONObject("id").getString("kind");
+                    if ("youtube#channel".equals(idKind))
+                        discoverItem.setChannelId(jsonObject.getJSONObject("id").getString("channelId"));
+                    else
+                        discoverItem.setVideoId(jsonObject.getJSONObject("id").getString("videoId"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                     return null;
@@ -62,6 +68,7 @@ class BeChefParser {
             return null;
         }
         discoverItem.setPublishedAt(getDataString(jsonSnippet, "publishedAt"));
+        discoverItem.setChannelId(getDataString(jsonSnippet, "channelId"));
         discoverItem.setTitle(getDataString(jsonSnippet, "title"));
         discoverItem.setDescription(getDataString(jsonSnippet, "description"));
         try {

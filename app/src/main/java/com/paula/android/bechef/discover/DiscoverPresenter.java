@@ -42,4 +42,9 @@ public class DiscoverPresenter implements BaseContract.MainPresenter {
     public ArrayList<BaseTab> getTabs() {
         return mDiscoverTabs;
     }
+
+    @Override
+    public void openDetail(Object content) {
+        mDiscoverView.showDetailUi(content);
+    }
 }

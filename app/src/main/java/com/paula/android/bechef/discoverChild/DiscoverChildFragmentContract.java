@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView;
 public interface DiscoverChildFragmentContract extends ChildContract {
     interface View extends ChildView<Presenter> {
         void updateSearchItems(GetSearchList bean);
+
+        void setLoading(boolean isLoading);
     }
 
     interface Presenter extends ChildPresenter {

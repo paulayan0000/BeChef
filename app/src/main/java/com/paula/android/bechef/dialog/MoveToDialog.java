@@ -11,7 +11,6 @@ import com.paula.android.bechef.data.dao.BookmarkItemDao;
 import com.paula.android.bechef.data.dao.ReceiptItemDao;
 import com.paula.android.bechef.data.database.ItemDatabase;
 import com.paula.android.bechef.data.database.TabDatabase;
-import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.data.entity.BookmarkTab;
 import com.paula.android.bechef.data.entity.ReceiptTab;
 import com.paula.android.bechef.receipt.ReceiptPresenter;
@@ -40,8 +39,6 @@ public class MoveToDialog<T> extends AddToBookmarkDialog {
     @Override
     protected void manipulateData(String tabName) {
         mTabName = tabName;
-        // TODO:
-        String dialogTag = getTag();
         new LoadDataTask<>(new LoadDataCallback<ItemDatabase>() {
             private TabDatabase mTabDatabase;
 
@@ -79,7 +76,7 @@ public class MoveToDialog<T> extends AddToBookmarkDialog {
         if (mChosenTab == 0) {
             tabUid = tabDatabase.bookmarkDao().insert(new BookmarkTab(mTabName));
         } else {
-            tabUid = ((BaseTab) mBaseTabs.get(mChosenTab - 1)).getUid();
+            tabUid = mBaseTabs.get(mChosenTab - 1).getUid();
         }
         ArrayList<Long> chosenUids = mPresenter.getChosenUids();
         for (long uid : chosenUids) dao.setNewTabUid(uid, tabUid);
@@ -90,7 +87,7 @@ public class MoveToDialog<T> extends AddToBookmarkDialog {
         if (mChosenTab == 0) {
             tabUid = tabDatabase.receiptDao().insert(new ReceiptTab(mTabName));
         } else {
-            tabUid = ((BaseTab) mBaseTabs.get(mChosenTab - 1)).getUid();
+            tabUid = mBaseTabs.get(mChosenTab - 1).getUid();
         }
         ArrayList<Long> chosenUids = mPresenter.getChosenUids();
         for (long uid : chosenUids) dao.setNewTabUid(uid, tabUid);

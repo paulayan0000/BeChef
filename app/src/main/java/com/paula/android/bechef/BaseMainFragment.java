@@ -3,6 +3,9 @@ package com.paula.android.bechef;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -21,7 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
-public class BaseMainFragment<T> extends Fragment implements View.OnClickListener {
+public class BaseMainFragment extends Fragment implements View.OnClickListener {
     protected Context mContext;
     protected AppBarLayout mAppBarLayout;
     protected ViewPager2 mViewPager;
@@ -84,12 +87,17 @@ public class BaseMainFragment<T> extends Fragment implements View.OnClickListene
                 if (!mIsSelectable) editTab();
                 break;
             case R.id.imagebutton_find:
-                if (!mIsSelectable) Toast.makeText(getContext(), "find", Toast.LENGTH_SHORT).show();
+//                if (!mIsSelectable) Toast.makeText(getContext(), "find", Toast.LENGTH_SHORT).show();
+                if (!mIsSelectable) find();
                 break;
             case R.id.imagebutton_toolbar_menu:
                 if (!mIsSelectable) Toast.makeText(getContext(), "menu", Toast.LENGTH_SHORT).show();
                 break;
         }
+    }
+
+    protected void find() {
+
     }
 
     protected void editTab() {

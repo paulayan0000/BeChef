@@ -7,11 +7,20 @@ import java.util.ArrayList;
 public class GetSearchList {
     private String mNextPageToken;
     private String mPrevPageToken;
+    private String mErrorMsg;
     private ArrayList<DiscoverItem> mDiscoverItems;
 
     public GetSearchList() {
         mNextPageToken = "";
         mPrevPageToken = "";
+        mErrorMsg = "";
+        mDiscoverItems = new ArrayList<>();
+    }
+
+    public GetSearchList(String errorMsg) {
+        mNextPageToken = "";
+        mPrevPageToken = "";
+        mErrorMsg = errorMsg;
         mDiscoverItems = new ArrayList<>();
     }
 
@@ -29,6 +38,14 @@ public class GetSearchList {
 
     public void setPrevPageToken(String prevPageToken) {
         mPrevPageToken = prevPageToken;
+    }
+
+    public String getErrorMsg() {
+        return mErrorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        mErrorMsg = errorMsg;
     }
 
     public ArrayList<DiscoverItem> getDiscoverItems() {

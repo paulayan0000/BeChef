@@ -63,10 +63,11 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
         @Override
         public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
-            if (recyclerView.getLayoutManager() != null) {
+            RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+            if (layoutManager != null) {
                 mPresenter.onScrollStateChanged(
-                        recyclerView.getLayoutManager().getChildCount(),
-                        recyclerView.getLayoutManager().getItemCount(),
+                        layoutManager.getChildCount(),
+                        layoutManager.getItemCount(),
                         newState);
             }
         }
@@ -97,6 +98,11 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
     @Override
     public void updateSearchItems(GetSearchList bean) {
         mDiscoverChildAdapter.updateData(bean);
+    }
+
+    @Override
+    public void setLoading(boolean isLoading) {
+        mDiscoverChildAdapter.setLoading(isLoading);
     }
 
     @Override

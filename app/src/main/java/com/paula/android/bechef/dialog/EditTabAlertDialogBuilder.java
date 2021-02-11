@@ -20,11 +20,7 @@ public class EditTabAlertDialogBuilder extends BeChefAlertDialogBuilder {
 
     public EditTabAlertDialogBuilder(@NonNull Context context, BaseContract.MainPresenter presenter) {
         super(context, R.style.SmallDialogTheme);
-        if (presenter instanceof DiscoverPresenter) {
-            mEditTabAdapter = new EditTabAdapter(new ArrayList<>(presenter.getTabs()));
-        } else {
-            mEditTabAdapter = new EditTabAdapter(new ArrayList<>(presenter.getTabs()));
-        }
+        mEditTabAdapter = new EditTabAdapter(new ArrayList<>(presenter.getTabs()));
         initBuilder(mContext);
     }
 
@@ -36,7 +32,6 @@ public class EditTabAlertDialogBuilder extends BeChefAlertDialogBuilder {
             @Override
             public void onPositiveButtonClick() {
                 mEditTabAdapter.onCompleteClicked();
-//                mMainPresenter.updateTabs(mEditTabAdapter.getBaseTabs());
             }
         });
     }
@@ -53,7 +48,7 @@ public class EditTabAlertDialogBuilder extends BeChefAlertDialogBuilder {
 
     @Override
     protected void setCustomView(AlertDialog alertDialog) {
-        View view = alertDialog.getLayoutInflater().inflate(R.layout.edit_tab_alert_dialog, null);
+        View view = alertDialog.getLayoutInflater().inflate(R.layout.alert_dialog_edit_tab, null);
         RecyclerView recyclerView = view.findViewById(R.id.recyclerview_edit);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 

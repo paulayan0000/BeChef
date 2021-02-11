@@ -66,6 +66,11 @@ public class CustomMainPresenter<T> implements BaseContract.CustomPresenter {
         return mTabs;
     }
 
+    @Override
+    public void openDetail(Object data) {
+        mCustomView.showDetailUi(data);
+    }
+
     private int getCurrentTabIndex() {
         return mCustomView.getCurrentTabIndex();
     }

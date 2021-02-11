@@ -1,5 +1,6 @@
 package com.paula.android.bechef.discoverChild;
 
+import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -23,7 +24,7 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
     private static final String LOG_TAG = DiscoverChildPresenter.class.getSimpleName();
 
     private DiscoverChildFragmentContract.View mDiscoverChildFragmentView;
-    private int mlastVisibleItemPosition;
+    private int mLastVisibleItemPosition;
     private boolean mLoading = false;
     private String mNextPagingId = "";
     private String mChannelId;
@@ -38,13 +39,8 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
     public void start() {
         if (mChannelId != null) {
             Map<String, String> queryParameters = new HashMap<>();
-
-            //        queryParameters.put("q", "wecook123");
-            //        queryParameters.put("type", "channel");
-
             queryParameters.put("pageToken", "");
             queryParameters.put("channelId", mChannelId);
-
             loadDiscoverItems(queryParameters);
         }
     }
@@ -52,7 +48,7 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
     @Override
     public void onScrollStateChanged(int visibleItemCount, int totalItemCount, int newState) {
         if (newState == RecyclerView.SCROLL_STATE_IDLE && visibleItemCount > 0 && !"".equals(mChannelId)) {
-            if (mlastVisibleItemPosition == totalItemCount - 1 && !"".equals(mNextPagingId)) {
+            if (mLastVisibleItemPosition == totalItemCount - 1 && !"".equals(mNextPagingId)) {
                 Map<String, String> queryParameters = new HashMap<>();
                 queryParameters.put("pageToken", mNextPagingId);
                 queryParameters.put("channelId", mChannelId);
@@ -61,10 +57,16 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
         }
     }
 
+    private void setLoading(boolean isLoading) {
+        mLoading = isLoading;
+        mDiscoverChildFragmentView.setLoading(isLoading);
+    }
+
     private void loadDiscoverItems(Map<String, String> queryParameters) {
         if (!mLoading) {
-            mLoading = true;
-            Log.d(LOG_TAG, "Loading...");
+//            mLoading = true;
+            setLoading(true);
+            Log.d(LOG_TAG, "Loading..." + queryParameters.get("channelId"));
             queryParameters.put("part", "snippet");
             queryParameters.put("maxResults", "10");
             queryParameters.put("order", "date");
@@ -88,7 +90,8 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
                     if (bean != null && error == null) {
                         mDiscoverChildFragmentView.updateSearchItems(bean);
                         mNextPagingId = bean.getNextPageToken();
-                        mLoading = false;
+//                        mLoading = false;
+                        setLoading(false);
                     } else {
                         onError(error);
                     }
@@ -97,18 +100,22 @@ public class DiscoverChildPresenter implements DiscoverChildFragmentContract.Pre
                 @Override
                 public void onError(Exception e) {
                     Log.d(LOG_TAG, "Error: " + e.getMessage());
+                    GetSearchList bean = new GetSearchList();
                     if (e instanceof NoResourceException)
-                        Toast.makeText(mDiscoverChildFragmentView.getContext(),
-                                "此資源不存在！", Toast.LENGTH_LONG).show();
-                    mLoading = false;
+                        bean.setErrorMsg("此資源不存在！");
+                    else
+                        bean.setErrorMsg("發生錯誤\n請檢查網路連線！");
+                    mDiscoverChildFragmentView.updateSearchItems(bean);
+                    setLoading(false);
                 }
-            }).execute();
+            }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//            }).execute();
         }
     }
 
     @Override
     public void onScrolled(RecyclerView.LayoutManager layoutManager) {
-        mlastVisibleItemPosition = ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
+        mLastVisibleItemPosition = ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
     }
 
     @Override

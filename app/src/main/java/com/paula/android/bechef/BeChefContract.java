@@ -14,6 +14,8 @@ public interface BeChefContract extends BaseContract {
 
         void transToDetail(Object content, boolean isBottomShown);
 
+        void transToSearch(BaseContract.MainPresenter presenter);
+
         void showToolbar(int itemId);
     }
 }
