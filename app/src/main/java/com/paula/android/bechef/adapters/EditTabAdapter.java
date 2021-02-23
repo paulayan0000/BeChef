@@ -75,14 +75,14 @@ public class EditTabAdapter extends RecyclerView.Adapter implements EditTextChan
         return mBaseTabs.size();
     }
 
-    public void onCompleteClicked() {
+    public boolean onCompleteClicked() {
         final int viewType = getItemViewType(0);
 
         if (viewType != Constants.VIEW_TYPE_DISCOVER) {
             for (BaseTab baseTab : mBaseTabs) {
                 if (baseTab.getTabName().isEmpty()) {
                     Toast.makeText(mContext, "請輸入書籤名", Toast.LENGTH_SHORT).show();
-                    return;
+                    return false;
                 }
             }
         }
@@ -134,9 +134,9 @@ public class EditTabAdapter extends RecyclerView.Adapter implements EditTextChan
 
             @Override
             public void onCompleted() {
-
             }
         }).execute();
+        return true;
     }
 
     @Override
@@ -153,6 +153,7 @@ public class EditTabAdapter extends RecyclerView.Adapter implements EditTextChan
             super(itemView);
             mEtTabName = itemView.findViewById(R.id.edittext_material_content);
             mTextWatcher = textWatcher;
+            mEtTabName.setHint("請輸入書籤名稱");
             mEtTabName.addTextChangedListener(mTextWatcher);
 
             itemView.findViewById(R.id.imagebutton_add).setOnClickListener(this);
@@ -187,13 +188,15 @@ public class EditTabAdapter extends RecyclerView.Adapter implements EditTextChan
                         removeTab(currentPosition);
                     } else {
                         BeChefAlertDialogBuilder builder = new BeChefAlertDialogBuilder(mContext);
+                        String tabName = mBaseTabs.get(currentPosition).getTabName();
                         builder.setButtons(new AlertDialogClickCallback() {
                             @Override
-                            public void onPositiveButtonClick() {
+                            public boolean onPositiveButtonClick() {
                                 removeTab(currentPosition);
+                                return true;
                             }
-                        }).setMessage("是否要刪除「" + mBaseTabs.get(currentPosition).getTabName() + "」標籤內所有內容？")
-                                .setTitle("刪除標籤及其內容").create().show();
+                        }).setMessage("是否要刪除" + (!tabName.isEmpty() ? "「" + tabName + "」" : "此") + "書籤內所有內容？")
+                                .setTitle("刪除書籤及其內容").create().show();
                     }
                     break;
                 case R.id.imagebutton_clear:

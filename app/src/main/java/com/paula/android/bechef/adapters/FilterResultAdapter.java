@@ -38,6 +38,7 @@ public class FilterResultAdapter extends RecyclerView.Adapter {
 
     public void updateData(ArrayList<BaseItem> baseItems) {
         mBaseItems = baseItems;
+        mIsSearching = false;
         notifyDataSetChanged();
     }
 
@@ -96,7 +97,6 @@ public class FilterResultAdapter extends RecyclerView.Adapter {
             itemView.findViewById(R.id.imagebutton_edit).setVisibility(View.GONE);
         }
         void bindView(int position) {
-            // TODO: bind view
             BaseItem baseItem = mBaseItems.get(position);
             if (baseItem instanceof DiscoverItem) {
                 mTvTimeCount.setText(baseItem.getCreatedTime());

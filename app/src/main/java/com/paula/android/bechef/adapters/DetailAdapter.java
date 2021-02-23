@@ -57,7 +57,8 @@ public class DetailAdapter extends RecyclerView.Adapter {
 //        }
         if (baseItem instanceof DiscoverItem) {
             DiscoverItem discoverItem = (DiscoverItem) baseItem;
-            mTimeAndCount = getFormatDate(discoverItem.getPublishedAt()) + " • "
+            mTimeAndCount = discoverItem.getVideoId().isEmpty() ? discoverItem.getSubscribeCount() + " 位訂閱者\n" : "";
+            mTimeAndCount += getFormatDate(discoverItem.getPublishedAt()) + " • "
                     + "觀看次數 : " + getFormatCount(discoverItem.getViewCount()) + "次";
         } else if (baseItem instanceof BookmarkItem) {
             BookmarkItem bookmarkItem = (BookmarkItem) baseItem;
@@ -169,9 +170,7 @@ public class DetailAdapter extends RecyclerView.Adapter {
         }
 
         void bindView() {
-            if (!(mBaseItem instanceof ReceiptItem)) {
-                mIvThumbnail.setVisibility(View.GONE);
-            } else {
+            if (mBaseItem instanceof ReceiptItem || "".equals(mBaseItem.getVideoId())) {
                 mIvThumbnail.setVisibility(View.VISIBLE);
                 String imageUrl = mBaseItem.getImageUrl();
                 Picasso.with(mContext)
@@ -179,6 +178,8 @@ public class DetailAdapter extends RecyclerView.Adapter {
                         .error(R.drawable.all_picture_placeholder)
                         .placeholder(R.drawable.all_picture_placeholder)
                         .into(mIvThumbnail);
+            } else {
+                mIvThumbnail.setVisibility(View.GONE);
             }
             setTextView(mTvTags, mBaseItem.getTags());
             mTvTitle.setText(mBaseItem.getTitle());

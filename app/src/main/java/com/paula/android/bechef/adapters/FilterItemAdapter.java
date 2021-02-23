@@ -78,7 +78,6 @@ public class FilterItemAdapter extends RecyclerView.Adapter<FilterItemAdapter.Fi
             mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    // TODO: set filter condition with chosen item
                     if (mChosenTabs.size() <= index)
                         mChosenTabs.add(index, filterContents.get(position));
                     else {

@@ -200,7 +200,7 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
 
             @Override
             public void onCompleted() {
-                // TODO: hide saving mask view
+                // TODO: custom toast layout for saved data
                 if (mBookmarkItem != null)
                     mCompleteCallback.onSaveDataComplete(mBookmarkItem);
                 else

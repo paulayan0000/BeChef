@@ -128,8 +128,9 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
     }
 
     @Override
-    public void onPositiveButtonClick() {
+    public boolean onPositiveButtonClick() {
         dismiss();
+        return true;
     }
 
     @Override

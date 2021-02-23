@@ -59,7 +59,7 @@ public class SearchPresenter implements SearchContract.Presenter {
             if (mLastVisibleItemPosition == totalItemCount - 1 && !"".equals(mNextPagingId)) {
                 Map<String, String> queryParameters = new HashMap<>();
                 queryParameters.put("pageToken", mNextPagingId);
-                loadChannelItems(queryParameters);
+                loadYouTubeItems(queryParameters);
             }
         }
     }
@@ -77,6 +77,7 @@ public class SearchPresenter implements SearchContract.Presenter {
     public void setBaseTabs(ArrayList<BaseTab> baseTabs) {
         mBaseTabs = baseTabs;
         mIsInDiscover = mBaseTabs == null;
+        setLoading(false);
     }
 
     @Override
@@ -102,12 +103,12 @@ public class SearchPresenter implements SearchContract.Presenter {
         if (chosenTabs.size() == 0) return;
         cancelTask();
         if (mBaseTabs == null) {
-            // TODO: Search with YouTube Data API
             Map<String, String> queryParameters = new HashMap<>();
             mVideoType = chosenTabs.get(0).getTabName();
             queryParameters.put("pageToken", "");
-            loadChannelItems(queryParameters);
+            loadYouTubeItems(queryParameters);
         } else {
+            setLoading(true);
             mLoadDataTask = new LoadDataTask<>(new LoadDataCallback<ItemDatabase>() {
                 private BaseTab baseTab = mBaseTabs.get(0);
                 private ArrayList<BaseItem> baseItems = new ArrayList<>();
@@ -166,9 +167,10 @@ public class SearchPresenter implements SearchContract.Presenter {
         mSearchFragment.showLoading(isLoading);
     }
 
-    private void loadChannelItems(final Map<String, String> queryParameters) {
+    private void loadYouTubeItems(final Map<String, String> queryParameters) {
         if (!mLoading) {
             setLoading(true);
+            Log.d("SearchPresenter", "start load...");
 
             if ("頻道".equals(mVideoType)) queryParameters.put("type", "channel");
             else queryParameters.put("type", "video");
@@ -215,6 +217,7 @@ public class SearchPresenter implements SearchContract.Presenter {
                 }
             });
             if (!mGetYouTubeDataTask.isCancelled()) mGetYouTubeDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            else Log.d("SearchPresenter", "cancelled");
         }
     }
 

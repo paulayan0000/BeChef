@@ -30,4 +30,7 @@ public interface DiscoverTabDao extends BaseDao<DiscoverTab> {
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateBaseTab(DiscoverTab discoverTab);
+
+    @Query("SELECT * FROM discover_tab WHERE channel_id = :channelId")
+    DiscoverTab getTabWithChannelId(String channelId);
 }

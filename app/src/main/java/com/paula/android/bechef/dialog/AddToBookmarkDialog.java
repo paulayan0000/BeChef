@@ -126,7 +126,7 @@ public class AddToBookmarkDialog extends BeChefDialog {
                     long newUid = mBookmarkTabDao.insert(new BookmarkTab(tabName));
                     mBookmarkItem = getBookmarkItem((int) newUid);
                 } else {
-                    mBookmarkItem = getBookmarkItem(((BaseTab) mBaseTabs.get(mChosenTab - 1)).getUid());
+                    mBookmarkItem = getBookmarkItem(mBaseTabs.get(mChosenTab - 1).getUid());
                 }
                 long uid = dao.insert(mBookmarkItem);
                 mBookmarkItem.setUid((int) uid);
@@ -135,7 +135,7 @@ public class AddToBookmarkDialog extends BeChefDialog {
             @Override
             public void onCompleted() {
                 dismiss();
-                mDetailPresenter.transDetailUi(mBookmarkItem);
+                mDetailPresenter.updateData(mBookmarkItem);
             }
         }).execute();
     }

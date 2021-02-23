@@ -11,10 +11,13 @@ import com.paula.android.bechef.api.exceptions.NoResourceException;
 import com.paula.android.bechef.data.LoadDataCallback;
 import com.paula.android.bechef.data.LoadDataTask;
 import com.paula.android.bechef.data.dao.BookmarkItemDao;
+import com.paula.android.bechef.data.dao.DiscoverTabDao;
 import com.paula.android.bechef.data.database.ItemDatabase;
+import com.paula.android.bechef.data.database.TabDatabase;
 import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.DiscoverItem;
+import com.paula.android.bechef.data.entity.DiscoverTab;
 import com.paula.android.bechef.data.entity.ReceiptItem;
 
 import java.util.HashMap;
@@ -26,7 +29,8 @@ public class DetailPresenter implements DetailContract.Presenter {
     private static final String LOG_TAG = DetailPresenter.class.getSimpleName();
     private DetailContract.View mDetailView;
     private Object mDataContent;
-    private LoadDataTask<BookmarkItemDao> mLoadDataTask;
+    private LoadDataTask<BookmarkItemDao> mLoadBookmarkItemTask;
+    private LoadDataTask<DiscoverTabDao> mLoadDiscoverTabTask;
     private GetYouTubeDataTask mGetYouTubeDataTask;
 
     public DetailPresenter(DetailContract.View detailView, Object dataContent) {
@@ -38,9 +42,9 @@ public class DetailPresenter implements DetailContract.Presenter {
     @Override
     public void start() {
         if (mDataContent instanceof String) {
-            if (checkTaskIsCanceled(mLoadDataTask)) mLoadDataTask = null;
+            if (checkTaskIsCanceled(mLoadBookmarkItemTask)) mLoadBookmarkItemTask = null;
             mDetailView.showLoading(true);
-            mLoadDataTask = new LoadDataTask<>(new LoadDataCallback<BookmarkItemDao>() {
+            mLoadBookmarkItemTask = new LoadDataTask<>(new LoadDataCallback<BookmarkItemDao>() {
                 private BookmarkItem mBookmarkItem = null;
 
                 @Override
@@ -62,13 +66,39 @@ public class DetailPresenter implements DetailContract.Presenter {
                         Map<String, String> queryParameters = new HashMap<>();
                         queryParameters.put("pageToken", "");
                         queryParameters.put("id", (String) mDataContent);
-                        loadVideo(queryParameters);
+                        loadVideo(queryParameters, "videos");
                     }
                 }
             });
-            if (!mLoadDataTask.isCancelled()) mLoadDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            if (!mLoadBookmarkItemTask.isCancelled()) mLoadBookmarkItemTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else if (mDataContent instanceof DiscoverItem) {
-            mDetailView.showDetailUi((DiscoverItem) mDataContent);
+            if (checkTaskIsCanceled(mLoadDiscoverTabTask)) mLoadDiscoverTabTask = null;
+            mDetailView.showLoading(true);
+            mLoadDiscoverTabTask = new LoadDataTask<>(new LoadDataCallback<DiscoverTabDao>() {
+                private DiscoverTab mDiscoverTab = null;
+
+                @Override
+                public DiscoverTabDao getDao() {
+                    return TabDatabase.getDiscoverInstance(mDetailView.getContext()).discoverDao();
+                }
+
+                @Override
+                public void doInBackground(DiscoverTabDao dao) {
+                    mDiscoverTab = dao.getTabWithChannelId(((DiscoverItem) mDataContent).getChannelId());
+                }
+
+                @Override
+                public void onCompleted() {
+                    DiscoverItem discoverItem = (DiscoverItem) mDataContent;
+                    discoverItem.setInBeChef(mDiscoverTab != null);
+                    mDataContent = discoverItem;
+                    Map<String, String> queryParameters = new HashMap<>();
+                    queryParameters.put("pageToken", "");
+                    queryParameters.put("id", discoverItem.getChannelId());
+                    loadVideo(queryParameters, "channels");
+                }
+            });
+            if (!mLoadDiscoverTabTask.isCancelled()) mLoadDiscoverTabTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else if (mDataContent instanceof BookmarkItem) {
             mDetailView.showDetailUi((BookmarkItem) mDataContent);
         } else {
@@ -84,7 +114,7 @@ public class DetailPresenter implements DetailContract.Presenter {
         return false;
     }
 
-    private void loadVideo(Map<String, String> queryParameters) {
+    private void loadVideo(Map<String, String> queryParameters, final String apiTypeName) {
         queryParameters.put("part", "snippet,contentDetails,statistics");
         queryParameters.put("maxResults", "10");
 
@@ -96,7 +126,7 @@ public class DetailPresenter implements DetailContract.Presenter {
             public GetSearchList doInBackground(Map<String, String> queryParameters) {
                 GetSearchList bean = null;
                 try {
-                    bean = BeChefApiHelper.GetYoutubeVideos(queryParameters);
+                    bean = BeChefApiHelper.GetYoutubeData(queryParameters, apiTypeName);
                 } catch (Exception e) {
                     error = e;
                 }
@@ -106,8 +136,10 @@ public class DetailPresenter implements DetailContract.Presenter {
             @Override
             public void onCompleted(GetSearchList bean) {
                 if (bean != null && error == null) {
-                    mDataContent = bean.getDiscoverItems().get(0);
-                    mDetailView.showDetailUi((DiscoverItem) mDataContent);
+                    DiscoverItem discoverItem = bean.getDiscoverItems().get(0);
+                    if (mDataContent instanceof DiscoverItem) discoverItem.setInBeChef(((DiscoverItem) mDataContent).isInBeChef());
+                    mDataContent = discoverItem;
+                    mDetailView.showDetailUi(discoverItem);
                 } else {
                     onError(error);
                 }
@@ -125,9 +157,9 @@ public class DetailPresenter implements DetailContract.Presenter {
         if (!mGetYouTubeDataTask.isCancelled()) mGetYouTubeDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    public void transDetailUi(BaseItem baseItem) {
+    public void updateData(BaseItem baseItem) {
         mDataContent = baseItem;
-        mDetailView.showDetailUi(baseItem);
+        mDetailView.updateButton(baseItem.getVideoId().isEmpty());
     }
 
     public Object getDataContent() {
@@ -145,7 +177,29 @@ public class DetailPresenter implements DetailContract.Presenter {
 
     @Override
     public void stopAllAsyncTasks() {
-        if (checkTaskIsCanceled(mLoadDataTask)) mLoadDataTask = null;
+        if (checkTaskIsCanceled(mLoadBookmarkItemTask)) mLoadBookmarkItemTask = null;
         if (checkTaskIsCanceled(mGetYouTubeDataTask)) mGetYouTubeDataTask = null;
+    }
+
+    @Override
+    public void addToDiscover(final DiscoverItem discoverItem) {
+        discoverItem.setInBeChef(true);
+        if (checkTaskIsCanceled(mLoadDiscoverTabTask)) mLoadDiscoverTabTask = null;
+        new LoadDataTask<>(new LoadDataCallback<DiscoverTabDao>() {
+            @Override
+            public DiscoverTabDao getDao() {
+                return TabDatabase.getDiscoverInstance(mDetailView.getContext()).discoverDao();
+            }
+
+            @Override
+            public void doInBackground(DiscoverTabDao dao) {
+                dao.insert(new DiscoverTab(discoverItem.getChannelId(), discoverItem.getTitle()));
+            }
+
+            @Override
+            public void onCompleted() {
+                updateData(discoverItem);
+            }
+        }).execute();
     }
 }

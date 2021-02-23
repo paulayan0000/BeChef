@@ -5,7 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.paula.android.bechef.ChildContract;
 import com.paula.android.bechef.R;
@@ -37,13 +39,18 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
     }
 
     public void updateData(GetSearchList newBean) {
+        mIsLoading = false;
         mErrorMsg = newBean.getErrorMsg();
-
+        if ("".equals(mErrorMsg)) {
 //        if (!mNextPageToken.equals(newBean.getNextPageToken())) {
             mDiscoverItems.addAll(newBean.getDiscoverItems());
             mNextPageToken = newBean.getNextPageToken();
             notifyItemRangeInserted(getItemCount(), newBean.getDiscoverItems().size());
 //        }
+        } else if (mDiscoverItems.size() > 0){
+            Toast.makeText(mContext, "發生錯誤，請檢查網路連線！", Toast.LENGTH_SHORT).show();
+
+        }
     }
 
     public void clearData(){
@@ -88,6 +95,8 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
             ((DiscoverViewHolder) holder).bindView(mDiscoverItems.get(position));
         } else if (holder instanceof NoResultViewHolder){
             ((NoResultViewHolder) holder).bindView();
+        } else if (holder instanceof LoadingViewHolder){
+            ((LoadingViewHolder) holder).bindView();
         }
     }
 
@@ -140,6 +149,10 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
     private class LoadingViewHolder extends RecyclerView.ViewHolder {
         private LoadingViewHolder(View itemView) {
             super(itemView);
+        }
+
+        public void bindView() {
+            itemView.setVisibility(mIsLoading ? View.VISIBLE : View.GONE);
         }
     }
 

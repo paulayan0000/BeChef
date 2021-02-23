@@ -11,7 +11,9 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         android:paddingVertical="8dp"
-        android:background="@color/colorPrimary">
+        android:background="@color/colorPrimary"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
         <ImageButton
             android:id="@+id/imagebutton_toolbar_back"
             android:layout_width="@dimen/normal_icon_size"
@@ -22,7 +24,7 @@
             android:paddingVertical="8dp"
             app:layout_constraintBottom_toBottomOf="@id/search_view"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/search_view" />
+            app:layout_constraintTop_toTopOf="@id/search_view"/>
         <androidx.appcompat.widget.SearchView
             android:id="@+id/search_view"
             android:layout_width="0dp"
@@ -32,7 +34,7 @@
             app:theme="@style/AppSearchView1"
             android:background="@drawable/negative_button"
             android:layout_margin="8dp"
-            app:queryHint="請輸入關鍵字" />
+            app:queryHint="請輸入關鍵字"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -76,6 +78,6 @@
         android:background="@color/translucent_bkg"
         android:visibility="invisible"
         android:clickable="true"
-        android:focusableInTouchMode="true"
-        android:focusable="true"/>
+        android:focusable="true"
+        android:focusableInTouchMode="true"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

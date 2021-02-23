@@ -68,8 +68,9 @@ public class ActionChooseFragment<T> extends Fragment implements View.OnClickLis
             case R.id.textview_action_cancel:
                 clickCallback = new AlertDialogClickCallback() {
                     @Override
-                    public void onPositiveButtonClick() {
+                    public boolean onPositiveButtonClick() {
                         mPresenter.leaveChooseDialog();
+                        return true;
                     }
                 };
                 break;
@@ -81,7 +82,7 @@ public class ActionChooseFragment<T> extends Fragment implements View.OnClickLis
             case R.id.textview_action_delete:
                 clickCallback = new AlertDialogClickCallback() {
                     @Override
-                    public void onPositiveButtonClick() {
+                    public boolean onPositiveButtonClick() {
                         new LoadDataTask<>(new LoadDataCallback<ItemDatabase>() {
                             @Override
                             public ItemDatabase getDao() {
@@ -105,6 +106,7 @@ public class ActionChooseFragment<T> extends Fragment implements View.OnClickLis
                                 mPresenter.leaveChooseDialog();
                             }
                         }).execute();
+                        return true;
                     }
                 };
                 break;

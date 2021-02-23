@@ -18,4 +18,8 @@ public class BeChefApiHelper {
     public static GetSearchList GetYoutubeVideos(Map<String, String> queryParameters) throws IOException, JSONException, YoutubeException, NoResourceException {
         return BeChefParser.parseGetSearchListFromSearch(new BeChefClient().get("videos", queryParameters));
     }
+
+    public static GetSearchList GetYoutubeData(Map<String, String> queryParameters, String apiTypeName) throws IOException, JSONException, YoutubeException, NoResourceException {
+        return BeChefParser.parseGetSearchListFromSearch(new BeChefClient().get(apiTypeName, queryParameters));
+    }
 }

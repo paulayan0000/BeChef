@@ -29,8 +29,8 @@ public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
             setPositiveButton(getPositiveWord(), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    clickCallback.onPositiveButtonClick();
-                    dialog.dismiss();
+                    boolean isDismissed = clickCallback.onPositiveButtonClick();
+                    if (isDismissed) dialog.dismiss();
                 }
             });
             setNegativeButton(getNegativeWord(), new DialogInterface.OnClickListener() {

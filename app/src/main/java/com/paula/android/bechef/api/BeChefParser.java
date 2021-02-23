@@ -56,6 +56,9 @@ class BeChefParser {
                     return null;
                 }
                 break;
+            case "youtube#channel":
+                discoverItem.setChannelId(getDataString(jsonObject, "id"));
+                break;
             default:
                 return discoverItem;
         }
@@ -68,7 +71,7 @@ class BeChefParser {
             return null;
         }
         discoverItem.setPublishedAt(getDataString(jsonSnippet, "publishedAt"));
-        discoverItem.setChannelId(getDataString(jsonSnippet, "channelId"));
+        if (discoverItem.getChannelId().isEmpty()) discoverItem.setChannelId(getDataString(jsonSnippet, "channelId"));
         discoverItem.setTitle(getDataString(jsonSnippet, "title"));
         discoverItem.setDescription(getDataString(jsonSnippet, "description"));
         try {
@@ -113,6 +116,7 @@ class BeChefParser {
             return discoverItem;
         }
         discoverItem.setViewCount(getDataString(jsonStatistics, "viewCount"));
+        discoverItem.setSubscribeCount(getDataString(jsonStatistics, "subscriberCount"));
         return discoverItem;
     }
 

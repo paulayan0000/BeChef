@@ -50,9 +50,10 @@ class BeChefClient {
         if (responseBody == null) throw new NullPointerException("Null response body");
         if (response.isSuccessful()) {
             String responseData = responseBody.string();
-//            Log.d(LOG_TAG, "Response Data: " + responseData);
+            Log.d(LOG_TAG, "Response Data: " + responseData);
             return responseData;
         } else {
+            Log.d(LOG_TAG, "io error");
             throw new IOException("Unexpected code " + response);
         }
     }

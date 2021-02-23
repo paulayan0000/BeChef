@@ -59,9 +59,10 @@ public class CustomMainFragment<T> extends BaseMainFragment implements BaseContr
 
                     new BeChefAlertDialogBuilder(mContext).setButtons(new AlertDialogClickCallback() {
                         @Override
-                        public void onPositiveButtonClick() {
+                        public boolean onPositiveButtonClick() {
                             showSelectable(false);
                             v.performClick();
+                            return true;
                         }
                     }).setTitle("取消選取")
                             .setMessage("是否將 " + chosenItemsCount + " 個項目取消選取？")

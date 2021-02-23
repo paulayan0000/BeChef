@@ -24,6 +24,8 @@ import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.data.entity.DiscoverItem;
 import com.paula.android.bechef.data.entity.ReceiptItem;
 import com.paula.android.bechef.dialog.AddToBookmarkDialog;
+import com.paula.android.bechef.dialog.AlertDialogClickCallback;
+import com.paula.android.bechef.dialog.BeChefAlertDialogBuilder;
 import com.paula.android.bechef.dialog.EditItemDialog;
 import com.paula.android.bechef.utils.Constants;
 
@@ -118,12 +120,21 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     public void showDetailUi(final BaseItem content) {
         mDetailAdapter.setLoading(false);
         if (content instanceof DiscoverItem && "".equals(content.getVideoId())) {
-            // TODO: channel detail UI
-            Toast.makeText(mContext, "detail of channel: " + ((DiscoverItem) content).getChannelId(), Toast.LENGTH_SHORT).show();
+            mDetailAdapter.updateData(content);
+
+            if (!((DiscoverItem) content).isInBeChef()) {
+                mIbtnMore.setBackgroundResource(R.drawable.ic_bookmark_white);
+                mIbtnMore.setVisibility(View.VISIBLE);
+            } else mIbtnMore.setVisibility(View.GONE);
+
+            mFragmentManager.beginTransaction().hide(mYouTubePlayerFragment).commit();
         } else if (!(content instanceof ReceiptItem)) {
             mDetailAdapter.updateData(content);
+
+            mIbtnMore.setVisibility(View.VISIBLE);
             if (content instanceof DiscoverItem) mIbtnMore.setBackgroundResource(R.drawable.ic_bookmark_white);
-            mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
+            else mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
+
             if (mYouTubePlayerFragment != null) {
                 mYouTubePlayerFragment.initialize(Constants.DEVELOPER_KEY, new YouTubePlayer.OnInitializedListener() {
                     @Override
@@ -146,6 +157,7 @@ public class DetailFragment extends Fragment implements DetailContract.View {
             }
         } else {
             mDetailAdapter.updateData(content);
+            mIbtnMore.setVisibility(View.VISIBLE);
             mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
             mFragmentManager.beginTransaction().hide(mYouTubePlayerFragment).commit();
         }
@@ -153,13 +165,23 @@ public class DetailFragment extends Fragment implements DetailContract.View {
         mIbtnMore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (content instanceof DiscoverItem) {
+                if (!(content instanceof DiscoverItem)) {
+                    EditItemDialog editItemDialog
+                            = new EditItemDialog(mDetailAdapter.getBaseItem(), mPresenter);
+                    editItemDialog.show(getChildFragmentManager(), "edit");
+                } else if (content.getVideoId().isEmpty()) {
+                    BeChefAlertDialogBuilder builder = new BeChefAlertDialogBuilder(mContext);
+                    builder.setButtons(new AlertDialogClickCallback() {
+                        @Override
+                        public boolean onPositiveButtonClick() {
+                            mPresenter.addToDiscover((DiscoverItem) content);
+                            return true;
+                        }
+                    }).setMessage("是否要將「" + content.getTitle() + "」添加為書籤？")
+                            .setTitle("添加為書籤").create().show();
+                } else {
                     addToBookmark();
-                    return;
                 }
-                EditItemDialog editItemDialog
-                        = new EditItemDialog(mDetailAdapter.getBaseItem(), mPresenter);
-                editItemDialog.show(getChildFragmentManager(), "edit");
             }
         });
     }
@@ -200,6 +222,15 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     @Override
     public void updateUi(BaseItem baseItem) {
         mDetailAdapter.updateData(baseItem);
+    }
+
+    @Override
+    public void updateButton(boolean isDiscoverTab) {
+        if (isDiscoverTab) mIbtnMore.setVisibility(View.GONE);
+        else {
+            mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
+            mIbtnMore.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

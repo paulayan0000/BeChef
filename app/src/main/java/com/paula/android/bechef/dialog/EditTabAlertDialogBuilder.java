@@ -30,8 +30,8 @@ public class EditTabAlertDialogBuilder extends BeChefAlertDialogBuilder {
         setTitle("編輯書籤");
         setButtons(new AlertDialogClickCallback() {
             @Override
-            public void onPositiveButtonClick() {
-                mEditTabAdapter.onCompleteClicked();
+            public boolean onPositiveButtonClick() {
+                return mEditTabAdapter.onCompleteClicked();
             }
         });
     }

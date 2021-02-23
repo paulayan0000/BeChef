@@ -4,6 +4,7 @@ public class DiscoverItem extends BaseItem {
     private String mPublishedAt;
     private String mDuration;
     private String mViewCount;
+    private String mSubscribeCount;
     private String mChannelId;
     private boolean mIsInBeChef;
 
@@ -12,6 +13,7 @@ public class DiscoverItem extends BaseItem {
         mPublishedAt = "";
         mDuration = "";
         mViewCount = "";
+        mSubscribeCount = "";
         mChannelId = "";
         mIsInBeChef = true;
     }
@@ -38,6 +40,14 @@ public class DiscoverItem extends BaseItem {
 
     public void setViewCount(String viewCount) {
         mViewCount = viewCount;
+    }
+
+    public String getSubscribeCount() {
+        return mSubscribeCount;
+    }
+
+    public void setSubscribeCount(String subscribeCount) {
+        mSubscribeCount = subscribeCount;
     }
 
     public String getChannelId() {

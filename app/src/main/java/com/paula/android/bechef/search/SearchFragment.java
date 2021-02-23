@@ -45,7 +45,6 @@ public class SearchFragment extends Fragment implements SearchContract.View {
     private FilterResultAdapter mFilterResultAdapter;
     private RecyclerView mRecyclerViewResult;
     private DiscoverChildAdapter mSearchResultAdapter;
-//    private SearchYouTubeAdapter mSearchResultAdapter;
     private FilterItemAdapter mFilterItemAdapter;
     private SearchView mSearchView;
     private TextView mTvSearchResult;
@@ -72,12 +71,6 @@ public class SearchFragment extends Fragment implements SearchContract.View {
             }
         });
 
-        mSearchView = root.findViewById(R.id.search_view);
-        setSearchView();
-
-        mTvSearchResult = root.findViewById(R.id.textview_search_result);
-        mViewMask = root.findViewById(R.id.view_search_translucent_mask);
-
         RecyclerView recyclerViewFilter = root.findViewById(R.id.recyclerview_search_filter);
         recyclerViewFilter.setLayoutManager(new LinearLayoutManager(mContext));
         if (recyclerViewFilter.getItemDecorationCount() == 0) recyclerViewFilter.addItemDecoration(dec);
@@ -85,7 +78,12 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         recyclerViewFilter.setAdapter(mFilterItemAdapter);
 
         mRecyclerViewResult = root.findViewById(R.id.recyclerview_search_result);
-        if (mRecyclerViewResult.getItemDecorationCount() == 0) mRecyclerViewResult.addItemDecoration(dec);
+        initResultView();
+
+        mTvSearchResult = root.findViewById(R.id.textview_search_result);
+        mViewMask = root.findViewById(R.id.view_search_translucent_mask);
+        mSearchView = root.findViewById(R.id.search_view);
+        setSearchView();
 
         return root;
     }
@@ -101,10 +99,20 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         }
     };
 
+    private RecyclerView.ItemDecoration decWithSpan = new RecyclerView.ItemDecoration() {
+        @Override
+        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+            super.getItemOffsets(outRect, view, parent, state);
+            if (outRect.bottom == 0)
+                outRect.bottom = (int) Utils.convertDpToPixel((float) 8, mContext);
+            if (parent.getChildAdapterPosition(view) <= 1)
+                outRect.top = (int) Utils.convertDpToPixel((float) 8, mContext);
+        }
+    };
+
     @Override
     public void onStart() {
         super.onStart();
-        initResultView();
         mPresenter.start();
         mSearchView.setQuery("", false);
         ((BeChefActivity) mContext).showBottomNavigationView(false);
@@ -127,7 +135,6 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         ArrayList<FilterItem> videoFilter = new ArrayList<>();
 
         if (baseTabs == null) {
-            // TODO: Set filter condition
             FilterItem filterResultType = new FilterItem();
             filterResultType.setFilterType("類型 :");
             ArrayList<BaseTab> typeFilterContents = new ArrayList<>();
@@ -158,7 +165,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
 
     @Override
     public void updateResultView(ArrayList<BaseItem> baseItems) {
-        mFilterResultAdapter.setLoading(false);
+//        mFilterResultAdapter.setLoading(false);
         mTvSearchResult.setText("搜尋結果 -- 共 " + baseItems.size() + " 筆結果");
         mFilterResultAdapter.updateData(baseItems);
     }
@@ -183,7 +190,6 @@ public class SearchFragment extends Fragment implements SearchContract.View {
         AutoCompleteTextView mAutoCompleteTextView = mSearchView.findViewById(R.id.search_src_text);
         mAutoCompleteTextView.setBackgroundColor(getResources().getColor(R.color.white));
         mAutoCompleteTextView.getLayoutParams().height = LinearLayout.LayoutParams.MATCH_PARENT;
-        mAutoCompleteTextView.clearFocus();
         mAutoCompleteTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -195,6 +201,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
                 }
             }
         });
+        mAutoCompleteTextView.clearFocus();
         mAutoCompleteTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -232,8 +239,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
             if (mSearchResultAdapter != null) {
                 mTvSearchResult.setText("搜尋結果");
                 mSearchResultAdapter.clearData();
-            }
-            else updateResultView(new ArrayList<BaseItem>());
+            } else updateResultView(new ArrayList<BaseItem>());
         } else {
             mTvSearchResult.setText("搜尋結果");
             if (mSearchResultAdapter != null) {
@@ -250,8 +256,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
 
     @Override
     public void updateSearchItems(GetSearchList bean) {
-        mSearchResultAdapter.setLoading(false);
-//        if (bean == null) mSearchResultAdapter.clearData();
+//        mSearchResultAdapter.setLoading(false);
         mSearchResultAdapter.updateData(bean);
         mTvSearchResult.setText("搜尋結果 -- 共顯示 " + mSearchResultAdapter.getBaseItemCounts() + " 筆結果");
     }
@@ -269,14 +274,13 @@ public class SearchFragment extends Fragment implements SearchContract.View {
             gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
                 public int getSpanSize(int position) {
-                    switch (mSearchResultAdapter.getItemViewType(position)) {
-                        case Constants.VIEW_TYPE_NORMAL:
-                            return 1;
-                        default:
-                            return 2;
+                    if (mSearchResultAdapter.getItemViewType(position) == Constants.VIEW_TYPE_NORMAL) {
+                        return 1;
                     }
+                    return 2;
                 }
             });
+            if (mRecyclerViewResult.getItemDecorationCount() == 0) mRecyclerViewResult.addItemDecoration(decWithSpan);
             mRecyclerViewResult.setLayoutManager(gridLayoutManager);
             mRecyclerViewResult.setAdapter(mSearchResultAdapter);
             mRecyclerViewResult.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -290,7 +294,6 @@ public class SearchFragment extends Fragment implements SearchContract.View {
                                 layoutManager.getItemCount(),
                                 newState);
                     }
-
                 }
 
                 @Override
@@ -301,6 +304,7 @@ public class SearchFragment extends Fragment implements SearchContract.View {
             });
         } else {
             mRecyclerViewResult.setLayoutManager(new LinearLayoutManager(mContext));
+            if (mRecyclerViewResult.getItemDecorationCount() == 0) mRecyclerViewResult.addItemDecoration(dec);
             mFilterResultAdapter = new FilterResultAdapter(new ArrayList<BaseItem>(), (SearchPresenter) mPresenter);
             mRecyclerViewResult.setAdapter(mFilterResultAdapter);
             mRecyclerViewResult.clearOnScrollListeners();
