@@ -1,5 +1,7 @@
 package com.paula.android.bechef.bookmark;
 
+import androidx.lifecycle.Observer;
+
 import com.paula.android.bechef.customMain.CustomMainFragment;
 import com.paula.android.bechef.customMain.CustomMainPresenter;
 import com.paula.android.bechef.data.database.TabDatabase;
@@ -9,12 +11,9 @@ import com.paula.android.bechef.data.entity.BookmarkTab;
 import java.util.ArrayList;
 import java.util.List;
 
-import androidx.lifecycle.Observer;
+public class BookmarkPresenter extends CustomMainPresenter {
 
-public class BookmarkPresenter extends CustomMainPresenter<BookmarkTab> {
-    private ArrayList<BaseTab> mBookmarkTabs = new ArrayList<>();
-
-    public BookmarkPresenter(CustomMainFragment<BookmarkTab> customView) {
+    public BookmarkPresenter(CustomMainFragment customView) {
         super(customView);
     }
 
@@ -24,14 +23,13 @@ public class BookmarkPresenter extends CustomMainPresenter<BookmarkTab> {
     }
 
     private void loadBookmarkTabs() {
-        TabDatabase.getBookmarkInstance(mCustomView.getContext()).bookmarkDao().getAllLive()
-                .observe(mCustomView, new Observer<List<BookmarkTab>>() {
+        TabDatabase.getTabInstance(getContext()).bookmarkDao().getAllLive()
+                .observe(mCustomMainView, new Observer<List<BookmarkTab>>() {
                     @Override
                     public void onChanged(List<BookmarkTab> bookmarkTabs) {
-                        mBookmarkTabs.clear();
-                        mBookmarkTabs.addAll(bookmarkTabs);
-                        setTabs(mBookmarkTabs);
-                        mCustomView.showDefaultUi(mBookmarkTabs);
+                        ArrayList<BaseTab> baseTabs = new ArrayList<BaseTab>(bookmarkTabs);
+                        setTabs(baseTabs);
+                        mCustomMainView.showDefaultUi(baseTabs);
                     }
                 });
     }

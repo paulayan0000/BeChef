@@ -7,29 +7,31 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.paula.android.bechef.R;
-import com.paula.android.bechef.activities.BeChefActivity;
-import com.paula.android.bechef.adapters.DiscoverChildAdapter;
-import com.paula.android.bechef.api.beans.GetSearchList;
-import com.paula.android.bechef.data.entity.DiscoverTab;
-import com.paula.android.bechef.utils.Utils;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.paula.android.bechef.activities.BeChefActivity;
+import com.paula.android.bechef.adapters.DiscoverChildAdapter;
+import com.paula.android.bechef.api.beans.YouTubeData;
+import com.paula.android.bechef.ChildContract;
+import com.paula.android.bechef.data.entity.DiscoverTab;
+import com.paula.android.bechef.R;
+import com.paula.android.bechef.utils.Constants;
+import com.paula.android.bechef.utils.Utils;
+
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class DiscoverChildFragment extends Fragment implements DiscoverChildFragmentContract.View {
-    private DiscoverChildFragmentContract.Presenter mPresenter;
+public class DiscoverChildFragment extends Fragment implements ChildContract.DiscoverChildView {
+    private ChildContract.DiscoverChildPresenter mPresenter;
     private Context mContext;
     private DiscoverChildAdapter mDiscoverChildAdapter;
 
     private DiscoverChildFragment(DiscoverTab discoverTab) {
         if (mPresenter == null) {
-            mPresenter = new DiscoverChildPresenter(this, discoverTab);
+            mPresenter = new DiscoverChildPresenter(this,
+                    discoverTab.getChannelId());
         }
     }
 
@@ -38,75 +40,84 @@ public class DiscoverChildFragment extends Fragment implements DiscoverChildFrag
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_child, container, false);
         mContext = view.getContext();
         view.findViewById(R.id.constraintlayout_info).setVisibility(View.GONE);
-
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerview_discover_main);
-        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        if (recyclerView.getItemDecorationCount() == 0) recyclerView.addItemDecoration(dec);
-        mDiscoverChildAdapter = new DiscoverChildAdapter(new GetSearchList(), mPresenter);
-        recyclerView.setAdapter(mDiscoverChildAdapter);
-        recyclerView.addOnScrollListener(mOnScrollListener);
+        setRecyclerView(view);
         return view;
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onStart() {
+        super.onStart();
         mPresenter.start();
     }
 
-    private RecyclerView.OnScrollListener mOnScrollListener = new RecyclerView.OnScrollListener() {
-        @Override
-        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-            super.onScrollStateChanged(recyclerView, newState);
-            RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-            if (layoutManager != null) {
-                mPresenter.onScrollStateChanged(
-                        layoutManager.getChildCount(),
-                        layoutManager.getItemCount(),
-                        newState);
-            }
-        }
-
-        @Override
-        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-            mPresenter.onScrolled(recyclerView.getLayoutManager());
-        }
-    };
-
-    private RecyclerView.ItemDecoration dec = new RecyclerView.ItemDecoration() {
-        @Override
-        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-            super.getItemOffsets(outRect, view, parent, state);
-            if (outRect.bottom == 0)
-                outRect.bottom = (int) Utils.convertDpToPixel((float) 8, mContext);
-            if (parent.getChildAdapterPosition(view) == 0)
-                outRect.top = (int) Utils.convertDpToPixel((float) 8, mContext);
-        }
-    };
-
-    @Override
-    public void setPresenter(DiscoverChildFragmentContract.Presenter presenter) {
-        mPresenter = checkNotNull(presenter);
+    public void refresh() {
+        mPresenter.cancelTask();
+        mDiscoverChildAdapter.clearData();
+        mPresenter.start();
     }
 
     @Override
-    public void updateSearchItems(GetSearchList bean) {
+    public void setCustomMainPresenter(ChildContract.DiscoverChildPresenter customMainPresenter) {
+        mPresenter = checkNotNull(customMainPresenter);
+    }
+
+    private void setRecyclerView(View view) {
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerview_child);
+        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        if (recyclerView.getItemDecorationCount() == 0)
+            recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+                @Override
+                public void getItemOffsets(@NonNull Rect outRect,
+                                           @NonNull View view,
+                                           @NonNull RecyclerView parent,
+                                           @NonNull RecyclerView.State state) {
+                    super.getItemOffsets(outRect, view, parent, state);
+                    if (outRect.bottom == 0) {
+                        outRect.bottom = Utils.convertDpToPixel(Constants.NORMAL_PADDING, mContext);
+                    }
+                    if (parent.getChildAdapterPosition(view) == 0) {
+                        outRect.top = Utils.convertDpToPixel(Constants.NORMAL_PADDING, mContext);
+                    }
+                }
+            });
+        mDiscoverChildAdapter = new DiscoverChildAdapter(new YouTubeData(), mPresenter);
+        recyclerView.setAdapter(mDiscoverChildAdapter);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+                if (layoutManager != null) {
+                    mPresenter.onScrollStateChanged(layoutManager.getChildCount(),
+                            layoutManager.getItemCount(), newState);
+                }
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                mPresenter.onScrolled(recyclerView.getLayoutManager());
+            }
+        });
+        recyclerView.setHasFixedSize(true);
+    }
+
+    @Override
+    public void updateSearchItems(YouTubeData bean) {
         mDiscoverChildAdapter.updateData(bean);
     }
 
     @Override
-    public void setLoading(boolean isLoading) {
-        mDiscoverChildAdapter.setLoading(isLoading);
+    public void showLoadingUi() {
+        mDiscoverChildAdapter.showLoading();
     }
 
     @Override
     public void showDetailUi(Object content, boolean isBottomShown) {
-        ((BeChefActivity) mContext).transToDetail(content, true);
+        ((BeChefActivity) mContext).showDetailUi(content, true);
     }
 }

@@ -7,41 +7,38 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.utils.BeChefTextWatcher;
 import com.paula.android.bechef.utils.EditTextChangeCallback;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.RecyclerView;
-
-import static androidx.recyclerview.widget.ItemTouchHelper.Callback.makeMovementFlags;
-
-public class MaterialContentAdapter extends RecyclerView.Adapter implements EditTextChangeCallback, ItemTouchHelperAdapter {
+public class MaterialContentAdapter extends RecyclerView.Adapter<MaterialContentAdapter.MaterialContentViewHolder> implements EditTextChangeCallback,
+        ItemTouchHelperAdapter {
+    private final ArrayList<String> mMaterialContents;
     private Context mContext;
-    private ArrayList<String> mMaterialContents;
 
     MaterialContentAdapter(ArrayList<String> materialContents) {
         mMaterialContents = materialContents;
-        if (materialContents.size() == 0) {
-            mMaterialContents.add("");
-        }
+        if (materialContents.size() == 0) mMaterialContents.add("");
     }
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MaterialContentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
-        View view = LayoutInflater.from(mContext).inflate(R.layout.item_edit_material_contents, parent, false);
-        return new ContentViewHolder(view, new BeChefTextWatcher(this));
+        View view = LayoutInflater.from(mContext)
+                .inflate(R.layout.item_edit_material_contents, parent, false);
+        return new MaterialContentViewHolder(view, new BeChefTextWatcher(this));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ((ContentViewHolder) holder).bindView(position);
+    public void onBindViewHolder(@NonNull MaterialContentViewHolder holder, int position) {
+        holder.bindView(position);
     }
 
     @Override
@@ -55,41 +52,16 @@ public class MaterialContentAdapter extends RecyclerView.Adapter implements Edit
     }
 
     @Override
-    public boolean onItemMoved(int fromPosition, int toPosition) {
-        if (fromPosition < toPosition) {
-            for (int i = fromPosition; i < toPosition; i++) {
-                Collections.swap(mMaterialContents, i, i + 1);
-            }
-        } else {
-            for (int i = fromPosition; i > toPosition; i--) {
-                Collections.swap(mMaterialContents, i, i - 1);
-            }
-        }
-        notifyItemMoved(fromPosition, toPosition);
-        return true;
+    public ArrayList<String> getDataList() {
+        return mMaterialContents;
     }
 
-    @Override
-    public void onItemSwiped(int position) {
-        mMaterialContents.remove(position);
-        notifyRemoved(position);
-    }
+    class MaterialContentViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private final EditText mEtContent;
+        private final BeChefTextWatcher mTextWatcher;
+        private final ImageButton mIbtnRemove;
 
-    @Override
-    public int getItemMovementFlags() {
-        if (mMaterialContents.size() <= 1)
-            return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.ACTION_STATE_IDLE);
-        else
-            return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
-                    ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
-    }
-
-    private class ContentViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private EditText mEtContent;
-        private BeChefTextWatcher mTextWatcher;
-        private ImageButton mIbtnRemove;
-
-        ContentViewHolder(@NonNull View itemView, BeChefTextWatcher textWatcher) {
+        MaterialContentViewHolder(@NonNull View itemView, BeChefTextWatcher textWatcher) {
             super(itemView);
             itemView.findViewById(R.id.imagebutton_add).setOnClickListener(this);
             mIbtnRemove = itemView.findViewById(R.id.imagebutton_remove);
@@ -104,39 +76,41 @@ public class MaterialContentAdapter extends RecyclerView.Adapter implements Edit
         void bindView(int position) {
             mTextWatcher.bindPosition(position);
             mEtContent.setText(mMaterialContents.get(position));
-            mIbtnRemove.setImageDrawable(mContext.getResources()
-                    .getDrawable(mMaterialContents.size() == 1 ? R.drawable.ic_remove_gray : R.drawable.ic_remove));
+            int removeDrawableId = getRemoveDrawableId(mMaterialContents.size() == 1);
+            setImageDrawable(mIbtnRemove, mContext, removeDrawableId);
+        }
+
+        private int getRemoveDrawableId(boolean isDisable) {
+            return isDisable ? R.drawable.ic_remove_gray : R.drawable.ic_remove;
+        }
+
+        private void setImageDrawable(ImageButton imageButton, Context context, int drawableId) {
+            imageButton.setImageDrawable(ContextCompat.getDrawable(context, drawableId));
         }
 
         @Override
         public void onClick(View v) {
             int currentIndex = getAdapterPosition();
             if (currentIndex < 0) return;
-            switch (v.getId()) {
-                case R.id.imagebutton_add:
-                    mMaterialContents.add(currentIndex + 1, "");
-                    notifyAdded(currentIndex);
-                    break;
-                case R.id.imagebutton_remove:
-                    if (mMaterialContents.size() == 1) return;
-                    mMaterialContents.remove(currentIndex);
-                    if (mMaterialContents.size() == 1) notifyItemRangeChanged(0, 2);
-                    else notifyRemoved(currentIndex);
-                    break;
-                case R.id.imagebutton_clear:
-                    mMaterialContents.set(currentIndex, "");
-                    notifyItemChanged(currentIndex);
-                    break;
+            int currentViewId = v.getId();
+            if (currentViewId == R.id.imagebutton_add) {
+                mMaterialContents.add(currentIndex + 1, "");
+                notifyItemInserted(currentIndex + 1);
+                notifyItemRangeChanged(currentIndex, getItemCount() - currentIndex);
+
+            } else if (currentViewId == R.id.imagebutton_remove) {
+                if (mMaterialContents.size() == 1) return;
+                mMaterialContents.remove(currentIndex);
+                if (mMaterialContents.size() == 1) {
+                    notifyItemRangeChanged(0, 2);
+                } else {
+                    notifyItemRemoved(currentIndex);
+                    notifyItemRangeChanged(currentIndex, getItemCount() - currentIndex);
+                }
+            } else if (currentViewId == R.id.imagebutton_clear) {
+                mMaterialContents.set(currentIndex, "");
+                notifyItemChanged(currentIndex);
             }
         }
-    }
-    private void notifyAdded(int currentPosition) {
-        notifyItemInserted(currentPosition + 1);
-        notifyItemRangeChanged(currentPosition, getItemCount() - currentPosition);
-    }
-
-    private void notifyRemoved(int currentPosition) {
-        notifyItemRemoved(currentPosition);
-        notifyItemRangeChanged(currentPosition, getItemCount() - currentPosition);
     }
 }

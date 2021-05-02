@@ -4,70 +4,72 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.paula.android.bechef.R;
-import com.paula.android.bechef.data.LoadDataCallback;
-import com.paula.android.bechef.data.LoadDataTask;
 import com.paula.android.bechef.data.dao.BookmarkItemDao;
 import com.paula.android.bechef.data.dao.BookmarkTabDao;
 import com.paula.android.bechef.data.dao.DiscoverTabDao;
-import com.paula.android.bechef.data.dao.ReceiptItemDao;
-import com.paula.android.bechef.data.dao.ReceiptTabDao;
+import com.paula.android.bechef.data.dao.RecipeItemDao;
+import com.paula.android.bechef.data.dao.RecipeTabDao;
 import com.paula.android.bechef.data.database.ItemDatabase;
 import com.paula.android.bechef.data.database.TabDatabase;
 import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.data.entity.BookmarkTab;
-import com.paula.android.bechef.data.entity.DiscoverTab;
-import com.paula.android.bechef.data.entity.ReceiptTab;
+import com.paula.android.bechef.data.entity.RecipeTab;
 import com.paula.android.bechef.dialog.AlertDialogClickCallback;
 import com.paula.android.bechef.dialog.BeChefAlertDialogBuilder;
 import com.paula.android.bechef.utils.BeChefTextWatcher;
 import com.paula.android.bechef.utils.Constants;
 import com.paula.android.bechef.utils.EditTextChangeCallback;
+import com.paula.android.bechef.viewHolders.EditTabViewHolder;
 
 import java.util.ArrayList;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
 public class EditTabAdapter extends RecyclerView.Adapter implements EditTextChangeCallback {
+    private final ArrayList<BaseTab> mBaseTabs;
+    private final ArrayList<Long> mRemoveTabUids = new ArrayList<>();
     private Context mContext;
-    private ArrayList<BaseTab> mBaseTabs;
-    private ArrayList<Long> mRemoveTabUids = new ArrayList<>();
+    private int mTabType = Constants.TAB_TYPE_DISCOVER;
 
     public EditTabAdapter(ArrayList<BaseTab> baseTabs) {
-        mBaseTabs = baseTabs;
-        BaseTab baseTab = mBaseTabs.get(0);
+        mBaseTabs = new ArrayList<>(baseTabs);
+        setTabType();
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        if (mBaseTabs.get(0) instanceof DiscoverTab) return Constants.VIEW_TYPE_DISCOVER;
-        else if (mBaseTabs.get(0) instanceof BookmarkTab) return Constants.VIEW_TYPE_BOOKMARK;
-        else return Constants.VIEW_TYPE_RECEIPT;
+    private void setTabType() {
+        if (mBaseTabs.size() == 0) return;
+        BaseTab firstTab = mBaseTabs.get(0);
+        if (firstTab instanceof BookmarkTab) {
+            mTabType = Constants.TAB_TYPE_BOOKMARK;
+        } else if (firstTab instanceof RecipeTab){
+            mTabType = Constants.TAB_TYPE_RECIPE;
+        }
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
-        if (viewType == Constants.VIEW_TYPE_DISCOVER) {
-            View view = LayoutInflater.from(mContext).inflate(R.layout.item_edit_discover_tab, parent, false);
-            return new EditDiscoverTabViewHolder(view);
-        } else {
-            View view = LayoutInflater.from(mContext).inflate(R.layout.item_edit_material_contents, parent, false);
-            return new EditTabViewHolder(view, new BeChefTextWatcher(this));
+        if (mTabType == Constants.TAB_TYPE_DISCOVER) {
+            return new EditDiscoverTabViewHolder(LayoutInflater.from(mContext)
+                    .inflate(R.layout.item_edit_material_contents, parent, false));
         }
+        return new EditCustomTabViewHolder(LayoutInflater.from(mContext)
+                .inflate(R.layout.item_edit_material_contents, parent, false)
+                , new BeChefTextWatcher(this));
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof EditDiscoverTabViewHolder) ((EditDiscoverTabViewHolder) holder).bindView(position);
-        else ((EditTabViewHolder) holder).bindView(position);
+        if (mTabType == Constants.TAB_TYPE_DISCOVER) {
+            ((EditDiscoverTabViewHolder) holder).bindView(mBaseTabs.get(position).getTabName());
+        } else {
+            ((EditCustomTabViewHolder) holder).bindCustomView(position);
+        }
     }
 
     @Override
@@ -76,66 +78,72 @@ public class EditTabAdapter extends RecyclerView.Adapter implements EditTextChan
     }
 
     public boolean onCompleteClicked() {
-        final int viewType = getItemViewType(0);
+        int viewType = mTabType;
+        final ArrayList<Long> finalRemoveTabUids = mRemoveTabUids;
+        final ArrayList<BaseTab> finalBaseTabs = mBaseTabs;
 
-        if (viewType != Constants.VIEW_TYPE_DISCOVER) {
-            for (BaseTab baseTab : mBaseTabs) {
-                if (baseTab.getTabName().isEmpty()) {
-                    Toast.makeText(mContext, "請輸入書籤名", Toast.LENGTH_SHORT).show();
-                    return false;
+        // Set new tabs for DiscoverTab
+        if (viewType == Constants.TAB_TYPE_DISCOVER) {
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    DiscoverTabDao discoverTabDao = TabDatabase.getTabInstance(mContext).discoverDao();
+                    for (long tabUid : finalRemoveTabUids)
+                        discoverTabDao.deleteItemWithTabUid(tabUid);
                 }
+            };
+            new Thread(runnable).start();
+            return true;
+        }
+
+        // Check tab names not to be empty
+        int tabNumber = finalBaseTabs.size();
+        for (int i = 0; i < tabNumber; i++) {
+            if (finalBaseTabs.get(i).getTabName().isEmpty()) {
+                Toast.makeText(mContext, mContext.getString(R.string.toast_no_empty_tab_name),
+                        Toast.LENGTH_SHORT).show();
+                return false;
             }
         }
-        new LoadDataTask<>(new LoadDataCallback<TabDatabase>() {
-            private BookmarkItemDao mBookmarkItemDao;
-            private ReceiptItemDao mReceiptItemDao;
 
-            @Override
-            public TabDatabase getDao() {
-                if (viewType == Constants.VIEW_TYPE_DISCOVER)
-                    return TabDatabase.getDiscoverInstance(mContext);
-                else if (viewType == Constants.VIEW_TYPE_BOOKMARK) {
-                    mBookmarkItemDao = ItemDatabase.getBookmarkInstance(mContext).bookmarkDao();
-                    return TabDatabase.getBookmarkInstance(mContext);
-                } else {
-                    mReceiptItemDao = ItemDatabase.getReceiptInstance(mContext).receiptDao();
-                    return TabDatabase.getReceiptInstance(mContext);
-                }
-            }
+        // Set new tabs for BookmarkTab and RecipeTab
+        Runnable runnable;
+        if (mTabType == Constants.TAB_TYPE_BOOKMARK) {
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+                    BookmarkTabDao bookmarkTabDao = TabDatabase.getTabInstance(mContext).bookmarkDao();
+                    BookmarkItemDao bookmarkItemDao = ItemDatabase.getItemInstance(mContext).bookmarkDao();
 
-            @Override
-            public void doInBackground(TabDatabase database) {
-                if (viewType == Constants.VIEW_TYPE_DISCOVER) {
-                    DiscoverTabDao discoverTabDao = database.discoverDao();
-                    for (long tabUid : mRemoveTabUids)
-                        discoverTabDao.deleteItemWithTabUid(tabUid);
-                } else if (viewType == Constants.VIEW_TYPE_BOOKMARK) {
-                    BookmarkTabDao bookmarkTabDao = database.bookmarkDao();
-                    for (long tabUid : mRemoveTabUids) {
+                    for (long tabUid : finalRemoveTabUids) {
                         bookmarkTabDao.deleteItemWithTabUid(tabUid);
-                        mBookmarkItemDao.deleteItemWithTabUid(tabUid);
+                        bookmarkItemDao.deleteItemWithTabUid(tabUid);
                     }
-                    for (BaseTab tab : mBaseTabs) {
+                    for (BaseTab tab : finalBaseTabs) {
                         if (tab.getUid() == 0) bookmarkTabDao.insert((BookmarkTab) tab);
                         else bookmarkTabDao.updateBaseTab((BookmarkTab) tab);
                     }
-                } else {
-                    ReceiptTabDao receiptTabDao = database.receiptDao();
-                    for (long tabUid : mRemoveTabUids) {
-                        receiptTabDao.deleteItemWithTabUid(tabUid);
-                        mReceiptItemDao.deleteItemWithTabUid(tabUid);
+                }
+            };
+        } else {
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+                    RecipeTabDao recipeTabDao = TabDatabase.getTabInstance(mContext).recipeDao();
+                    RecipeItemDao recipeItemDao = ItemDatabase.getItemInstance(mContext).recipeDao();
+
+                    for (long tabUid : finalRemoveTabUids) {
+                        recipeTabDao.deleteItemWithTabUid(tabUid);
+                        recipeItemDao.deleteItemWithTabUid(tabUid);
                     }
-                    for (BaseTab tab : mBaseTabs) {
-                        if (tab.getUid() == 0) receiptTabDao.insert((ReceiptTab) tab);
-                        else receiptTabDao.updateBaseTab((ReceiptTab) tab);
+                    for (BaseTab tab : finalBaseTabs) {
+                        if (tab.getUid() == 0) recipeTabDao.insert((RecipeTab) tab);
+                        else recipeTabDao.updateBaseTab((RecipeTab) tab);
                     }
                 }
-            }
-
-            @Override
-            public void onCompleted() {
-            }
-        }).execute();
+            };
+        }
+        new Thread(runnable).start();
         return true;
     }
 
@@ -144,108 +152,75 @@ public class EditTabAdapter extends RecyclerView.Adapter implements EditTextChan
         mBaseTabs.get(position).setTabName(textContent);
     }
 
-    private class EditTabViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private EditText mEtTabName;
-        private ImageButton mIbtnRemove;
-        private BeChefTextWatcher mTextWatcher;
+    private class EditCustomTabViewHolder extends EditTabViewHolder {
 
-        EditTabViewHolder(@NonNull View itemView, BeChefTextWatcher textWatcher) {
-            super(itemView);
-            mEtTabName = itemView.findViewById(R.id.edittext_material_content);
-            mTextWatcher = textWatcher;
-            mEtTabName.setHint("請輸入書籤名稱");
-            mEtTabName.addTextChangedListener(mTextWatcher);
-
-            itemView.findViewById(R.id.imagebutton_add).setOnClickListener(this);
-            mIbtnRemove = itemView.findViewById(R.id.imagebutton_remove);
-            mIbtnRemove.setOnClickListener(this);
-            itemView.findViewById(R.id.imagebutton_clear).setOnClickListener(this);
+        EditCustomTabViewHolder(@NonNull View itemView, BeChefTextWatcher textWatcher) {
+            super(itemView, textWatcher);
         }
 
-        void bindView(int position) {
+        public void bindCustomView(int position) {
             mTextWatcher.bindPosition(position);
-            mEtTabName.setText(mBaseTabs.get(position).getTabName());
-            mIbtnRemove.setImageDrawable(mContext.getResources()
-                    .getDrawable(mBaseTabs.size() == 1 ? R.drawable.ic_remove_gray : R.drawable.ic_remove));
+            bindView(mBaseTabs.get(position).getTabName());
+            int removeDrawableId = getRemoveDrawableId(isOnlyOneTab());
+            setImageDrawable(mIbtnRemove, itemView.getContext(), removeDrawableId);
         }
 
         @Override
         public void onClick(View v) {
+            super.onClick(v);
             final int currentPosition = getAdapterPosition();
-            if (currentPosition < 0) return;
-            switch (v.getId()) {
-                case R.id.imagebutton_add:
-                    BaseTab baseTab = mBaseTabs.get(0);
-                    if (baseTab instanceof BookmarkTab)
-                        mBaseTabs.add(currentPosition + 1, new BookmarkTab(""));
-                    else if (baseTab instanceof ReceiptTab)
-                        mBaseTabs.add(currentPosition + 1, new ReceiptTab(""));
-                    notifyAdded(currentPosition);
-                    break;
-                case R.id.imagebutton_remove:
-                    if (mBaseTabs.size() == 1) return;
-                    if (mBaseTabs.get(0) instanceof DiscoverTab) {
+            int currentViewId = v.getId();
+            if (currentViewId == R.id.imagebutton_remove) {
+                if (isOnlyOneTab()) return;
+                String tabName = mBaseTabs.get(currentPosition).getTabName();
+                String shownTabName = tabName.isEmpty() ? mContext.getString(R.string.this_word) :
+                        String.format(mContext.getString(R.string.tab_name), tabName);
+                new BeChefAlertDialogBuilder(mContext).setButtons(new AlertDialogClickCallback() {
+                    @Override
+                    public boolean onPositiveButtonClick() {
                         removeTab(currentPosition);
-                    } else {
-                        BeChefAlertDialogBuilder builder = new BeChefAlertDialogBuilder(mContext);
-                        String tabName = mBaseTabs.get(currentPosition).getTabName();
-                        builder.setButtons(new AlertDialogClickCallback() {
-                            @Override
-                            public boolean onPositiveButtonClick() {
-                                removeTab(currentPosition);
-                                return true;
-                            }
-                        }).setMessage("是否要刪除" + (!tabName.isEmpty() ? "「" + tabName + "」" : "此") + "書籤內所有內容？")
-                                .setTitle("刪除書籤及其內容").create().show();
+                        return true;
                     }
-                    break;
-                case R.id.imagebutton_clear:
-                    mBaseTabs.get(currentPosition).setTabName("");
-                    notifyItemChanged(currentPosition);
-                    break;
+                }).setMessage(String.format(mContext.getString(R.string.remove_tab_msg), shownTabName))
+                        .setTitle(mContext.getString(R.string.remove_tab_and_its_content)).create().show();
+            } else if (currentViewId == R.id.imagebutton_clear) {
+                mBaseTabs.get(currentPosition).setTabName("");
+                notifyItemChanged(currentPosition);
+            }
+            if (currentViewId == R.id.imagebutton_add) {
+                mBaseTabs.add(currentPosition + 1, mTabType == Constants.TAB_TYPE_BOOKMARK ?
+                        new BookmarkTab("") : new RecipeTab(""));
+                notifyItemInserted(currentPosition + 1);
+                notifyItemRangeChanged(currentPosition, getItemCount() - currentPosition);
             }
         }
+    }
+
+    private class EditDiscoverTabViewHolder extends EditTabViewHolder {
+
+        public EditDiscoverTabViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+
+        @Override
+        public void onClick(View v) {
+            super.onClick(v);
+            removeTab(getAdapterPosition());
+        }
+    }
+
+    private boolean isOnlyOneTab() {
+        return mBaseTabs.size() == 1;
     }
 
     private void removeTab(int currentPosition) {
         mRemoveTabUids.add(mBaseTabs.get(currentPosition).getUid());
         mBaseTabs.remove(currentPosition);
-        if (mBaseTabs.size() == 1) notifyItemRangeChanged(0, 2);
-        else notifyRemoved(currentPosition);
-    }
-
-    private void notifyAdded(int currentPosition) {
-        notifyItemInserted(currentPosition + 1);
-        notifyItemRangeChanged(currentPosition, getItemCount() - currentPosition);
-    }
-
-    private void notifyRemoved(int currentPosition) {
-        notifyItemRemoved(currentPosition);
-        notifyItemRangeChanged(currentPosition, getItemCount() - currentPosition);
-    }
-
-    private class EditDiscoverTabViewHolder extends RecyclerView.ViewHolder {
-        private TextView mTvTabName;
-        private ImageButton mIbtnRemove;
-
-        public EditDiscoverTabViewHolder(View view) {
-            super(view);
-            mTvTabName = view.findViewById(R.id.textview_tab_name);
-            mIbtnRemove = view.findViewById(R.id.imagebutton_remove);
-            mIbtnRemove.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int currentPosition = getAdapterPosition();
-                    if (currentPosition < 0 || mBaseTabs.size() <= 1) return;
-                    removeTab(currentPosition);
-                }
-            });
-        }
-
-        public void bindView(int position) {
-            mTvTabName.setText(mBaseTabs.get(position).getTabName());
-            mIbtnRemove.setImageDrawable(mContext.getResources()
-                    .getDrawable(mBaseTabs.size() == 1 ? R.drawable.ic_remove_gray : R.drawable.ic_remove));
+        if (isOnlyOneTab()) {
+            notifyItemRangeChanged(0, 2);
+        } else {
+            notifyItemRemoved(currentPosition);
+            notifyItemRangeChanged(currentPosition, getItemCount() - currentPosition);
         }
     }
 }

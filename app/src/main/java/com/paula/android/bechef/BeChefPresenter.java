@@ -1,65 +1,51 @@
 package com.paula.android.bechef;
 
-import android.util.Log;
+import android.content.Context;
+
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.paula.android.bechef.bookmark.BookmarkFragment;
 import com.paula.android.bechef.bookmark.BookmarkPresenter;
-import com.paula.android.bechef.data.entity.BaseTab;
 import com.paula.android.bechef.detail.DetailFragment;
 import com.paula.android.bechef.detail.DetailPresenter;
 import com.paula.android.bechef.discover.DiscoverFragment;
 import com.paula.android.bechef.discover.DiscoverPresenter;
-import com.paula.android.bechef.receipt.ReceiptFragment;
-import com.paula.android.bechef.receipt.ReceiptPresenter;
-import com.paula.android.bechef.search.SearchFragment;
-import com.paula.android.bechef.search.SearchPresenter;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-
-import androidx.annotation.StringDef;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
+import com.paula.android.bechef.recipe.RecipeFragment;
+import com.paula.android.bechef.recipe.RecipePresenter;
+import com.paula.android.bechef.find.FindFragment;
+import com.paula.android.bechef.find.FindPresenter;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class BeChefPresenter implements BeChefContract.Presenter {
     private final BeChefContract.View mMainView;
-    private FragmentManager mFragmentManager;
+    private final FragmentManager mFragmentManager;
 
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            DISCOVER, BOOKMARK, RECEIPT, DETAIL, SEARCH
-    })
-    @interface FragmentType {
-    }
-
-    static final String DISCOVER = "DISCOVER";
-    static final String BOOKMARK = "BOOKMARK";
-    static final String RECEIPT = "RECEIPT";
-    static final String DETAIL = "DETAIL";
-    static final String SEARCH = "SEARCH";
+    private static final String DISCOVER = "DISCOVER";
+    private static final String BOOKMARK = "BOOKMARK";
+    private static final String RECIPE = "RECIPE";
+    private static final String DETAIL = "DETAIL";
+    private static final String SEARCH = "SEARCH";
 
     private DiscoverFragment mDiscoverFragment;
     private BookmarkFragment mBookmarkFragment;
-    private ReceiptFragment mReceiptFragment;
+    private RecipeFragment mRecipeFragment;
     private DetailFragment mDetailFragment;
-    private SearchFragment mSearchFragment;
+    private FindFragment mFindFragment;
 
     private DiscoverPresenter mDiscoverPresenter;
     private BookmarkPresenter mBookmarkPresenter;
-    private ReceiptPresenter mReceiptPresenter;
+    private RecipePresenter mRecipePresenter;
     private DetailPresenter mDetailPresenter;
-    private SearchPresenter mSearchPresenter;
+    private FindPresenter mFindPresenter;
 
     public BeChefPresenter(BeChefContract.View mainView, FragmentManager fragmentManager) {
         mMainView = checkNotNull(mainView, "mainView cannot be null!");
-        mMainView.setPresenter(this);
+        mMainView.setCustomMainPresenter(this);
         mFragmentManager = fragmentManager;
     }
 
-    @FragmentType
     @Override
     public void transToDiscover() {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
@@ -69,13 +55,13 @@ public class BeChefPresenter implements BeChefContract.Presenter {
             mFragmentManager.popBackStack();
         }
         if (mFragmentManager.findFragmentByTag(SEARCH) != null) {
-            transaction.remove(mSearchFragment);
+            transaction.remove(mFindFragment);
             mFragmentManager.popBackStack();
         }
 
         if (mDiscoverFragment == null) mDiscoverFragment = DiscoverFragment.newInstance();
         if (mBookmarkFragment != null) transaction.hide(mBookmarkFragment);
-        if (mReceiptFragment != null) transaction.hide(mReceiptFragment);
+        if (mRecipeFragment != null) transaction.hide(mRecipeFragment);
         if (!mDiscoverFragment.isAdded()) {
             transaction.add(R.id.linearlayout_main_container, mDiscoverFragment, DISCOVER);
         } else {
@@ -83,70 +69,39 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         }
         transaction.commit();
 
-        if (mDiscoverPresenter == null) {
-            mDiscoverPresenter = new DiscoverPresenter(mDiscoverFragment);
-        }
+        if (mDiscoverPresenter == null) mDiscoverPresenter = new DiscoverPresenter(mDiscoverFragment);
         mMainView.setMenuId(R.id.navigation_discover);
     }
 
-    @FragmentType
     @Override
     public void transToBookmark() {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
         if (mFragmentManager.findFragmentByTag(DETAIL) != null) {
-//            Log.d("BechefPresenter", "1");
-//            int count = mFragmentManager.getBackStackEntryCount();
-//            StringBuilder fragmentName = new StringBuilder();
-//            for (int i = 0; i < count; i++) {
-//                fragmentName.append(mFragmentManager.getBackStackEntryAt(i));
-//            }
-//            Log.d("BechefPresenter", String.valueOf(fragmentName));
             transaction.remove(mDetailFragment);
             mFragmentManager.popBackStack();
         }
         if (mFragmentManager.findFragmentByTag(SEARCH) != null) {
-            transaction.remove(mSearchFragment);
+            transaction.remove(mFindFragment);
             mFragmentManager.popBackStack();
         }
 
-//        StringBuilder fragmentName = new StringBuilder();
-//        for (Fragment fragment :mFragmentManager.getFragments()) {
-//            fragmentName.append(fragment.getTag());
-//        }
-//        Log.d("BechefPresenter", String.valueOf(fragmentName));
-
-        if (mBookmarkFragment == null) {
-            Log.d("BechefPresenter", "2");
-            mBookmarkFragment = BookmarkFragment.newInstance();
-        }
-        if (mDiscoverFragment != null) {
-            Log.d("BechefPresenter", "3");
-            transaction.hide(mDiscoverFragment);
-        }
-        if (mReceiptFragment != null) {
-            Log.d("BechefPresenter", "4");
-            transaction.hide(mReceiptFragment);
-        }
+        if (mBookmarkFragment == null) mBookmarkFragment = BookmarkFragment.newInstance();
+        if (mDiscoverFragment != null) transaction.hide(mDiscoverFragment);
+        if (mRecipeFragment != null) transaction.hide(mRecipeFragment);
         if (!mBookmarkFragment.isAdded()) {
-            Log.d("BechefPresenter", "5");
             transaction.add(R.id.linearlayout_main_container, mBookmarkFragment, BOOKMARK);
         } else {
-            Log.d("BechefPresenter", "6");
             transaction.show(mBookmarkFragment);
         }
         transaction.commit();
 
-        if (mBookmarkPresenter == null) {
-            Log.d("BechefPresenter", "7");
-            mBookmarkPresenter = new BookmarkPresenter(mBookmarkFragment);
-        }
+        if (mBookmarkPresenter == null) mBookmarkPresenter = new BookmarkPresenter(mBookmarkFragment);
         mMainView.setMenuId(R.id.navigation_bookmark);
     }
 
-    @FragmentType
     @Override
-    public void transToReceipt() {
+    public void transToRecipe() {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
         if (mFragmentManager.findFragmentByTag(DETAIL) != null) {
@@ -154,34 +109,28 @@ public class BeChefPresenter implements BeChefContract.Presenter {
             mFragmentManager.popBackStack();
         }
         if (mFragmentManager.findFragmentByTag(SEARCH) != null) {
-            transaction.remove(mSearchFragment);
+            transaction.remove(mFindFragment);
             mFragmentManager.popBackStack();
         }
 
-        if (mReceiptFragment == null) mReceiptFragment = ReceiptFragment.newInstance();
+        if (mRecipeFragment == null) mRecipeFragment = RecipeFragment.newInstance();
         if (mDiscoverFragment != null) transaction.hide(mDiscoverFragment);
         if (mBookmarkFragment != null) transaction.hide(mBookmarkFragment);
-        if (!mReceiptFragment.isAdded()) {
-            transaction.add(R.id.linearlayout_main_container, mReceiptFragment, RECEIPT);
+        if (!mRecipeFragment.isAdded()) {
+            transaction.add(R.id.linearlayout_main_container, mRecipeFragment, RECIPE);
         } else {
-            transaction.show(mReceiptFragment);
+            transaction.show(mRecipeFragment);
         }
         transaction.commit();
 
-        if (mReceiptPresenter == null) {
-            mReceiptPresenter = new ReceiptPresenter(mReceiptFragment);
-        }
-        mMainView.setMenuId(R.id.navigation_receipt);
+        if (mRecipePresenter == null) mRecipePresenter = new RecipePresenter(mRecipeFragment);
+        mMainView.setMenuId(R.id.navigation_recipe);
     }
 
-    @FragmentType
     @Override
     public void transToDetail(Object content, boolean isBottomShown) {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-        if (mDetailFragment == null) {
-            mDetailFragment = DetailFragment.newInstance();
-        }
         if (mDiscoverFragment != null && !mDiscoverFragment.isHidden()) {
             transaction.hide(mDiscoverFragment);
             transaction.addToBackStack(DISCOVER);
@@ -190,28 +139,25 @@ public class BeChefPresenter implements BeChefContract.Presenter {
             transaction.hide(mBookmarkFragment);
             transaction.addToBackStack(BOOKMARK);
         }
-        if (mReceiptFragment != null && !mReceiptFragment.isHidden()) {
-            transaction.hide(mReceiptFragment);
-            transaction.addToBackStack(RECEIPT);
+        if (mRecipeFragment != null && !mRecipeFragment.isHidden()) {
+            transaction.hide(mRecipeFragment);
+            transaction.addToBackStack(RECIPE);
         }
-        if (mSearchFragment != null && !mSearchFragment.isHidden()) {
-            transaction.hide(mSearchFragment);
+        if (mFindFragment != null && !mFindFragment.isHidden()) {
+            transaction.hide(mFindFragment);
             transaction.addToBackStack(SEARCH);
         }
 
-        if (!mDetailFragment.isAdded()) {
-            transaction.add(R.id.linearlayout_main_container, mDetailFragment, DETAIL);
-        } else {
-            transaction.show(mDetailFragment);
-        }
+        mDetailFragment = DetailFragment.newInstance();
         mDetailFragment.setBottomShown(isBottomShown);
+        transaction.add(R.id.linearlayout_main_container, mDetailFragment, DETAIL);
 
-        if (mDetailPresenter == null) mDetailPresenter = new DetailPresenter(mDetailFragment, content);
-        else mDetailPresenter.setDataContent(content);
+        if (mDetailPresenter != null) mDetailPresenter.setAllThreadCanceled();
+        mDetailPresenter = new DetailPresenter(mDetailFragment, content);
+
         transaction.commit();
     }
 
-    @FragmentType
     @Override
     public void transToSearch(BaseContract.MainPresenter presenter) {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
@@ -221,7 +167,6 @@ public class BeChefPresenter implements BeChefContract.Presenter {
             mFragmentManager.popBackStack();
         }
 
-        if (mSearchFragment == null) mSearchFragment = SearchFragment.newInstance();
         if (mDiscoverFragment != null && !mDiscoverFragment.isHidden()) {
             transaction.hide(mDiscoverFragment);
             transaction.addToBackStack(DISCOVER);
@@ -230,40 +175,29 @@ public class BeChefPresenter implements BeChefContract.Presenter {
             transaction.hide(mBookmarkFragment);
             transaction.addToBackStack(BOOKMARK);
         }
-        if (mReceiptFragment != null && !mReceiptFragment.isHidden()) {
-            transaction.hide(mReceiptFragment);
-            transaction.addToBackStack(RECEIPT);
-        }
-        if (!mSearchFragment.isAdded()) {
-            transaction.add(R.id.linearlayout_main_container, mSearchFragment, SEARCH);
-        } else {
-            transaction.show(mSearchFragment);
+        if (mRecipeFragment != null && !mRecipeFragment.isHidden()) {
+            transaction.hide(mRecipeFragment);
+            transaction.addToBackStack(RECIPE);
         }
 
-        if (presenter instanceof DiscoverPresenter) {
-            if (mSearchPresenter == null) mSearchPresenter = new SearchPresenter(mSearchFragment);
-            else mSearchPresenter.setBaseTabs(null);
-        } else {
-            if (mSearchPresenter == null) mSearchPresenter = new SearchPresenter(mSearchFragment, presenter.getTabs());
-            else mSearchPresenter.setBaseTabs(presenter.getTabs());
-        }
-        mSearchFragment.initOldKeyword();
+        mFindFragment = FindFragment.newInstance();
+        transaction.add(R.id.linearlayout_main_container, mFindFragment, SEARCH);
+
+        if (mFindPresenter != null) mFindPresenter.cancelTask();
+        mFindPresenter = new FindPresenter(mFindFragment);
+        if (!(presenter instanceof DiscoverPresenter)) mFindPresenter.setBaseTabs(presenter.getTabs());
+
         transaction.commit();
     }
 
     @Override
     public void showToolbar(int itemId) {
-        switch (itemId) {
-            case R.id.navigation_discover:
-                mDiscoverFragment.showToolbar();
-                break;
-            case R.id.navigation_bookmark:
-                mBookmarkFragment.showToolbar();
-                break;
-            case R.id.navigation_receipt:
-                mReceiptFragment.showToolbar();
-                break;
-            default:
+        if (itemId == R.id.navigation_discover) {
+            mDiscoverFragment.showToolbar();
+        } else if (itemId == R.id.navigation_bookmark) {
+            mBookmarkFragment.showToolbar();
+        } else if (itemId == R.id.navigation_recipe){
+            mRecipeFragment.showToolbar();
         }
     }
 
@@ -272,12 +206,8 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         transToDiscover();
     }
 
-//    public boolean isDetailShown() {
-//        if (mDetailFragment != null && mDetailFragment.isVisible()) {
-//            mFragmentManager.beginTransaction().remove(mDetailFragment).commit();
-//            mFragmentManager.popBackStack();
-//            return true;
-//        }
-//        return false;
-//    }
+    @Override
+    public Context getContext() {
+        return mMainView.getContext();
+    }
 }

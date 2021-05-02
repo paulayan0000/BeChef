@@ -1,59 +1,44 @@
 package com.paula.android.bechef.api;
 
-import android.util.Log;
+import com.paula.android.bechef.ApiKey;
+import com.paula.android.bechef.utils.Constants;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 class BeChefClient {
-    private static final String LOG_TAG = BeChefClient.class.getSimpleName();
-    private static final String KEY = "AIzaSyAajGSZR9eHL_IKeV34fd_nN58tYUVf5FQ";
-
-    private HttpUrl.Builder mBasicHttpUrlBuilder;
-    private OkHttpClient mOkHttpClient;
-
-    BeChefClient() {
-        mBasicHttpUrlBuilder = new HttpUrl.Builder().scheme("https")
-                .host("www.googleapis.com")
-                .addPathSegment("youtube")
-                .addPathSegment("v3")
-                .addQueryParameter("key", KEY);
-        mOkHttpClient = new OkHttpClient();
-    }
-
-    String get(String apiTypeName, Map<String, String> queryParameters) throws IOException {
-        HttpUrl.Builder httpUrl = mBasicHttpUrlBuilder
-                .addPathSegment(apiTypeName);
+    String get(String apiType, Map<String, String> queryParameters) throws IOException {
+        StringBuilder url = new StringBuilder(String.format(Constants.URL,
+                apiType,
+                ApiKey.DEVELOPER_KEY));
         for (Map.Entry<String, String> entry : queryParameters.entrySet()) {
-            httpUrl.addQueryParameter(entry.getKey(), entry.getValue());
+            url.append(String.format(Constants.QUERY_PARAMS, entry.getKey(), entry.getValue()));
         }
         Request request = new Request.Builder()
-                .url(httpUrl.build())
+                .url(url.toString())
                 .build();
-        Response response = mOkHttpClient.newCall(request).execute();
-
-        if (apiTypeName.equals("search"))
+        OkHttpClient client = new OkHttpClient.Builder()
+                .callTimeout(Constants.CALL_TIMEOUT, TimeUnit.SECONDS)
+                .build();
+        Response response = client.newCall(request).execute();
+        if (apiType.equals(Constants.API_SEARCH)) {
             return doResponse(response).replaceAll("&amp;", "&");
-        else
+        } else {
             return doResponse(response);
+        }
     }
 
     private String doResponse(Response response) throws IOException {
-        Log.d(LOG_TAG, "Response Code: " + response.code());
         ResponseBody responseBody = response.body();
-        if (responseBody == null) throw new NullPointerException("Null response body");
-        if (response.isSuccessful()) {
-            String responseData = responseBody.string();
-            Log.d(LOG_TAG, "Response Data: " + responseData);
-            return responseData;
+        if (responseBody != null && response.isSuccessful()) {
+            return responseBody.string();
         } else {
-            Log.d(LOG_TAG, "io error");
             throw new IOException("Unexpected code " + response);
         }
     }

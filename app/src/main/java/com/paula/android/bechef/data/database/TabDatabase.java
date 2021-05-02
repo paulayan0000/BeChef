@@ -1,47 +1,43 @@
 package com.paula.android.bechef.data.database;
 
 import android.content.Context;
-import android.os.AsyncTask;
-
-import com.paula.android.bechef.data.dao.BookmarkTabDao;
-import com.paula.android.bechef.data.dao.DiscoverTabDao;
-import com.paula.android.bechef.data.dao.ReceiptTabDao;
-import com.paula.android.bechef.data.entity.BookmarkTab;
-import com.paula.android.bechef.data.entity.DiscoverTab;
-import com.paula.android.bechef.data.entity.ReceiptTab;
-import com.paula.android.bechef.utils.Constants;
-import com.paula.android.bechef.utils.Utils;
-
-import java.util.ArrayList;
 
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {DiscoverTab.class, BookmarkTab.class, ReceiptTab.class}, version = 1, exportSchema = false)
+import com.paula.android.bechef.data.dao.BookmarkTabDao;
+import com.paula.android.bechef.data.dao.DiscoverTabDao;
+import com.paula.android.bechef.data.dao.RecipeTabDao;
+import com.paula.android.bechef.data.entity.BookmarkTab;
+import com.paula.android.bechef.data.entity.DiscoverTab;
+import com.paula.android.bechef.data.entity.RecipeTab;
+import com.paula.android.bechef.utils.Constants;
+import com.paula.android.bechef.utils.Utils;
+
+import java.util.ArrayList;
+
+@Database(entities = {DiscoverTab.class, BookmarkTab.class, RecipeTab.class}, version = 1, exportSchema = false)
 public abstract class TabDatabase extends RoomDatabase {
     public abstract DiscoverTabDao discoverDao();
 
     public abstract BookmarkTabDao bookmarkDao();
 
-    public abstract ReceiptTabDao receiptDao();
+    public abstract RecipeTabDao recipeDao();
 
-    private static volatile TabDatabase mDiscoverTabDatabaseInstance;
-    private static volatile TabDatabase mBookmarkTabDatabaseInstance;
-    private static volatile TabDatabase mReceiptTabDatabaseInstance;
+    private static volatile TabDatabase mTabDatabaseInstance;
 
-    public static TabDatabase getDiscoverInstance(Context context) {
-        if (mDiscoverTabDatabaseInstance == null) {
+    public static TabDatabase getTabInstance(Context context) {
+        if (mTabDatabaseInstance == null) {
             synchronized (TabDatabase.class) {
-                if (mDiscoverTabDatabaseInstance == null) {
-                    mDiscoverTabDatabaseInstance = Room.databaseBuilder(context,
+                if (mTabDatabaseInstance == null) {
+                    mTabDatabaseInstance = Room.databaseBuilder(context,
                             TabDatabase.class,
-                            Constants.DISCOVER_TAB_TABLE)
+                            Constants.TAB_TABLE)
                             .build();
 
-                    if (Utils.doesDatabaseExist(context, Constants.DISCOVER_TAB_TABLE))
-                        return mDiscoverTabDatabaseInstance;
-
+                    if (Utils.doesDatabaseExist(context, Constants.TAB_TABLE))
+                        return mTabDatabaseInstance;
                     // TODO: read Json file (DefaultChannelId.json),
                     // add default data
                     DiscoverTab discoverTab1 = new DiscoverTab(
@@ -64,89 +60,22 @@ public abstract class TabDatabase extends RoomDatabase {
                     discoverTabs.add(discoverTab4);
                     discoverTabs.add(discoverTab5);
 
-
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            mDiscoverTabDatabaseInstance.discoverDao().insert(discoverTabs);
-                            return null;
-                        }
-                    }.execute();
-                }
-            }
-        }
-        return mDiscoverTabDatabaseInstance;
-    }
-
-    public static TabDatabase getBookmarkInstance(Context context) {
-        if (mBookmarkTabDatabaseInstance == null) {
-            synchronized (TabDatabase.class) {
-                if (mBookmarkTabDatabaseInstance == null) {
-                    mBookmarkTabDatabaseInstance = Room.databaseBuilder(context,
-                            TabDatabase.class,
-                            Constants.BOOKMARK_TAB_TABLE)
-                            .build();
-
-                    if (Utils.doesDatabaseExist(context, Constants.BOOKMARK_TAB_TABLE))
-                        return mBookmarkTabDatabaseInstance;
-
                     // add default data
-                    BookmarkTab bookmarkTab1 = new BookmarkTab(
+                    final BookmarkTab bookmarkTab = new BookmarkTab(
                             "未命名書籤");
-                    final ArrayList<BookmarkTab> bookmarkTabs = new ArrayList<>();
-                    bookmarkTabs.add(bookmarkTab1);
-
-                    // TODO: remove fake default data
-                    BookmarkTab bookmarkTab2 = new BookmarkTab(
-                            "Default tab2");
-                    bookmarkTabs.add(bookmarkTab2);
-
-                    new AsyncTask<Void, Void, Void>() {
+                    final RecipeTab recipeTab = new RecipeTab(
+                            "未命名書籤");
+                    new Thread(new Runnable() {
                         @Override
-                        protected Void doInBackground(Void... voids) {
-                            mBookmarkTabDatabaseInstance.bookmarkDao().insert(bookmarkTabs);
-                            return null;
+                        public void run() {
+                            mTabDatabaseInstance.discoverDao().insert(discoverTabs);
+                            mTabDatabaseInstance.bookmarkDao().insert(bookmarkTab);
+                            mTabDatabaseInstance.recipeDao().insert(recipeTab);
                         }
-                    }.execute();
+                    }).start();
                 }
             }
         }
-        return mBookmarkTabDatabaseInstance;
-    }
-
-    public static TabDatabase getReceiptInstance(Context context) {
-        if (mReceiptTabDatabaseInstance == null) {
-            synchronized (TabDatabase.class) {
-                if (mReceiptTabDatabaseInstance == null) {
-                    mReceiptTabDatabaseInstance = Room.databaseBuilder(context,
-                            TabDatabase.class,
-                            Constants.RECEIPT_TAB_TABLE)
-                            .build();
-
-                    if (Utils.doesDatabaseExist(context, Constants.RECEIPT_TAB_TABLE))
-                        return mReceiptTabDatabaseInstance;
-
-                    // add default data
-                    ReceiptTab receiptTab1 = new ReceiptTab(
-                            "未命名書籤");
-                    final ArrayList<ReceiptTab> receiptTabs = new ArrayList<>();
-                    receiptTabs.add(receiptTab1);
-
-                    // TODO: remove fake default data
-                    ReceiptTab receiptTab2 = new ReceiptTab(
-                            "Receipt 2");
-                    receiptTabs.add(receiptTab2);
-
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            mReceiptTabDatabaseInstance.receiptDao().insert(receiptTabs);
-                            return null;
-                        }
-                    }.execute();
-                }
-            }
-        }
-        return mReceiptTabDatabaseInstance;
+        return mTabDatabaseInstance;
     }
 }

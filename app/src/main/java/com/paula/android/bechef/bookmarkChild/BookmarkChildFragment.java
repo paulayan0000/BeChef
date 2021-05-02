@@ -1,19 +1,17 @@
 package com.paula.android.bechef.bookmarkChild;
 
-import com.paula.android.bechef.customChild.CustomChildFragment;
-import com.paula.android.bechef.customMain.CustomMainFragment;
-import com.paula.android.bechef.data.entity.BookmarkItem;
-import com.paula.android.bechef.data.entity.BookmarkTab;
-
 import androidx.fragment.app.Fragment;
 
+import com.paula.android.bechef.customChild.CustomChildFragment;
+import com.paula.android.bechef.data.entity.BookmarkItem;
+
 public class BookmarkChildFragment extends CustomChildFragment<BookmarkItem> {
-    private BookmarkChildFragment(BookmarkTab bookmarkTab, Fragment fragment) {
-        mCustomChildPresenter = new BookmarkChildPresenter(this, bookmarkTab);
-        mCustomMainFragment = (CustomMainFragment) fragment;
+    private BookmarkChildFragment(long tabUid, Fragment fragment) {
+        super(fragment);
+        mCustomChildPresenter = new BookmarkChildPresenter(this, tabUid);
     }
 
-    public static BookmarkChildFragment newInstance(BookmarkTab bookmarkTab, Fragment fragment) {
-        return new BookmarkChildFragment(bookmarkTab, fragment);
+    public static BookmarkChildFragment newInstance(long tabUid, Fragment fragment) {
+        return new BookmarkChildFragment(tabUid, fragment);
     }
 }

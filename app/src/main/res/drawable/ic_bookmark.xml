@@ -1,4 +1,4 @@
-<vector android:height="24dp" android:tint="@color/colorPrimary"
+<vector android:height="24dp" android:tint="#ffffff"
     android:viewportHeight="24.0"
     android:viewportWidth="24.0"
     android:width="24dp"

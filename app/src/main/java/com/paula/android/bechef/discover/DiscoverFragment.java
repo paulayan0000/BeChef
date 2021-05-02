@@ -1,21 +1,19 @@
 package com.paula.android.bechef.discover;
 
-import android.os.Bundle;
 import android.view.View;
 
+import androidx.fragment.app.Fragment;
+
+import com.paula.android.bechef.R;
+import com.paula.android.bechef.activities.BeChefActivity;
 import com.paula.android.bechef.BaseContract;
 import com.paula.android.bechef.BaseMainFragment;
-import com.paula.android.bechef.activities.BeChefActivity;
-import com.paula.android.bechef.data.entity.DiscoverTab;
 import com.paula.android.bechef.dialog.EditTabAlertDialogBuilder;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import com.paula.android.bechef.discoverChild.DiscoverChildFragment;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class DiscoverFragment extends BaseMainFragment implements BaseContract.BaseView<DiscoverPresenter>{
+public class DiscoverFragment extends BaseMainFragment implements BaseContract.BaseView<DiscoverPresenter> {
     private DiscoverPresenter mPresenter;
 
     public static DiscoverFragment newInstance() {
@@ -23,35 +21,40 @@ public class DiscoverFragment extends BaseMainFragment implements BaseContract.B
     }
 
     @Override
-    public void setPresenter(DiscoverPresenter presenter) {
-        mPresenter = checkNotNull(presenter);
+    public void setCustomMainPresenter(DiscoverPresenter customMainPresenter) {
+        mPresenter = checkNotNull(customMainPresenter);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onStart() {
+        super.onStart();
         mPresenter.start();
     }
 
     @Override
     protected void editTab() {
-        EditTabAlertDialogBuilder builder = new EditTabAlertDialogBuilder(mContext, mPresenter);
-        builder.create().show();
-//        EditTabDialog editTabDialog = new EditTabDialog(mPresenter.getDiscoverTabs());
-//        editTabDialog.show(getChildFragmentManager(), "edit");
+        new EditTabAlertDialogBuilder(mContext, mPresenter.getTabs()).create().show();
+    }
+
+    @Override
+    protected void setRefreshButton(View view) {
+        view.setVisibility(View.VISIBLE);
+        view.setOnClickListener(this);
     }
 
     @Override
     protected void find() {
-        ((BeChefActivity) mContext).transToFind(mPresenter);
-
-//        SearchItemDialog searchItemDialog = new SearchItemDialog(mPresenter);
-//        searchItemDialog.show(getChildFragmentManager(), "search");
+        ((BeChefActivity) mContext).showSearchUi(mPresenter);
     }
 
-    public void showDetailUi(Object content) {
-        ((BeChefActivity) mContext).transToDetail(content, true);
-//        Fragment searchFragment = getChildFragmentManager().findFragmentByTag("search");
-//        if (searchFragment != null) ((SearchItemDialog) searchFragment).dismiss();
+    @Override
+    public void onClick(View v) {
+        super.onClick(v);
+        if (v.getId() == R.id.imagebutton_refresh) {
+            Fragment childFragment = getChildFragment(getCurrentTabIndex());
+            if (childFragment != null) {
+                ((DiscoverChildFragment) childFragment).refresh();
+            }
+        }
     }
 }

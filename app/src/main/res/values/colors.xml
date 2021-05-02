@@ -5,7 +5,6 @@
     <color name="colorPrimaryDark">#8200ad</color>
     <color name="colorAccent">#D81B60</color>
     <color name="white">#ffffff</color>
-    <color name="bottom_navigation_background">#fafafa</color>
     <color name="bottom_navigation_item_normal">#aeaeae</color>
     <color name="black">#000000</color>
     <color name="picture_placeholder_bkg">#CDCDCD</color>

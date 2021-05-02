@@ -10,113 +10,122 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.paula.android.bechef.activities.BeChefActivity;
+import com.paula.android.bechef.adapters.CustomChildAdapter;
 import com.paula.android.bechef.BaseMainFragment;
 import com.paula.android.bechef.ChildContract;
-import com.paula.android.bechef.R;
-import com.paula.android.bechef.activities.BeChefActivity;
-import com.paula.android.bechef.adapters.DefaultChildAdapter;
 import com.paula.android.bechef.customMain.CustomMainFragment;
 import com.paula.android.bechef.dialog.BeChefAlertDialogBuilder;
+import com.paula.android.bechef.R;
+import com.paula.android.bechef.utils.Constants;
 import com.paula.android.bechef.utils.Utils;
 
 import java.util.ArrayList;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class CustomChildFragment<I> extends BaseMainFragment implements ChildContract.CustomChildView<CustomChildPresenter, I>{
-    protected CustomChildPresenter mCustomChildPresenter;
-    protected CustomMainFragment mCustomMainFragment;
-    protected Context mContext;
-    private DefaultChildAdapter<I> mDefaultChildAdapter;
+public class CustomChildFragment<I> extends BaseMainFragment implements ChildContract.CustomChildView<I> {
+    private final CustomMainFragment mCustomMainFragment;
+    private CustomChildAdapter<I> mCustomChildAdapter;
     private TextView mTvInfoDescription;
     private ImageButton mIbtnFilter;
+    protected ChildContract.CustomChildPresenter mCustomChildPresenter;
+    protected Context mContext;
+
+    public CustomChildFragment(Fragment fragment) {
+        mCustomMainFragment = (CustomMainFragment) fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_child, container, false);
         mContext = view.getContext();
-
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerview_discover_main);
-        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        if (recyclerView.getItemDecorationCount() == 0) recyclerView.addItemDecoration(dec);
-        mDefaultChildAdapter = new DefaultChildAdapter<>(mIsSelectable, new ArrayList<I>(), mCustomChildPresenter);
-        recyclerView.setAdapter(mDefaultChildAdapter);
-
-        mTvInfoDescription = view.findViewById(R.id.textview_info_description);
+        mTvInfoDescription = view.findViewById(R.id.textview_total_description);
         mIbtnFilter = view.findViewById(R.id.imagebutton_filter);
         mIbtnFilter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String[] itemString = new String[]{"時間由新至舊", "時間由舊至新", "評分由高至低", "評分由低至高"};
-                int currentFilterIndex = mCustomChildPresenter.getDataFilterType();
-                itemString[currentFilterIndex] = " * " + itemString[currentFilterIndex];
-                new BeChefAlertDialogBuilder(mContext).setTitle("排序依...")
-                        .setItems(itemString,
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        int currentFilterIndex = mCustomChildPresenter.getDataFilterType();
-                                        if (which != currentFilterIndex) {
-                                            mCustomChildPresenter.setDataFilterType(which);
-                                            mCustomChildPresenter.loadSpecificItems(which);
-                                        }
-                                    }
-                                }).create().show();
+                onIbtnFilterClick();
             }
         });
+        setRecyclerView(view);
         return view;
     }
 
+    private void onIbtnFilterClick() {
+        String[] itemString = getResources().getStringArray(R.array.filter_type);
+        int currentFilterIndex = mCustomChildPresenter.getDataFilterType();
+        itemString[currentFilterIndex] = getString(R.string.star) + itemString[currentFilterIndex];
+        new BeChefAlertDialogBuilder(mContext).setTitle(getString(R.string.filter_with))
+                .setItems(itemString, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int index) {
+                        int currentFilterIndex = mCustomChildPresenter.getDataFilterType();
+                        if (index != currentFilterIndex) {
+                            mCustomChildPresenter.setDataFilterType(index);
+                            mCustomChildPresenter.loadSpecificItems(index);
+                        }
+                    }
+                }).create().show();
+    }
+
+    private void setRecyclerView(View view) {
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerview_child);
+        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        if (recyclerView.getItemDecorationCount() == 0)
+            recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+                @Override
+                public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                    super.getItemOffsets(outRect, view, parent, state);
+                    if (outRect.top == 0) {
+                        outRect.top = Utils.convertDpToPixel(Constants.NORMAL_PADDING, mContext);
+                    }
+                    if (parent.getChildAdapterPosition(view) == 0) outRect.top = 0;
+                }
+            });
+        mCustomChildAdapter = new CustomChildAdapter<>(mIsSelectable, new ArrayList<I>(), mCustomChildPresenter);
+        recyclerView.setAdapter(mCustomChildAdapter);
+        recyclerView.setHasFixedSize(true);
+    }
+
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onStart() {
+        super.onStart();
         mCustomChildPresenter.start();
     }
 
-    private RecyclerView.ItemDecoration dec = new RecyclerView.ItemDecoration() {
-        @Override
-        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-            super.getItemOffsets(outRect, view, parent, state);
-            if (outRect.top == 0) outRect.top = (int) Utils.convertDpToPixel((float) 8, mContext);
-
-            if (parent.getChildAdapterPosition(view) == 0) outRect.top = 0;
-        }
-    };
-
     @Override
-    public void setPresenter(CustomChildPresenter presenter) {
-        mCustomChildPresenter = checkNotNull(presenter);
+    public void setCustomMainPresenter(ChildContract.CustomChildPresenter customMainPresenter) {
+        mCustomChildPresenter = checkNotNull(customMainPresenter);
     }
 
     @Override
     public void showDetailUi(Object content, boolean isBottomShown) {
-        ((BeChefActivity) mContext).transToDetail(content, !mIsSelectable);
+        ((BeChefActivity) mContext).showDetailUi(content, !mIsSelectable);
     }
 
     @Override
     public void showSelectableUi(boolean isSelectable) {
         if (mIsSelectable == isSelectable) return;
-
         mIsSelectable = isSelectable;
-        mDefaultChildAdapter.setSelectable(mIsSelectable);
+        mCustomChildAdapter.setSelectable(mIsSelectable);
         mIbtnFilter.setVisibility(mIsSelectable ? View.GONE : View.VISIBLE);
         mCustomMainFragment.showSelectable(mIsSelectable);
     }
 
     @Override
     public void updateItems(ArrayList<I> items) {
-        mDefaultChildAdapter.updateData(items);
-        mTvInfoDescription.setText("共 " + items.size() + " 道");
+        mCustomChildAdapter.updateData(items);
+        mTvInfoDescription.setText(String.format(getString(R.string.sum_info_msg), items.size()));
     }
 
-    public ArrayList<Long> getChosenUids() {
-        return mDefaultChildAdapter.getChosenUids();
+    @Override
+    public ArrayList<Long> getChosenItemUids() {
+        return mCustomChildAdapter.getChosenItemUids();
     }
-
-
 }

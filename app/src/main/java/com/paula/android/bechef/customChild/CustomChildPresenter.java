@@ -1,23 +1,35 @@
 package com.paula.android.bechef.customChild;
 
-import com.paula.android.bechef.ChildContract;
-import com.paula.android.bechef.data.entity.BaseTab;
-import com.paula.android.bechef.utils.Constants;
+import android.content.Context;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+
+import com.paula.android.bechef.ChildContract;
+import com.paula.android.bechef.utils.Constants;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class CustomChildPresenter<I> implements ChildContract.CustomChildPresenter {
-    public long mTabUid;
+    private final ChildContract.CustomChildView<I> mCustomChildFragment;
+    protected long mTabUid;
     protected int mDataFilterType = Constants.FILTER_WITH_TIME_DESC;
-    protected ChildContract.CustomChildView<CustomChildPresenter, I> mCustomChildFragment;
 
-    public CustomChildPresenter(ChildContract.CustomChildView<CustomChildPresenter, I> customChildFragment, BaseTab baseTab) {
+    public CustomChildPresenter(ChildContract.CustomChildView<I> customChildFragment, long tabUid) {
         mCustomChildFragment = checkNotNull(customChildFragment, "customChildView cannot be null!");
-        customChildFragment.setPresenter(this);
-        mTabUid = baseTab.getUid();
+        customChildFragment.setCustomMainPresenter(this);
+        mTabUid = tabUid;
+    }
+
+    @Override
+    public Context getContext() {
+        return mCustomChildFragment.getContext();
     }
 
     @Override
@@ -30,6 +42,7 @@ public class CustomChildPresenter<I> implements ChildContract.CustomChildPresent
         mCustomChildFragment.showSelectableUi(true);
     }
 
+    @Override
     public void loadSpecificItems(int type) {
     }
 
@@ -42,11 +55,27 @@ public class CustomChildPresenter<I> implements ChildContract.CustomChildPresent
         return ((Fragment) mCustomChildFragment).getChildFragmentManager();
     }
 
-    int getDataFilterType() {
+    @Override
+    public int getDataFilterType() {
         return mDataFilterType;
     }
 
-    void setDataFilterType(int dataFilterType) {
+    @Override
+    public void setDataFilterType(int dataFilterType) {
         mDataFilterType = dataFilterType;
+    }
+
+    protected void addDataObserver(LiveData<List<I>> liveData) {
+        liveData.observe((LifecycleOwner) mCustomChildFragment, new Observer<List<I>>() {
+            @Override
+            public void onChanged(List<I> baseItems) {
+                mCustomChildFragment.updateItems(new ArrayList<>(baseItems));
+            }
+        });
+    }
+
+    @Override
+    public long getTabUid() {
+        return mTabUid;
     }
 }

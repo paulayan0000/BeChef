@@ -2,35 +2,39 @@ package com.paula.android.bechef.dialog;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.view.Gravity;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 import com.paula.android.bechef.R;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
+import static android.util.TypedValue.COMPLEX_UNIT_PX;
 
 public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
-    protected Context mContext;
+    Context mContext;
+    private AlertDialogClickCallback mAlertDialogClickCallback;
+
+    public BeChefAlertDialogBuilder(@NonNull Context context, int themeResId) {
+        super(context, themeResId);
+        mContext = context;
+        setCancelable(true);
+    }
 
     public BeChefAlertDialogBuilder(@NonNull Context context) {
-        super(context, R.style.SmallDialogTheme);
-        mContext = context;
-        setCancelable(true);
+        this(context, R.style.AlertDialogTheme);
     }
 
-    BeChefAlertDialogBuilder(@NonNull Context context, int style) {
-        super(context, style);
-        mContext = context;
-        setCancelable(true);
-    }
-
-    public BeChefAlertDialogBuilder setButtons(final AlertDialogClickCallback clickCallback) {
+    public BeChefAlertDialogBuilder setButtons(AlertDialogClickCallback clickCallback) {
         if (clickCallback != null) {
+            mAlertDialogClickCallback = clickCallback;
             setPositiveButton(getPositiveWord(), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    boolean isDismissed = clickCallback.onPositiveButtonClick();
-                    if (isDismissed) dialog.dismiss();
                 }
             });
             setNegativeButton(getNegativeWord(), new DialogInterface.OnClickListener() {
@@ -44,17 +48,11 @@ public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
     }
 
     protected String getNegativeWord() {
-        return "否";
+        return mContext.getString(R.string.no);
     }
 
     protected String getPositiveWord() {
-        return "是";
-    }
-
-    public BeChefAlertDialogBuilder setCustomItems(AlertDialogItemsCallback itemsCallback) {
-        if (itemsCallback != null)
-            setItems(itemsCallback.getItems(), itemsCallback.getItemOnClickListener());
-        return this;
+        return mContext.getString(R.string.yes);
     }
 
     @NonNull
@@ -65,13 +63,33 @@ public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
             @Override
             public void onShow(DialogInterface dialog) {
                 Button negativeButton = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-                negativeButton.setTextColor(mContext.getResources().getColor(R.color.colorPrimary));
+                negativeButton.setTextAppearance(mContext, R.style.MyAlertButtonTextStyle);
+
                 Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                positiveButton.setTextColor(mContext.getResources().getColor(R.color.colorPrimary));
+                positiveButton.setTextAppearance(mContext, R.style.MyAlertButtonTextStyle);
+                positiveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (mAlertDialogClickCallback.onPositiveButtonClick()) alertDialog.dismiss();
+                    }
+                });
             }
         });
         setCustomView(alertDialog);
         return alertDialog;
+    }
+
+    @Override
+    public AlertDialog.Builder setTitle(@Nullable CharSequence title) {
+        TextView tvTitle = new TextView(mContext);
+        tvTitle.setText(title);
+        tvTitle.setGravity(Gravity.CENTER_HORIZONTAL);
+        tvTitle.setTextColor(mContext.getResources().getColor(R.color.black));
+        float textSize = mContext.getResources().getDimension(R.dimen.title_text_size);
+        tvTitle.setTextSize(COMPLEX_UNIT_PX, textSize);
+        int padding = (int) mContext.getResources().getDimension(R.dimen.dialog_padding);
+        tvTitle.setPadding(0, padding, 0, padding);
+        return setCustomTitle(tvTitle);
     }
 
     protected void setCustomView(AlertDialog alertDialog) {

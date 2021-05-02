@@ -1,13 +1,16 @@
 package com.paula.android.bechef.customMain;
 
-import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.tabs.TabLayout;
-import com.paula.android.bechef.BaseContract;
+import com.paula.android.bechef.R;
 import com.paula.android.bechef.activities.BeChefActivity;
+import com.paula.android.bechef.BaseContract;
 import com.paula.android.bechef.BaseMainFragment;
 import com.paula.android.bechef.customChild.CustomChildFragment;
 import com.paula.android.bechef.dialog.AlertDialogClickCallback;
@@ -16,30 +19,26 @@ import com.paula.android.bechef.dialog.EditTabAlertDialogBuilder;
 
 import java.util.ArrayList;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class CustomMainFragment<T> extends BaseMainFragment implements BaseContract.CustomView<CustomMainPresenter<T>> {
-    private CustomMainPresenter<T> mCustomPresenter;
-    AlertDialog mEditTabAlertDialog;
+public class CustomMainFragment extends BaseMainFragment implements BaseContract.CustomView {
+    private BaseContract.CustomPresenter mCustomPresenter;
+
+    private AlertDialog mEditTabAlertDialog;
 
     public CustomMainFragment() {
-        mCustomPresenter = new CustomMainPresenter<>(this);
+        mCustomPresenter = new CustomMainPresenter(this);
     }
 
     @Override
-    public void setPresenter(CustomMainPresenter<T> presenter) {
-        mCustomPresenter = checkNotNull(presenter);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onStart() {
+        super.onStart();
         mCustomPresenter.start();
+    }
+
+    @Override
+    public void setCustomMainPresenter(BaseContract.CustomPresenter customMainPresenter) {
+        mCustomPresenter = checkNotNull(customMainPresenter);
     }
 
     @Override
@@ -48,6 +47,7 @@ public class CustomMainFragment<T> extends BaseMainFragment implements BaseContr
             @Override
             public boolean onTouch(final View v, MotionEvent event) {
                 if (!mIsSelectable) return false;
+                // If item is not selected and touched in choose mode
                 if (!v.isSelected() && event.getAction() == MotionEvent.ACTION_DOWN) {
                     int chosenItemsCount = mCustomPresenter.getChosenItemsCount();
                     // No AlertDialog shown if nothing is chosen
@@ -64,8 +64,10 @@ public class CustomMainFragment<T> extends BaseMainFragment implements BaseContr
                             v.performClick();
                             return true;
                         }
-                    }).setTitle("取消選取")
-                            .setMessage("是否將 " + chosenItemsCount + " 個項目取消選取？")
+                    }).setTitle(getString(R.string.action_cancel_choose))
+                            .setMessage(String.format(getString(R.string.msg_action),
+                                    chosenItemsCount,
+                                    getString(R.string.action_cancel_choose)))
                             .create().show();
                     return false;
                 }
@@ -74,6 +76,7 @@ public class CustomMainFragment<T> extends BaseMainFragment implements BaseContr
         });
     }
 
+    @Override
     public void showSelectable(boolean selectable) {
         if (mIsSelectable == selectable) return;
 
@@ -91,36 +94,33 @@ public class CustomMainFragment<T> extends BaseMainFragment implements BaseContr
 
         mCustomPresenter.transToAction(mIsSelectable, getChildFragmentManager());
         Fragment childFragment = getChildFragment(getCurrentTabIndex());
-        if (!mIsSelectable && childFragment != null)
+        if (!mIsSelectable && childFragment != null) {
             ((CustomChildFragment) childFragment).showSelectableUi(false);
+        }
         ((BeChefActivity) mContext).showBottomNavigationView(!mIsSelectable);
     }
 
-    protected Fragment getChildFragment(int tabIndex) {
-        return getChildFragmentManager().findFragmentByTag("f" + mDefaultMainAdapter.getItemId(tabIndex));
-    }
-
-    public int getCurrentTabIndex() {
-        return mViewPager.getCurrentItem();
-    }
-
-    public ArrayList<Long> getChosenUids() {
+    public ArrayList<Long> getChosenItemUids() {
+        Fragment childFragment = getChildFragment(getCurrentTabIndex());
+        if (childFragment != null) {
+            return ((CustomChildFragment) childFragment).getChosenItemUids();
+        }
         return new ArrayList<>();
     }
 
     @Override
     protected void editTab() {
-        EditTabAlertDialogBuilder builder = new EditTabAlertDialogBuilder(mContext, mCustomPresenter);
+        EditTabAlertDialogBuilder builder = new EditTabAlertDialogBuilder(mContext, mCustomPresenter.getTabs());
         mEditTabAlertDialog = builder.create();
         mEditTabAlertDialog.show();
     }
 
     @Override
     protected void find() {
-        ((BeChefActivity) mContext).transToFind(mCustomPresenter);
+        ((BeChefActivity) mContext).showSearchUi(mCustomPresenter);
     }
 
-    public void showDetailUi(Object content) {
-        ((BeChefActivity) mContext).transToDetail(content, false);
+    AlertDialog getEditTabAlertDialog() {
+        return mEditTabAlertDialog;
     }
 }

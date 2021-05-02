@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:background="@color/white"
+    android:padding="@dimen/normal_padding">
+
+    <ImageButton
+        android:id="@+id/imagebutton_choose_box"
+        android:layout_width="@dimen/normal_icon_size"
+        android:layout_height="@dimen/normal_icon_size"
+        android:visibility="gone"
+        android:src="@drawable/custom_checkbox"
+        style="@style/LightSmallIconImageButtonStyle"
+        app:layout_constraintBottom_toBottomOf="@id/imageview_thumbnail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/imageview_thumbnail" />
+
+    <ImageView
+        android:id="@+id/imageview_thumbnail"
+        android:layout_width="@dimen/default_item_thumbnail_width"
+        android:layout_height="@dimen/default_item_thumbnail_height"
+        android:background="@color/black"
+        android:layout_marginStart="@dimen/normal_padding"
+        app:layout_goneMarginStart="@dimen/large_margin"
+        app:layout_constraintStart_toEndOf="@id/imagebutton_choose_box"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <TextView
+        android:id="@+id/textview_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:layout_marginStart="@dimen/normal_margin"
+        app:layout_goneMarginEnd="@dimen/large_margin"
+        app:layout_constraintEnd_toStartOf="@+id/imagebutton_edit"
+        app:layout_constraintStart_toEndOf="@id/imageview_thumbnail"
+        app:layout_constraintTop_toTopOf="@+id/imageview_thumbnail"/>
+
+    <TextView
+        android:id="@+id/textview_tags"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:layout_marginTop="@dimen/small_margin"
+        style="@style/LightGrayTextView"
+        app:layout_constraintEnd_toEndOf="@id/textview_title"
+        app:layout_constraintStart_toStartOf="@id/textview_title"
+        app:layout_constraintTop_toBottomOf="@id/textview_title"/>
+
+    <TextView
+        android:id="@+id/textview_time_and_rating"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"
+        style="@style/LightGrayTextView"
+        app:layout_goneMarginTop="@dimen/small_margin"
+        app:layout_constraintEnd_toEndOf="@id/textview_title"
+        app:layout_constraintStart_toStartOf="@id/textview_title"
+        app:layout_constraintTop_toBottomOf="@id/textview_tags" />
+
+    <ImageButton
+        android:id="@+id/imagebutton_edit"
+        android:layout_width="@dimen/normal_icon_size"
+        android:layout_height="@dimen/normal_icon_size"
+        android:src="@drawable/ic_more"
+        android:tint="@color/colorPrimary"
+        style="@style/LightSmallIconImageButtonStyle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

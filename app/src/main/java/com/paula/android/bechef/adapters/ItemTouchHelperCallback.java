@@ -4,16 +4,24 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Collections;
+
 public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
-    private ItemTouchHelperAdapter mAdapter;
+    private final ItemTouchHelperAdapter mAdapter;
 
     ItemTouchHelperCallback(ItemTouchHelperAdapter adapter) {
         mAdapter = adapter;
     }
 
     @Override
-    public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-        return mAdapter.getItemMovementFlags();
+    public int getMovementFlags(@NonNull RecyclerView recyclerView,
+                                @NonNull RecyclerView.ViewHolder viewHolder) {
+        if (mAdapter.getDataList().size() <= 1) {
+            return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.ACTION_STATE_IDLE);
+        } else {
+            return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+                    ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+        }
     }
 
     @Override
@@ -27,14 +35,29 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
     }
 
     @Override
-    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+    public boolean onMove(@NonNull RecyclerView recyclerView,
+                          @NonNull RecyclerView.ViewHolder viewHolder,
+                          @NonNull RecyclerView.ViewHolder target) {
+        RecyclerView.Adapter adapter = recyclerView.getAdapter();
+        if (adapter == null) return false;
         if (viewHolder.getAdapterPosition() < 0 || target.getAdapterPosition() < 0) return false;
-        return mAdapter.onItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+
+        int fromPosition = viewHolder.getAdapterPosition();
+        int toPosition = target.getAdapterPosition();
+        if (fromPosition < toPosition) {
+            for (int i = fromPosition; i < toPosition; i++) {
+                Collections.swap(mAdapter.getDataList(), i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i > toPosition; i--) {
+                Collections.swap(mAdapter.getDataList(), i, i - 1);
+            }
+        }
+        adapter.notifyItemMoved(fromPosition, toPosition);
+        return true;
     }
 
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-        if (viewHolder.getAdapterPosition() < 0) return;
-        mAdapter.onItemSwiped(viewHolder.getAdapterPosition());
     }
 }

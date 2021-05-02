@@ -3,18 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/white">
+    android:layout_height="wrap_content">
 
     <ImageButton
         android:id="@+id/imagebutton_add"
         android:layout_width="@dimen/normal_icon_size"
         android:layout_height="@dimen/normal_icon_size"
-        android:background="@color/white"
-        android:padding="8dp"
-        android:scaleType="centerCrop"
         android:src="@drawable/ic_add_image"
         android:tint="@color/colorPrimary"
+        style="@style/LightSmallIconImageButtonStyle"
         app:layout_constraintBottom_toBottomOf="@id/edittext_step_description"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/edittext_step_description" />
@@ -23,10 +20,8 @@
         android:id="@+id/imagebutton_remove"
         android:layout_width="@dimen/normal_icon_size"
         android:layout_height="@dimen/normal_icon_size"
-        android:background="@color/white"
-        android:padding="8dp"
-        android:scaleType="centerCrop"
         android:src="@drawable/ic_remove"
+        style="@style/LightSmallIconImageButtonStyle"
         app:layout_constraintBottom_toBottomOf="@id/edittext_step_description"
         app:layout_constraintStart_toEndOf="@id/imagebutton_add"
         app:layout_constraintTop_toTopOf="@id/edittext_step_description" />
@@ -35,10 +30,8 @@
         android:id="@+id/imagebutton_move_up"
         android:layout_width="@dimen/normal_icon_size"
         android:layout_height="@dimen/normal_icon_size"
-        android:background="@color/white"
-        android:padding="8dp"
-        android:scaleType="centerCrop"
         android:src="@drawable/ic_move_up"
+        style="@style/LightSmallIconImageButtonStyle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imagebutton_add" />
 
@@ -46,10 +39,8 @@
         android:id="@+id/imagebutton_move_down"
         android:layout_width="@dimen/normal_icon_size"
         android:layout_height="@dimen/normal_icon_size"
-        android:background="@color/white"
-        android:padding="8dp"
-        android:scaleType="centerCrop"
         android:src="@drawable/ic_move_down"
+        style="@style/LightSmallIconImageButtonStyle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imagebutton_move_up" />
 
@@ -57,10 +48,8 @@
         android:id="@+id/textview_step_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="00"
-        android:layout_margin="8dp"
-        android:textColor="@color/black"
-        android:textSize="@dimen/small_content_text_size"
+        android:layout_margin="@dimen/normal_margin"
+        android:singleLine="true"
         app:layout_constraintStart_toEndOf="@id/imagebutton_remove"
         app:layout_constraintTop_toTopOf="@id/edittext_step_description"
         app:layout_constraintBottom_toBottomOf="@id/edittext_step_description"/>
@@ -69,13 +58,8 @@
         android:id="@+id/edittext_step_description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text=""
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="8dp"
-        android:textColor="@color/black"
-        android:textSize="@dimen/small_content_text_size"
-        android:hint="均勻混合麵粉與水直到濃稠"
-        app:backgroundTint="@color/colorPrimary"
+        android:hint="@string/step_description_hint"
+        android:layout_marginStart="@dimen/normal_margin"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/textview_step_number"
         app:layout_constraintEnd_toStartOf="@id/imagebutton_clear"/>
@@ -84,10 +68,8 @@
         android:id="@+id/imagebutton_clear"
         android:layout_width="@dimen/normal_icon_size"
         android:layout_height="@dimen/normal_icon_size"
-        android:background="@color/white"
-        android:padding="8dp"
-        android:scaleType="centerCrop"
         android:src="@drawable/ic_clear"
+        style="@style/LightSmallIconImageButtonStyle"
         app:layout_constraintBottom_toBottomOf="@id/edittext_step_description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/edittext_step_description" />
@@ -96,9 +78,8 @@
         android:id="@+id/recyclerview_step_image"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/edittext_step_description"
-        app:layout_constraintStart_toEndOf="@+id/imagebutton_add"
+        app:layout_constraintStart_toEndOf="@+id/imagebutton_move_up"
         app:layout_constraintTop_toBottomOf="@id/edittext_step_description" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

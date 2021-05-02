@@ -1,15 +1,10 @@
 package com.paula.android.bechef;
 
 import android.app.Application;
-import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.util.LruCache;
 
 public class BeChef extends Application {
-
-    private static LruCache mLruCache;
 
     @Override
     public void onCreate() {
@@ -21,7 +16,7 @@ public class BeChef extends Application {
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1204);
         int cacheSize = maxMemory / 8;
 
-        mLruCache = new LruCache<String, Bitmap>(cacheSize) {
+        new LruCache<String, Bitmap>(cacheSize) {
             @Override
             protected int sizeOf(String key, Bitmap value) {
                 return value.getByteCount() / 1024;
@@ -29,17 +24,13 @@ public class BeChef extends Application {
         };
     }
 
-    public static LruCache getLruCache() {
-        return mLruCache;
-    }
-
-    private int getAppVersion(Context context) {
-        try {
-            PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            return info.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return 1;
-    }
+//    private int getAppVersion(Context context) {
+//        try {
+//            PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+//            return info.versionCode;
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        return 1;
+//    }
 }

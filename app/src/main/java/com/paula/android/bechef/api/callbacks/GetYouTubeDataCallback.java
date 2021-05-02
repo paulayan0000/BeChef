@@ -1,13 +1,13 @@
 package com.paula.android.bechef.api.callbacks;
 
-import com.paula.android.bechef.api.beans.GetSearchList;
+import com.paula.android.bechef.api.beans.YouTubeData;
 
 import java.util.Map;
 
 public interface GetYouTubeDataCallback {
-    GetSearchList doInBackground(Map<String, String> queryParameters);
+    YouTubeData doInBackground(Map<String, String> queryParameters);
 
-    void onCompleted(GetSearchList bean);
+    void onCompleted(YouTubeData bean);
 
     void onError(Exception e);
 }

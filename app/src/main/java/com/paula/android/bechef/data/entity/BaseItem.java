@@ -1,5 +1,6 @@
 package com.paula.android.bechef.data.entity;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -16,6 +17,7 @@ public class BaseItem {
     @ColumnInfo(name = "tab_uid")
     private long mTabUid = 0;
 
+    @NonNull
     @ColumnInfo(name = "title")
     private String mTitle;
 
@@ -40,7 +42,7 @@ public class BaseItem {
     @ColumnInfo(name = "video_id")
     private String mVideoId;
 
-    public BaseItem(long tabUid, String title, String imageUrl, double rating, String tags,
+    public BaseItem(long tabUid, @NonNull String title, String imageUrl, double rating, String tags,
                     int inTodayId, String createdTime, String description, String videoId) {
         mTabUid = tabUid;
         mTitle = title;
@@ -77,10 +79,6 @@ public class BaseItem {
         mVideoId = baseItem.getVideoId();
     }
 
-    public Boolean getSelected() {
-        return mIsSelected;
-    }
-
     public void setSelected(Boolean selected) {
         mIsSelected = selected;
     }
@@ -101,11 +99,12 @@ public class BaseItem {
         mTabUid = tabUid;
     }
 
+    @NonNull
     public String getTitle() {
         return mTitle;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(@NonNull String title) {
         mTitle = title;
     }
 

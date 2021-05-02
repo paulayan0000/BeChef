@@ -1,11 +1,19 @@
 package com.paula.android.bechef.utils;
 
-public interface EditCallback<T> {
-    String getDialogTag();
+import android.content.Context;
 
-    void onSaveDataComplete(T data);
+import com.paula.android.bechef.data.entity.BaseItem;
 
-    void onInsertComplete(int position);
+public interface EditCallback {
+    Context getContext();
 
-    void onChooseImages(int editAdapterPosition, int stepImagePosition);
+    boolean isFromBookmark();
+
+    void onSaveDataComplete(BaseItem baseItem);
+
+    void onChooseImages(int stepPosition, int imagePosition);
+
+    void scrollByY(int y);
+
+    void scrollToBottom();
 }

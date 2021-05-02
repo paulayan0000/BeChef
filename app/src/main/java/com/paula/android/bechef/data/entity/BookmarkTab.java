@@ -7,4 +7,8 @@ public class BookmarkTab extends BaseTab {
     public BookmarkTab(String tabName) {
         super(tabName);
     }
+
+    public BookmarkTab(BookmarkTab bookmarkTab) {
+        super(bookmarkTab);
+    }
 }

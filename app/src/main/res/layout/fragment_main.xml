@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".discover.DiscoverFragment">
+    android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
@@ -14,99 +11,87 @@
         android:layout_height="wrap_content">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/toolbar"
+            android:id="@+id/constraintlayout_toolbar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/title_height"
-            android:background="@color/colorPrimary"
-            android:gravity="center_vertical"
             app:layout_scrollFlags="scroll|snap|enterAlways"
-            android:theme="@style/AppTheme.AppBarOverlay"
-            app:popupTheme="@style/AppTheme.PopupOverlay">
+            style="@style/ConstraintLayoutToolbarStyle">
 
             <ImageButton
                 android:id="@+id/imagebutton_toolbar_menu"
-                android:layout_width="@dimen/title_height"
-                android:layout_height="match_parent"
-                android:padding="8dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_menu_white"
-                android:background="@color/colorPrimary"
-                app:layout_constraintStart_toStartOf="parent"/>
+                android:layout_width="@dimen/normal_icon_size"
+                android:layout_height="@dimen/normal_icon_size"
+                android:src="@drawable/ic_menu"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <TextView
                 android:id="@+id/textview_toolbar_title"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
                 android:text="@string/title_discover"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                android:textSize="@dimen/title_text_size"
-                app:layout_constraintStart_toEndOf="@id/imagebutton_toolbar_menu"/>
-            <View
-                android:id="@+id/view_divider_tab"
-                android:layout_width="1dp"
-                android:layout_height="0dp"
-                android:background="@color/bottom_navigation_item_normal"
-                app:layout_constraintTop_toTopOf="@id/toolbar"
-                app:layout_constraintBottom_toBottomOf="@id/toolbar"
-                app:layout_constraintEnd_toStartOf="@id/imagebutton_find" />
+                app:layout_constraintStart_toEndOf="@id/imagebutton_toolbar_menu"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_goneMarginStart="@dimen/normal_margin"
+                style="@style/ToolbarTitleStyle"/>
+
             <ImageButton
                 android:id="@+id/imagebutton_find"
-                android:layout_width="@dimen/title_height"
-                android:layout_height="match_parent"
-                android:padding="8dp"
-                android:iconifiedByDefault="true"
-                android:scaleType="fitCenter"
+                android:layout_width="@dimen/normal_icon_size"
+                android:layout_height="@dimen/normal_icon_size"
                 android:src="@drawable/ic_search"
-                android:background="@color/colorPrimary"
-                app:layout_constraintEnd_toStartOf="@id/imagebutton_edit" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/imagebutton_edit"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/imagebutton_edit"
-                android:layout_width="@dimen/title_height"
-                android:layout_height="match_parent"
-                android:padding="8dp"
-                android:scaleType="fitCenter"
+                android:layout_width="@dimen/normal_icon_size"
+                android:layout_height="@dimen/normal_icon_size"
                 android:src="@drawable/ic_edit"
-                android:background="@color/colorPrimary"
-                app:layout_constraintEnd_toStartOf="@id/imagebutton_new"/>
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/imagebutton_new"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/imagebutton_new"
-                android:layout_width="@dimen/title_height"
-                android:layout_height="match_parent"
-                android:padding="8dp"
-                android:scaleType="fitCenter"
+                android:layout_width="@dimen/normal_icon_size"
+                android:layout_height="@dimen/normal_icon_size"
+                android:visibility="gone"
+                android:padding="0dp"
                 android:src="@drawable/ic_new"
-                android:background="@color/colorPrimary"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/imagebutton_refresh"/>
+
+            <ImageButton
+                android:id="@+id/imagebutton_refresh"
+                android:layout_width="@dimen/normal_icon_size"
+                android:layout_height="@dimen/normal_icon_size"
+                android:visibility="gone"
+                android:src="@drawable/ic_refresh"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/title_height">
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/large_padding"
+            style="@style/TabLayoutStyle" />
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tabLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:tabIndicatorColor="@color/white"
-                app:tabIndicatorHeight="4dp"
-                app:tabMode="scrollable"
-                android:paddingHorizontal="16dp"
-                android:paddingBottom="1dp"
-                app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget"
-                app:tabSelectedTextColor="@android:color/white"
-                app:tabInlineLabel="true"
-                app:tabTextColor="@color/bottom_navigation_item_normal" />
-            <View
-                android:id="@+id/view_tablayout_bottom"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/bottom_navigation_item_normal"
-                app:layout_constraintBottom_toBottomOf="parent"/>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divider_height"
+            android:background="@color/bottom_navigation_item_normal"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.viewpager2.widget.ViewPager2

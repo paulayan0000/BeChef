@@ -7,48 +7,48 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.paula.android.bechef.R;
+import com.paula.android.bechef.utils.Constants;
 import com.paula.android.bechef.utils.EditCallback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.RecyclerView;
-
-import static androidx.recyclerview.widget.ItemTouchHelper.Callback.makeMovementFlags;
-
-public class StepImageAdapter extends RecyclerView.Adapter implements ItemTouchHelperAdapter {
+public class StepImageAdapter extends RecyclerView.Adapter<StepImageAdapter.StepImageViewHolder>
+        implements ItemTouchHelperAdapter {
+    private final ArrayList<String> mImageUrls;
+    private final int mStepPos;
     private Context mContext;
-    private ArrayList<String> mImageUrls;
-    private int mViewType;
     private EditCallback mCompleteCallback;
 
-    StepImageAdapter(ArrayList<String> imageUrls, int viewType, EditCallback completeCallback) {
+    // Constructor for step image of EditItemAdapter with various stepPos
+    StepImageAdapter(ArrayList<String> imageUrls, int stepPos, EditCallback editCallback) {
         mImageUrls = imageUrls;
-        mViewType = viewType;
-        if (imageUrls.size() == 0) imageUrls.add("");
-        mCompleteCallback = completeCallback;
+        mStepPos = stepPos;
+        mCompleteCallback = editCallback;
+        if (mImageUrls.size() == 0) mImageUrls.add("");
     }
 
+    // Constructor for step image of DetailAdapter
     StepImageAdapter(ArrayList<String> imageUrls) {
         mImageUrls = imageUrls;
-        mViewType = -1;
+        mStepPos = Constants.STEP_POSITION_DETAIL;
     }
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public StepImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         mContext = parent.getContext();
-        View view = LayoutInflater.from(mContext).inflate(R.layout.item_detail_step_images, parent, false);
-        return new StepImageViewHolder(view);
+        return new StepImageViewHolder(LayoutInflater.from(mContext)
+                .inflate(R.layout.item_step_images, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ((StepImageViewHolder) holder).bindView(mImageUrls.get(position));
+    public void onBindViewHolder(@NonNull StepImageViewHolder holder, int position) {
+        holder.bindView(mImageUrls.get(position));
     }
 
     @Override
@@ -57,59 +57,26 @@ public class StepImageAdapter extends RecyclerView.Adapter implements ItemTouchH
     }
 
     @Override
-    public int getItemViewType(int position) {
-        return mViewType;
+    public ArrayList<String> getDataList() {
+        return mImageUrls;
     }
 
-    @Override
-    public boolean onItemMoved(int fromPosition, int toPosition) {
-        if (fromPosition < toPosition) {
-            for (int i = fromPosition; i < toPosition; i++) {
-                Collections.swap(mImageUrls, i, i + 1);
-            }
-        } else {
-            for (int i = fromPosition; i > toPosition; i--) {
-                Collections.swap(mImageUrls, i, i - 1);
-            }
-        }
-        notifyItemMoved(fromPosition, toPosition);
-        return true;
-    }
-
-    @Override
-    public void onItemSwiped(int position) {
-
-    }
-
-    @Override
-    public int getItemMovementFlags() {
-        if (mImageUrls.size() <= 1)
-            return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.ACTION_STATE_IDLE);
-        else
-            return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
-                    ItemTouchHelper.ACTION_STATE_IDLE);
-    }
-
-    private class StepImageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private ImageView mIvStepImage;
-        private ImageButton mIbtnAdd;
+    class StepImageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private final ImageView mIvStepImage;
 
         private StepImageViewHolder(View itemView) {
             super(itemView);
             mIvStepImage = itemView.findViewById(R.id.imageview_step_image);
-            ImageView ivForeground = itemView.findViewById(R.id.imageview_step_image_forground);
-            if (mViewType != -1) {
-                itemView.setOnClickListener(this);
-                ivForeground.setVisibility(View.VISIBLE);
-            }
-            mIbtnAdd = itemView.findViewById(R.id.imagebutton_add);
-            itemView.findViewById(R.id.imagebutton_add).setOnClickListener(this);
+            itemView.setOnClickListener(this);
+            if (mStepPos == Constants.STEP_POSITION_DETAIL) return;
+
+            itemView.findViewById(R.id.imageview_step_image_forground).setVisibility(View.VISIBLE);
+            ImageButton ibtnAdd = itemView.findViewById(R.id.imagebutton_add);
+            ibtnAdd.setVisibility(View.VISIBLE);
+            ibtnAdd.setOnClickListener(this);
         }
 
         void bindView(String imageUrl) {
-            if (mViewType != -1) {
-                mIbtnAdd.setVisibility(View.VISIBLE);
-            }
             Picasso.with(mContext)
                     .load(imageUrl.isEmpty() ? null : imageUrl)
                     .error(R.drawable.all_picture_placeholder)
@@ -122,12 +89,24 @@ public class StepImageAdapter extends RecyclerView.Adapter implements ItemTouchH
             int position = getAdapterPosition();
             if (position < 0) return;
             if (v.getId() == R.id.imagebutton_add) {
-                mImageUrls.add(position + 1, "");
-                notifyItemInserted(position + 1);
-                notifyItemRangeChanged(position + 1, getItemCount() - position - 1);
-                return;
+                int newPos = position + 1;
+                mImageUrls.add(newPos, "");
+                notifyItemInserted(newPos);
+                notifyItemRangeChanged(newPos, getItemCount() - newPos);
+            } else {
+                mCompleteCallback.onChooseImages(mStepPos, position);
             }
-            mCompleteCallback.onChooseImages(mViewType, position);
         }
+    }
+
+    public void notifyRemoved(int position) {
+        mImageUrls.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, getItemCount() - position);
+    }
+
+    public void notifyChanged(int position, String urlString) {
+        mImageUrls.set(position, urlString);
+        notifyItemChanged(position);
     }
 }

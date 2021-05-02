@@ -13,12 +13,11 @@ import com.google.android.gms.tasks.Task;
 import com.paula.android.bechef.utils.Constants;
 
 public class UserManager {
-    private static final UserManager ourInstance = new UserManager();
     private static final String LOG_TAG = UserManager.class.getSimpleName();
+    private static final UserManager ourInstance = new UserManager();
     private static GoogleSignInAccount mGoogleSignInAccount;
 
     private UserManager() {
-
     }
 
     public static UserManager getInstance() {
@@ -36,21 +35,19 @@ public class UserManager {
 
     public GoogleSignInAccount checkLastSignedInAccount(Context context) {
         Log.d(LOG_TAG, "check last signed-in account");
-        if (mGoogleSignInAccount == null)
+        if (mGoogleSignInAccount == null) {
             mGoogleSignInAccount = GoogleSignIn.getLastSignedInAccount(context);
+        }
         logUserInfo((Activity) context);
         return mGoogleSignInAccount;
     }
 
-    public GoogleSignInAccount checkSignedInAccountFromIntent(Intent data, Context context) {
+    public GoogleSignInAccount checkSignedInAccountFromIntent(Intent data, Context context)
+            throws ApiException {
         Log.d(LOG_TAG, "check sign-in account from intent");
         if (mGoogleSignInAccount == null) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                mGoogleSignInAccount = task.getResult(ApiException.class);
-            } catch (ApiException e) {
-                Log.w(LOG_TAG, "signInResult:failed code=" + e.getStatusCode());
-            }
+            mGoogleSignInAccount = task.getResult(ApiException.class);
         }
         logUserInfo((Activity) context);
         return mGoogleSignInAccount;

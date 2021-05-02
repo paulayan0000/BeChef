@@ -4,8 +4,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 
 public class BeChefTextWatcher implements TextWatcher {
+    private final EditTextChangeCallback mCallback;
     private int mPosition;
-    private EditTextChangeCallback mCallback;
 
     public BeChefTextWatcher(EditTextChangeCallback callback) {
         mCallback = callback;

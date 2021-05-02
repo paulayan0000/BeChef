@@ -2,20 +2,15 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".activities.BeChefActivity">
+    android:layout_height="match_parent">
 
     <TextView
         android:id="@+id/textview_statusbar"
         android:layout_width="match_parent"
         android:layout_height="0px"
         android:background="@color/colorPrimary"
-        android:text=""
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
         android:id="@+id/linearlayout_main_container"
@@ -23,17 +18,13 @@
         android:layout_height="0dp"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/textview_statusbar"
-        app:layout_constraintBottom_toTopOf="@id/navigation" />
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/navigation"
+        android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/bottom_navigation_background"
-        app:itemIconTint="@drawable/nav_itembutton"
-        app:itemHorizontalTranslationEnabled="false"
         app:menu="@menu/menu_navigation"
-        android:animateLayoutChanges="false"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

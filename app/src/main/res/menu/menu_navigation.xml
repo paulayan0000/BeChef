@@ -12,8 +12,8 @@
         android:title="@string/title_bookmark" />
 
     <item
-        android:id="@+id/navigation_receipt"
-        android:icon="@drawable/ic_receipt"
-        android:title="@string/title_receipt" />
+        android:id="@+id/navigation_recipe"
+        android:icon="@drawable/ic_recipe"
+        android:title="@string/title_recipe" />
 
 </menu>

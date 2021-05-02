@@ -5,58 +5,64 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
+
 import com.paula.android.bechef.ChildContract;
 import com.paula.android.bechef.R;
-import com.paula.android.bechef.api.beans.GetSearchList;
+import com.paula.android.bechef.api.beans.YouTubeData;
 import com.paula.android.bechef.data.entity.DiscoverItem;
 import com.paula.android.bechef.discoverChild.DiscoverChildPresenter;
 import com.paula.android.bechef.utils.Constants;
 import com.paula.android.bechef.utils.Utils;
+import com.paula.android.bechef.viewHolders.NoResultViewHolder;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import java.util.ArrayList;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
 public class DiscoverChildAdapter extends RecyclerView.Adapter {
-    private ChildContract.ChildPresenter mPresenter;
-    private ArrayList<DiscoverItem> mDiscoverItems;
+    private final ChildContract.ChildPresenter mPresenter;
+    private final ArrayList<DiscoverItem> mDiscoverItems;
+    private final Context mContext;
     private String mNextPageToken;
-    private Context mContext;
-    private boolean mIsLoading;
     private String mErrorMsg = "";
+    private boolean mIsLoading;
+    private final Transformation mTransformation = new RoundedCornersTransformation(8, 0);
 
-    public DiscoverChildAdapter(GetSearchList bean, ChildContract.ChildPresenter presenter) {
+    public DiscoverChildAdapter(YouTubeData bean, ChildContract.ChildPresenter presenter) {
         mDiscoverItems = bean.getDiscoverItems();
         mNextPageToken = bean.getNextPageToken();
         mPresenter = presenter;
+        mContext = mPresenter.getContext();
         mIsLoading = false;
     }
 
-    public void updateData(GetSearchList newBean) {
+    public void updateData(YouTubeData newBean) {
         mIsLoading = false;
         mErrorMsg = newBean.getErrorMsg();
         if ("".equals(mErrorMsg)) {
-//        if (!mNextPageToken.equals(newBean.getNextPageToken())) {
+            int oldDiscoverItemCount = mDiscoverItems.size();
             mDiscoverItems.addAll(newBean.getDiscoverItems());
             mNextPageToken = newBean.getNextPageToken();
-            notifyItemRangeInserted(getItemCount(), newBean.getDiscoverItems().size());
-//        }
-        } else if (mDiscoverItems.size() > 0){
-            Toast.makeText(mContext, "發生錯誤，請檢查網路連線！", Toast.LENGTH_SHORT).show();
-
+            notifyItemRangeChanged(oldDiscoverItemCount, newBean.getDiscoverItems().size());
+        } else if (mDiscoverItems.size() > 0) {
+            // Toast error message if there are already some items loaded
+            Toast.makeText(mContext, mContext.getString(R.string.adapter_error), Toast.LENGTH_SHORT).show();
+        } else {
+            notifyDataSetChanged();
         }
     }
 
-    public void clearData(){
+    public void clearData() {
         mErrorMsg = "";
         mDiscoverItems.clear();
         mNextPageToken = "";
+        mIsLoading = false;
         notifyDataSetChanged();
     }
 
@@ -67,55 +73,52 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        mContext = parent.getContext();
         View view;
-        if (viewType == Constants.VIEW_TYPE_NO_RESULT) {
-            view = LayoutInflater.from(mContext).inflate(R.layout.item_search_no_result, parent, false);
-            return new NoResultViewHolder(view);
-        } else if (viewType == Constants.VIEW_TYPE_NORMAL) {
-            view = LayoutInflater.from(mContext).inflate(R.layout.item_discover_recycler, parent, false);
-            return new DiscoverViewHolder(view);
-        } else {
-            view = LayoutInflater.from(mContext).inflate(R.layout.item_all_loading, parent, false);
-            return new LoadingViewHolder(view);
+        switch (viewType) {
+            case Constants.VIEW_TYPE_NO_RESULT:
+                view = LayoutInflater.from(mContext)
+                        .inflate(R.layout.item_search_no_result, parent, false);
+                return new NoResultViewHolder(view, mErrorMsg);
+            case Constants.VIEW_TYPE_NORMAL:
+                view = LayoutInflater.from(mContext)
+                        .inflate(R.layout.item_discover_child_recycler, parent, false);
+                return new DiscoverViewHolder(view);
+            default:
+                view = LayoutInflater.from(mContext)
+                        .inflate(R.layout.item_loading, parent, false);
+                return new RecyclerView.ViewHolder(view) {
+                };
         }
     }
 
     @Override
     public int getItemViewType(int position) {
-//        return (mIsLoading ? Constants.VIEW_TYPE_LOADING : Constants.VIEW_TYPE_NORMAL);
-//        return (position < mDiscoverItems.size()) ? Constants.VIEW_TYPE_NORMAL : Constants.VIEW_TYPE_LOADING;
         if (mDiscoverItems.size() == 0 && !mIsLoading) return Constants.VIEW_TYPE_NO_RESULT;
-        return (position < mDiscoverItems.size()) ? Constants.VIEW_TYPE_NORMAL : Constants.VIEW_TYPE_LOADING;
+        return (position < mDiscoverItems.size()) ? Constants.VIEW_TYPE_NORMAL
+                : Constants.VIEW_TYPE_LOADING;
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (mDiscoverItems.size() > 0 && holder instanceof DiscoverChildAdapter.DiscoverViewHolder) {
+        if (holder.getItemViewType() == Constants.VIEW_TYPE_NORMAL) {
             ((DiscoverViewHolder) holder).bindView(mDiscoverItems.get(position));
-        } else if (holder instanceof NoResultViewHolder){
-            ((NoResultViewHolder) holder).bindView();
-        } else if (holder instanceof LoadingViewHolder){
-            ((LoadingViewHolder) holder).bindView();
         }
     }
 
     @Override
     public int getItemCount() {
-//        if (mDiscoverItems.size() == 0) return mIsLoading ? 1 : 0;
         if (mDiscoverItems.size() == 0) return 1;
         return !"".equals(mNextPageToken) ? mDiscoverItems.size() + 1 : mDiscoverItems.size();
     }
 
-    public void setLoading(boolean loading) {
-        mIsLoading = loading;
+    public void showLoading() {
+        mIsLoading = true;
         notifyDataSetChanged();
     }
 
     private class DiscoverViewHolder extends RecyclerView.ViewHolder {
-        private ImageView mIvThumbnail;
-        private TextView mTvVideoTitle;
-        private TextView mTvVideoTime;
+        private final ImageView mIvThumbnail;
+        private final TextView mTvVideoTitle, mTvVideoTime;
 
         private DiscoverViewHolder(View itemView) {
             super(itemView);
@@ -125,45 +128,28 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (getAdapterPosition() < 0) return;
-                    if (mPresenter instanceof DiscoverChildPresenter)
-                        mPresenter.openDetail(mDiscoverItems.get(getAdapterPosition()).getVideoId(), true);
-                    else
-                        mPresenter.openDetail(mDiscoverItems.get(getAdapterPosition()), true);
+                    int position = getAdapterPosition();
+                    if (position < 0) return;
+                    if (mPresenter instanceof DiscoverChildPresenter) {
+                        mPresenter.openDetail(mDiscoverItems.get(position).getVideoId(),
+                                true);
+                    } else {
+                        mPresenter.openDetail(mDiscoverItems.get(position), true);
+                    }
                 }
             });
         }
 
-        void bindView(final DiscoverItem discoverItem) {
+        void bindView(DiscoverItem discoverItem) {
             mTvVideoTitle.setText(discoverItem.getTitle());
-            mTvVideoTime.setText(Utils.getCreatedTime(discoverItem.getPublishedAt()));
+            mTvVideoTime.setText(Utils.getRelevantTime(mContext, discoverItem.getPublishedAt()));
 
             Picasso.with(mContext)
                     .load(discoverItem.getImageUrl())
                     .error(R.drawable.all_picture_placeholder)
                     .placeholder(R.drawable.all_picture_placeholder)
+                    .transform(mTransformation)
                     .into(mIvThumbnail);
-        }
-    }
-
-    private class LoadingViewHolder extends RecyclerView.ViewHolder {
-        private LoadingViewHolder(View itemView) {
-            super(itemView);
-        }
-
-        public void bindView() {
-            itemView.setVisibility(mIsLoading ? View.VISIBLE : View.GONE);
-        }
-    }
-
-    private class NoResultViewHolder extends RecyclerView.ViewHolder {
-        private TextView mTvNoResult;
-        private NoResultViewHolder(@NonNull View itemView) {
-            super(itemView);
-            mTvNoResult = itemView.findViewById(R.id.textview_no_result);
-        }
-        public void bindView() {
-            mTvNoResult.setText(mErrorMsg);
         }
     }
 }

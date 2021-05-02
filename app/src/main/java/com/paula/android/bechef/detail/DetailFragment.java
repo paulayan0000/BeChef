@@ -1,56 +1,56 @@
 package com.paula.android.bechef.detail;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
-
-import com.google.android.youtube.player.YouTubeInitializationResult;
-import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayerFragmentX;
-import com.paula.android.bechef.R;
-import com.paula.android.bechef.activities.BeChefActivity;
-import com.paula.android.bechef.adapters.DetailAdapter;
-import com.paula.android.bechef.data.LoadDataCallback;
-import com.paula.android.bechef.data.LoadDataTask;
-import com.paula.android.bechef.data.dao.BookmarkTabDao;
-import com.paula.android.bechef.data.database.TabDatabase;
-import com.paula.android.bechef.data.entity.BaseItem;
-import com.paula.android.bechef.data.entity.BaseTab;
-import com.paula.android.bechef.data.entity.DiscoverItem;
-import com.paula.android.bechef.data.entity.ReceiptItem;
-import com.paula.android.bechef.dialog.AddToBookmarkDialog;
-import com.paula.android.bechef.dialog.AlertDialogClickCallback;
-import com.paula.android.bechef.dialog.BeChefAlertDialogBuilder;
-import com.paula.android.bechef.dialog.EditItemDialog;
-import com.paula.android.bechef.utils.Constants;
-
-import java.util.ArrayList;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayerFragmentX;
+import com.paula.android.bechef.ApiKey;
+import com.paula.android.bechef.activities.BeChefActivity;
+import com.paula.android.bechef.adapters.DetailAdapter;
+import com.paula.android.bechef.data.entity.BaseItem;
+import com.paula.android.bechef.data.entity.DiscoverItem;
+import com.paula.android.bechef.data.entity.RecipeItem;
+import com.paula.android.bechef.dialog.AlertDialogClickCallback;
+import com.paula.android.bechef.dialog.BeChefAlertDialogBuilder;
+import com.paula.android.bechef.dialog.EditItemDialog;
+import com.paula.android.bechef.R;
+
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
+import static com.google.android.youtube.player.YouTubePlayer.FULLSCREEN_FLAG_CUSTOM_LAYOUT;
 
 public class DetailFragment extends Fragment implements DetailContract.View {
-    private DetailContract.Presenter mPresenter;
+    private static final int RECOVERY_DIALOG_REQUEST = 1;
     private Context mContext;
-    private RecyclerView mRvDetail;
-    private ImageButton mIbtnMore;
-    private boolean mIsBottomShown;
+    private DetailContract.Presenter mPresenter;
     private DetailAdapter mDetailAdapter;
-
-    private YouTubePlayerFragmentX mYouTubePlayerFragment;
+    private ImageButton mIbtnMore;
+    private ConstraintLayout mClToolbar;
+    private RecyclerView mRvDetail;
+    private FragmentManager mChildFragmentManager;
     private YouTubePlayer mYouTubePlayer;
-    private FragmentManager mFragmentManager;
+    private YouTubePlayerFragmentX mYouTubePlayerFragment;
+    private boolean mIsBottomShown;
+    private boolean mIsFullscreen;
 
     private DetailFragment() {
     }
@@ -59,40 +59,39 @@ public class DetailFragment extends Fragment implements DetailContract.View {
         return new DetailFragment();
     }
 
-//    @Override
-//    public void onCreate(@Nullable Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        if (getActivity() != null) ((BeChefActivity) getActivity()).showBottomNavigationView(false);
-//    }
-
     public void setBottomShown(boolean bottomShown) {
         mIsBottomShown = bottomShown;
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setFullscreenUi();
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_detail, container, false);
-//        if (getArguments() != null) mIsBottomShown = (boolean) getArguments().get("isBottomShown");
-
         mContext = root.getContext();
+        mChildFragmentManager = getChildFragmentManager();
         root.findViewById(R.id.imagebutton_toolbar_back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mPresenter.stopAllAsyncTasks();
                 ((BeChefActivity) mContext).onBackPressed();
             }
         });
-
         mIbtnMore = root.findViewById(R.id.imagebutton_toolbar_more);
+        mClToolbar = root.findViewById(R.id.constraintlayout_toolbar);
+        setRecyclerView(root);
+        return root;
+    }
+
+    private void setRecyclerView(View root) {
         mRvDetail = root.findViewById(R.id.recyclerview_detail);
         mRvDetail.setLayoutManager(new LinearLayoutManager(mContext));
         mDetailAdapter = new DetailAdapter(null);
         mRvDetail.setAdapter(mDetailAdapter);
-
-        mFragmentManager = getChildFragmentManager();
-        mYouTubePlayerFragment = (YouTubePlayerFragmentX) mFragmentManager.findFragmentById(R.id.youtube_player_fragment);
-        return root;
     }
 
     @Override
@@ -102,120 +101,150 @@ public class DetailFragment extends Fragment implements DetailContract.View {
         ((BeChefActivity) mContext).showBottomNavigationView(false);
     }
 
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//        if (mYouTubePlayer != null) {
-//            mYouTubePlayer.release();
-//            mYouTubePlayer = null;
-//        }
-//    }
-
     @Override
-    public void setPresenter(DetailContract.Presenter presenter) {
-        mPresenter = checkNotNull(presenter);
+    public void setCustomMainPresenter(DetailContract.Presenter customMainPresenter) {
+        mPresenter = checkNotNull(customMainPresenter);
     }
 
     @Override
-    public void showDetailUi(final BaseItem content) {
-        mDetailAdapter.setLoading(false);
-        if (content instanceof DiscoverItem && "".equals(content.getVideoId())) {
-            mDetailAdapter.updateData(content);
-
-            if (!((DiscoverItem) content).isInBeChef()) {
-                mIbtnMore.setBackgroundResource(R.drawable.ic_bookmark_white);
-                mIbtnMore.setVisibility(View.VISIBLE);
-            } else mIbtnMore.setVisibility(View.GONE);
-
-            mFragmentManager.beginTransaction().hide(mYouTubePlayerFragment).commit();
-        } else if (!(content instanceof ReceiptItem)) {
-            mDetailAdapter.updateData(content);
-
-            mIbtnMore.setVisibility(View.VISIBLE);
-            if (content instanceof DiscoverItem) mIbtnMore.setBackgroundResource(R.drawable.ic_bookmark_white);
-            else mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
-
-            if (mYouTubePlayerFragment != null) {
-                mYouTubePlayerFragment.initialize(Constants.DEVELOPER_KEY, new YouTubePlayer.OnInitializedListener() {
-                    @Override
-                    public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer player,
-                                                        boolean wasRestored) {
-                        if (!wasRestored) {
-                            mYouTubePlayer = player;
-                            mYouTubePlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
-                            mYouTubePlayer.cueVideo(content.getVideoId());
-//                            mFragmentManager.beginTransaction().show(mYouTubePlayerFragment).commit();
-                            mFragmentManager.beginTransaction().show(mYouTubePlayerFragment).commitAllowingStateLoss();
-                        }
-                    }
-
-                    @Override
-                    public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
-                        Log.e("DetailFragment", "Youtube Player View initialization failed");
-                    }
-                });
-            }
-        } else {
-            mDetailAdapter.updateData(content);
-            mIbtnMore.setVisibility(View.VISIBLE);
-            mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
-            mFragmentManager.beginTransaction().hide(mYouTubePlayerFragment).commit();
-        }
-
+        public void showDetailUi(final BaseItem content) {
+        // Set ibtnMore onClick method
         mIbtnMore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!(content instanceof DiscoverItem)) {
-                    EditItemDialog editItemDialog
-                            = new EditItemDialog(mDetailAdapter.getBaseItem(), mPresenter);
-                    editItemDialog.show(getChildFragmentManager(), "edit");
+                    // onClick for bookmarkItem or recipeItem
+                    BaseItem baseItem = mDetailAdapter.getBaseItem();
+                    new EditItemDialog(baseItem).setDetailPresenter(mPresenter)
+                            .show(mChildFragmentManager, baseItem.getClass().getSimpleName());
                 } else if (content.getVideoId().isEmpty()) {
-                    BeChefAlertDialogBuilder builder = new BeChefAlertDialogBuilder(mContext);
-                    builder.setButtons(new AlertDialogClickCallback() {
+                    // onClick for channel
+                    new BeChefAlertDialogBuilder(mContext).setButtons(new AlertDialogClickCallback() {
                         @Override
                         public boolean onPositiveButtonClick() {
                             mPresenter.addToDiscover((DiscoverItem) content);
                             return true;
                         }
-                    }).setMessage("是否要將「" + content.getTitle() + "」添加為書籤？")
-                            .setTitle("添加為書籤").create().show();
+                    }).setMessage(String.format(getString(R.string.msg_follow_channel), content.getTitle()))
+                            .setTitle(getString(R.string.title_follow_channel)).create().show();
                 } else {
-                    addToBookmark();
+                    // onClick for discoverItem
+                    mPresenter.addToBookmark();
                 }
             }
         });
+
+        // Set detail UI
+        mDetailAdapter.setLoading(false);
+        mDetailAdapter.updateData(content);
+        mYouTubePlayerFragment = (YouTubePlayerFragmentX) mChildFragmentManager
+                .findFragmentById(R.id.youtube_player_fragment);
+
+        // detail of discover and bookmark
+        if (!content.getVideoId().isEmpty()) {
+            if (content instanceof DiscoverItem) {
+                mIbtnMore.setBackgroundResource(R.drawable.ic_bookmark);
+            } else {
+                mIbtnMore.setBackgroundResource(R.drawable.ic_more);
+            }
+            if (mYouTubePlayerFragment != null) initYouTubePlayFragment(content);
+            return;
+        }
+
+        // detail of recipe and channel
+        mChildFragmentManager.beginTransaction().hide(mYouTubePlayerFragment).commit();
+        if (content instanceof RecipeItem) {
+            // detail of recipe
+            mIbtnMore.setBackgroundResource(R.drawable.ic_more);
+        } else if (!((DiscoverItem) content).isChannelInBeChef()) {
+            // detail of channel not in BeChef
+            mIbtnMore.setBackgroundResource(R.drawable.ic_bookmark);
+        } else {
+            // detail of channel in BeChef
+            mIbtnMore.setVisibility(View.GONE);
+        }
+    }
+
+    private void initYouTubePlayFragment(final BaseItem content) {
+        mYouTubePlayerFragment.initialize(ApiKey.DEVELOPER_KEY,
+                new YouTubePlayer.OnInitializedListener() {
+                    @Override
+                    public void onInitializationSuccess(YouTubePlayer.Provider provider,
+                                                        final YouTubePlayer player,
+                                                        boolean wasRestored) {
+                        player.setFullscreenControlFlags(FULLSCREEN_FLAG_CUSTOM_LAYOUT);
+                        player.setOnFullscreenListener(new YouTubePlayer.OnFullscreenListener() {
+                            @Override
+                            public void onFullscreen(boolean isFullscreen) {
+                                mIsFullscreen = isFullscreen;
+                                setFullscreenUi();
+                            }
+                        });
+                        if (!wasRestored) {
+                            mYouTubePlayer = player;
+                            mYouTubePlayer.setPlayerStyle(YouTubePlayer.PlayerStyle.DEFAULT);
+                            mYouTubePlayer.cueVideo(content.getVideoId());
+                            mChildFragmentManager.beginTransaction().show(mYouTubePlayerFragment)
+                                    .commitAllowingStateLoss();
+                        }
+                        if (mYouTubePlayer != null) mYouTubePlayer.setFullscreen(false);
+                        if (!isCurrentOrientationPortrait()) setFullscreenUi();
+                    }
+
+                    @Override
+                    public void onInitializationFailure(YouTubePlayer.Provider provider,
+                                                        YouTubeInitializationResult initResult) {
+                        if (initResult.isUserRecoverableError()) {
+                            initResult.getErrorDialog((Activity) mContext, RECOVERY_DIALOG_REQUEST).show();
+                        } else {
+                            String errorMessage = getString(R.string.toast_require_youtube_installed);
+                            Toast.makeText(mContext, errorMessage, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
+    private boolean isCurrentOrientationPortrait() {
+        return mContext.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT;
+    }
+
+    private void setFullscreenUi() {
+        if (mYouTubePlayer == null ||
+                mYouTubePlayerFragment == null ||
+                mYouTubePlayerFragment.getView() == null) return;
+        /* If it's in portrait and not fullscreen, show normal layout with fullcreen button.
+         Otherwise, show layout in fullscreen without fullscreen button.*/
+        LinearLayout.LayoutParams layoutParams =
+                (LinearLayout.LayoutParams) mYouTubePlayerFragment.getView().getLayoutParams();
+        mYouTubePlayer.setShowFullscreenButton(isCurrentOrientationPortrait());
+        if (!mIsFullscreen && isCurrentOrientationPortrait()) {
+            setOtherViewVisibility(View.VISIBLE);
+            layoutParams.height = mContext.getResources().getDimensionPixelOffset(R.dimen.detail_image_height);
+            mYouTubePlayer.setShowFullscreenButton(true);
+        } else {
+            setOtherViewVisibility(View.GONE);
+            layoutParams.height = MATCH_PARENT;
+        }
+    }
+
+    private void setOtherViewVisibility(int visibility) {
+        mRvDetail.setVisibility(visibility);
+        mClToolbar.setVisibility(visibility);
     }
 
     @Override
     public void showErrorUi(String errorMsg) {
-        mDetailAdapter.updateData(errorMsg);
-    }
-
-    private void addToBookmark() {
-        new LoadDataTask<>(new LoadDataCallback<BookmarkTabDao>() {
-            private ArrayList<BaseTab> mBookmarkTabs = new ArrayList<>();
-            @Override
-            public BookmarkTabDao getDao() {
-                return TabDatabase.getBookmarkInstance(mContext).bookmarkDao();
-            }
-
-            @Override
-            public void doInBackground(BookmarkTabDao dao) {
-                mBookmarkTabs.addAll(dao.getAll());
-            }
-
-            @Override
-            public void onCompleted() {
-                AddToBookmarkDialog addToBookmarkDialog = new AddToBookmarkDialog((DetailPresenter) mPresenter);
-                addToBookmarkDialog.setTabs(mBookmarkTabs);
-                addToBookmarkDialog.show(getChildFragmentManager(), "add");
-            }
-        }).execute();
+        mDetailAdapter.updateError(errorMsg);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        if (mYouTubePlayer != null) {
+            mYouTubePlayer.release();
+            mYouTubePlayer = null;
+        }
+        mPresenter.setAllThreadCanceled();
         ((BeChefActivity) mContext).showBottomNavigationView(mIsBottomShown);
     }
 
@@ -226,10 +255,19 @@ public class DetailFragment extends Fragment implements DetailContract.View {
 
     @Override
     public void updateButton(boolean isDiscoverTab) {
-        if (isDiscoverTab) mIbtnMore.setVisibility(View.GONE);
-        else {
-            mIbtnMore.setBackgroundResource(R.drawable.ic_more_white);
+        if (isDiscoverTab) {
+            mIbtnMore.setVisibility(View.GONE);
+        } else {
+            mIbtnMore.setBackgroundResource(R.drawable.ic_more);
             mIbtnMore.setVisibility(View.VISIBLE);
+            mIbtnMore.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BaseItem baseItem = mDetailAdapter.getBaseItem();
+                    new EditItemDialog(baseItem).setDetailPresenter(mPresenter)
+                            .show(mChildFragmentManager, baseItem.getClass().getSimpleName());
+                }
+            });
         }
     }
 
@@ -237,11 +275,4 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     public void showLoading(boolean isLoading) {
         mDetailAdapter.setLoading(isLoading);
     }
-
-    //    @Override
-//    public void onDestroy() {
-//        super.onDestroy();
-//        Log.d("BechefPresenter", "detail ondestroy");
-//        ((BeChefActivity) mContext).showBottomNavigationView(mIsBottomShown);
-//    }
 }

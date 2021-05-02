@@ -1,60 +1,76 @@
 package com.paula.android.bechef.customMain;
 
-import com.paula.android.bechef.BaseContract;
-import com.paula.android.bechef.R;
-import com.paula.android.bechef.action.ActionChooseFragment;
-import com.paula.android.bechef.data.entity.BaseTab;
+import android.content.Context;
 
-import java.util.ArrayList;
-
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.paula.android.bechef.action.ActionFragment;
+import com.paula.android.bechef.BaseContract;
+import com.paula.android.bechef.action.ActionPresenter;
+import com.paula.android.bechef.data.entity.BaseTab;
+import com.paula.android.bechef.R;
+
+import java.util.ArrayList;
+
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class CustomMainPresenter<T> implements BaseContract.CustomPresenter {
-    protected CustomMainFragment<T> mCustomView;
+public class CustomMainPresenter implements BaseContract.CustomPresenter, BaseContract.CustomPresenterForAction {
     private ArrayList<BaseTab> mTabs;
-    private ActionChooseFragment mActionChooseFragment;
+    private ActionFragment mActionFragment;
     private FragmentTransaction mTransaction;
+    protected CustomMainFragment mCustomMainView;
 
-    public CustomMainPresenter(CustomMainFragment<T> customView) {
-        mCustomView = checkNotNull(customView, "customView cannot be null!");
-        mCustomView.setPresenter(this);
+    public CustomMainPresenter(CustomMainFragment customMainView) {
+        mCustomMainView = checkNotNull(customMainView, "customMainView cannot be null!");
+        mCustomMainView.setCustomMainPresenter(this);
     }
 
-    void transToAction(boolean isTrans, FragmentManager fragmentManager) {
+    @Override
+    public Context getContext() {
+        return mCustomMainView.getContext();
+    }
+
+    @Override
+    public void transToAction(boolean isTrans, FragmentManager fragmentManager) {
         if (fragmentManager != null) mTransaction = fragmentManager.beginTransaction();
-
-        if (isTrans && mActionChooseFragment != null) {
-            mTransaction.show(mActionChooseFragment).commit();
-        } else if (isTrans) {
-            mActionChooseFragment = new ActionChooseFragment<>(this);
-            mTransaction.add(R.id.toolbar, mActionChooseFragment).commit();
-        } else if (mActionChooseFragment != null) {
-            mTransaction.hide(mActionChooseFragment).commit();
+        if (!isTrans && mActionFragment != null) {
+            mTransaction.hide(mActionFragment);
+            mTransaction.commit();
+            return;
         }
+
+        // If it's in selectable mode
+        mActionFragment = new ActionFragment();
+        if (!mActionFragment.isAdded()) {
+            mTransaction.add(R.id.constraintlayout_toolbar, mActionFragment);
+        } else {
+            mTransaction.show(mActionFragment);
+        }
+        new ActionPresenter(mActionFragment, this);
+        mTransaction.commit();
     }
 
-    public void leaveChooseDialog() {
-        mCustomView.showSelectable(false);
+    @Override
+    public void leaveChooseMode() {
+        mCustomMainView.showSelectable(false);
     }
 
+    @Override
     public int getChosenItemsCount() {
-        return getChosenUids().size();
+        return getChosenItemUids().size();
     }
 
-    public ArrayList<Long> getChosenUids() {
-        return mCustomView.getChosenUids();
+    @Override
+    public ArrayList<Long> getChosenItemUids() {
+        return mCustomMainView.getChosenItemUids();
     }
 
+    @Override
     public ArrayList<BaseTab> getOtherTabs() {
-        return getOtherTabs(getCurrentTabIndex());
-    }
-
-    public ArrayList<BaseTab> getOtherTabs(int removedIndex) {
         ArrayList<BaseTab> otherTabs = new ArrayList<>(mTabs);
-        otherTabs.remove(removedIndex);
+        otherTabs.remove(mCustomMainView.getCurrentTabIndex());
         return otherTabs;
     }
 
@@ -62,27 +78,18 @@ public class CustomMainPresenter<T> implements BaseContract.CustomPresenter {
         mTabs = tabs;
     }
 
+    @Override
     public ArrayList<BaseTab> getTabs() {
         return mTabs;
     }
 
     @Override
-    public void openDetail(Object data) {
-        mCustomView.showDetailUi(data);
-    }
-
-    private int getCurrentTabIndex() {
-        return mCustomView.getCurrentTabIndex();
-    }
-
     public void start() {
     }
 
-    public FragmentManager getFragmentManager() {
-        return mCustomView.getChildFragmentManager();
-    }
-
+    @Override
     public void dismissEditDialog() {
-        if (mCustomView.mEditTabAlertDialog != null) mCustomView.mEditTabAlertDialog.dismiss();
+        AlertDialog alertDialog = mCustomMainView.getEditTabAlertDialog();
+        if (alertDialog != null) alertDialog.dismiss();
     }
 }

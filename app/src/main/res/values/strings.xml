@@ -3,7 +3,7 @@
     <string name="title_activity_youtube_list">發現</string>
     <string name="title_discover">發現</string>
     <string name="title_bookmark">收藏</string>
-    <string name="title_receipt">食譜</string>
+    <string name="title_recipe">食譜</string>
     <string name="title_today">今日</string>
     <string name="title_menu_list">菜單列表</string>
     <string name="title_buy_list">採買列表</string>
@@ -11,5 +11,123 @@
     <string name="channel_one">頻道1</string>
     <string name="channel_two">頻道2</string>
     <string name="channel_three">頻道3</string>
+    <string name="toast_action_nothing_chosen">您尚未選擇任何項目</string>
+    <string name="msg_action">是否將 %d 個項目%s ? </string>
+    <string name="login_success_msg">登入中...</string>
+    <string name="login_error_msg">發生錯誤，請檢查網路連線！錯誤碼 : </string>
+    <string-array name="filter_type">
+        <item>時間由新至舊</item>
+        <item>時間由舊至新</item>
+        <item>評分由高至低</item>
+        <item>評分由低至高</item>
+    </string-array>
+    <string name="star"> * </string>
+    <string name="filter_with">排序依...</string>
+    <string name="sum_info_msg">共 %d 道</string>
+    <string name="action_move">移動至...</string>
+    <string name="action_delete">刪除</string>
+    <string name="action_cancel_choose">取消選取</string>
+    <string name="date_format">yyyy 年 MM 月 dd 日</string>
+    <string name="date_format_for_discover">%s 年 %s 月 %s 日</string>
+    <string name="msg_follow_channel">是否要追蹤「 %s 」頻道 ? </string>
+    <string name="title_follow_channel">追蹤頻道</string>
+    <string name="total_find_result">搜尋結果</string>
+    <string name="total_search_result">搜尋結果 -- 共顯示 %d 筆結果</string>
+    <string name="total_filter_result">搜尋結果 -- 共 %d 筆結果</string>
+    <string name="adapter_nothing">此資源不存在 ! </string>
+    <string name="adapter_error">發生錯誤\n請檢查網路連線 ! </string>
+    <string name="adapter_search_nothing">找不到結果\n請修改關鍵字或調整篩選條件 ! </string>
+    <string name="video">影片</string>
+    <string name="channel">頻道</string>
+    <string name="title">標題</string>
+    <string name="tags">標籤</string>
+    <string name="description">說明</string>
+    <string name="tab">書籤</string>
+    <string name="search_with_type">類型 : </string>
+    <string name="filter_with_tab">書籤 : </string>
+    <string name="filter_with_rating">評分 : </string>
+    <string name="all">全部</string>
+    <string name="filter_with_range">搜尋範圍 : </string>
+    <string name="no">否</string>
+    <string name="yes">是</string>
+    <string name="cancel_edit_title">取消編輯</string>
+    <string name="cancel_edit_msg">是否要取消編輯 ? </string>
+    <string name="toast_require_camera_permission">請開啟相機和外部儲存權限 ! </string>
+    <string name="image_resource_title">請選擇相片來源</string>
+    <string name="image_resource_from_camera">從相機</string>
+    <string name="image_resource_from_gallery">從相簿</string>
+    <string name="image_resource_remove">移除</string>
+    <string name="toast_create_folder_error">創建資料夾錯誤 ! </string>
+    <string name="toast_create_file_error">創建照片錯誤 ! </string>
+    <string name="cancel">取消</string>
+    <string name="complete">完成</string>
+    <string name="edit_tab">編輯書籤</string>
+    <string name="toast_no_empty_tab_name">請輸入書籤名稱</string>
+    <string name="add_to_bookmark">加入收藏...</string>
+    <string name="add_new_tab">新增書籤</string>
+    <string name="rating">評分</string>
+    <string name="duration">耗時</string>
+    <string name="weight">份量</string>
+    <string name="default_group_name">準備材料</string>
+    <string name="toast_require_title">請輸入標題 ! </string>
+    <string name="toast_require_material">請輸入準備材料 ! </string>
+    <string name="toast_require_step">請輸入步驟 ! </string>
+    <string name="nameless_group_name">未命名類別</string>
+    <string name="remove_tab_and_its_content">刪除書籤及其內容</string>
+    <string name="remove_tab_msg">是否要刪除%s書籤及其內容 ? </string>
+    <string name="this_word">此</string>
+    <string name="tab_name">「 %s 」</string>
+    <string name="years_age">" 年前"</string>
+    <string name="months_age">" 個月前"</string>
+    <string name="weeks_age">" 週前"</string>
+    <string name="days_ago">" 天前"</string>
+    <string name="hours_age">" 小時前"</string>
+    <string name="minutes_ago">" 分鐘前"</string>
+    <string name="recently">剛剛</string>
+    <string name="time_and_rating">%s • %2.1f 分</string>
+    <string name="time_and_count">%s • 觀看次數 : %,d 次</string>
+    <string name="subscribe_count">%,d 位訂閱者</string>
+    <string name="duration_and_weight">耗時 : %s • 份量 : %d 人份</string>
+    <string name="material_contents_detail">" • %s\n"</string>
+    <string name="enter_new_tab_name">請輸入欲新增的書籤名</string>
+    <string name="param">"%s : "</string>
+    <string name="material_content_hint">材料名稱及份量，例如：麵粉 500 公克</string>
+    <string name="material_group_name_hint">材料類別名稱</string>
+    <string name="step_description_hint">步驟說明，例如：均勻混合麵粉與水直到濃稠</string>
+    <string name="toast_require_youtube_installed">"請確認已安裝新版 YouTube APP ! "</string>
 
+    <string-array name="resource_type">
+        <item>@string/video</item>
+        <item>@string/channel</item>
+    </string-array>
+    <string-array name="filter_range">
+        <item>@string/title</item>
+        <item>@string/tags</item>
+        <item>@string/description</item>
+    </string-array>
+    <string-array name="image_resource_item">
+        <item>@string/image_resource_from_camera</item>
+        <item>@string/image_resource_from_gallery</item>
+        <item>@string/image_resource_remove</item>
+    </string-array>
+    <string-array name="info_names">
+<!--        If its element order is changed, MUST check setParams(), getParams()-->
+<!--        and EditItemAdapter.EditDescriptionViewHolder.-->
+<!--        If its size is changed, MUST check Constants.DESCRIPTION_SIZE -->
+<!--        and EditItemAdapter.EditDescriptionViewHolder.-->
+        <item>@string/tags</item>
+        <item>@string/title</item>
+        <item>@string/rating</item>
+        <item>@string/duration</item>
+        <item>@string/weight</item>
+        <item>@string/description</item>
+    </string-array>
+    <string-array name="info_hints">
+        <item>#氣炸鍋 #烤箱</item>
+        <item>宮保雞丁 , 必填</item>
+        <item />
+        <item>1 小時 30 分鐘</item>
+        <item>1 , 輸入整數 , 單位為人份</item>
+        <item>詳細說明</item>
+    </string-array>
 </resources>

@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import androidx.room.TypeConverter;
 
 public class StepsConverter {
-    private Gson gson = new Gson();
-    private Type type = new TypeToken<ArrayList<Step>>(){}.getType();
+    private final Gson gson = new Gson();
+    private final Type type = new TypeToken<ArrayList<Step>>(){}.getType();
 
     @TypeConverter
-    public ArrayList<Step> stepsFromJsonArray(String json) {
+    public ArrayList<Step> stepsFromJsonString(String json) {
         if (json == null) {
             return (null);
         }

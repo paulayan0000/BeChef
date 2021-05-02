@@ -1,9 +1,7 @@
 package com.paula.android.bechef.adapters;
 
+import java.util.ArrayList;
+
 interface ItemTouchHelperAdapter {
-    boolean onItemMoved(int fromPosition, int toPosition);
-
-    void onItemSwiped(int position);
-
-    int getItemMovementFlags();
+    ArrayList<String> getDataList();
 }

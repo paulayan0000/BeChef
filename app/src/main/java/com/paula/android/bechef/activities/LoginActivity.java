@@ -6,17 +6,16 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.paula.android.bechef.R;
-import com.paula.android.bechef.user.UserManager;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.common.SignInButton;
-import com.paula.android.bechef.utils.Constants;
-
 import androidx.annotation.Nullable;
 
-public class LoginActivity extends BaseActivity {
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.SignInButton;
+import com.paula.android.bechef.user.UserManager;
+import com.paula.android.bechef.utils.Constants;
+import com.paula.android.bechef.R;
 
-    private static final String LOG_TAG = LoginActivity.class.getSimpleName();
+public class LoginActivity extends BaseActivity {
     private SignInButton mSignInButtonGoogle;
 
     @Override
@@ -45,7 +44,15 @@ public class LoginActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.SIGN_IN_REQUSET_CODE) {
-            updateUI(UserManager.getInstance().checkSignedInAccountFromIntent(data, mContext));
+            try {
+                updateUI(UserManager.getInstance().checkSignedInAccountFromIntent(data, mContext));
+            } catch (ApiException e) {
+                if (e.getStatusCode() == Constants.SIGN_IN_FAILED) {
+                    Toast.makeText(mContext, getString(R.string.login_error_msg) + e.getMessage(), Toast.LENGTH_LONG).show();
+                } else {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -64,7 +71,7 @@ public class LoginActivity extends BaseActivity {
     private void updateUI(GoogleSignInAccount account) {
         if (account != null) {
             mSignInButtonGoogle.setVisibility(View.GONE);
-            Toast.makeText(this, account.getDisplayName() + " 登入中...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, account.getDisplayName() + getString(R.string.login_success_msg), Toast.LENGTH_SHORT).show();
             setResult(Constants.LOGIN_SUCCESS);
             finish();
         } else {

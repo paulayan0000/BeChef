@@ -1,6 +1,8 @@
 package com.paula.android.bechef.adapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -8,245 +10,236 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.paula.android.bechef.R;
-import com.paula.android.bechef.data.LoadDataCallback;
-import com.paula.android.bechef.data.LoadDataTask;
 import com.paula.android.bechef.data.MaterialGroup;
 import com.paula.android.bechef.data.Step;
 import com.paula.android.bechef.data.database.ItemDatabase;
-import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
-import com.paula.android.bechef.data.entity.ReceiptItem;
+import com.paula.android.bechef.data.entity.RecipeItem;
 import com.paula.android.bechef.utils.BeChefTextWatcher;
+import com.paula.android.bechef.utils.Constants;
 import com.paula.android.bechef.utils.EditCallback;
 import com.paula.android.bechef.utils.EditTextChangeCallback;
 import com.paula.android.bechef.utils.Utils;
-import com.squareup.picasso.Picasso;
+import com.paula.android.bechef.viewHolders.ThumbnailImageViewHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import static com.paula.android.bechef.utils.Constants.DESCRIPTION_SIZE;
-import static com.paula.android.bechef.utils.Constants.VIEW_TYPE_BODY;
-import static com.paula.android.bechef.utils.Constants.VIEW_TYPE_FOOT;
-import static com.paula.android.bechef.utils.Constants.VIEW_TYPE_HEAD;
-import static com.paula.android.bechef.utils.Constants.VIEW_TYPE_IMAGE;
-
 public class EditItemAdapter extends RecyclerView.Adapter implements EditTextChangeCallback {
-    private ArrayList<String> mDescriptionNames
-            = new ArrayList<>(Arrays.asList("標籤", "標題", "評分", "耗時", "份量", "說明"));
-    private ArrayList<String> mDescriptionHints
-            = new ArrayList<>(Arrays.asList("#氣炸鍋 #烤箱", "宮保雞丁，必填", "", "1 小時 30 分鐘",
-            "1 ，輸入整數，單位為人份", "詳細說明"));
+    private final ArrayList<String> mInfoNames;
+    private final ArrayList<String> mInfoHints;
+    private final EditCallback mEditCallback;
+    private final Context mContext;
+    private final RecipeItem mRecipeItem;
 
-    private ReceiptItem mReceiptItem;
-    private Context mContext;
-    private EditCallback<BaseItem> mCompleteCallback;
-    private String mDialogTag;
-    private RecyclerView.ItemDecoration dec = new RecyclerView.ItemDecoration() {
-        @Override
-        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-            super.getItemOffsets(outRect, view, parent, state);
-            if (outRect.bottom == 0)
-                outRect.bottom = (int) Utils.convertDpToPixel((float) 8, mContext);
+    public EditItemAdapter(RecipeItem recipeItem, EditCallback editCallback) {
+        mRecipeItem = recipeItem;
+        mEditCallback = editCallback;
+        mContext = editCallback.getContext();
+        mInfoNames = new ArrayList<>(Arrays.asList(mContext.getResources()
+                .getStringArray(R.array.info_names)));
+        mInfoHints = new ArrayList<>(Arrays.asList(mContext.getResources()
+                .getStringArray(R.array.info_hints)));
+        if (mEditCallback.isFromBookmark()) return;
+        if (recipeItem.getMaterialGroups().size() == 0) {
+            mRecipeItem.getMaterialGroups().add(
+                    new MaterialGroup(mContext.getString(R.string.default_group_name)));
         }
-    };
-
-    public EditItemAdapter(ReceiptItem receiptItem, EditCallback<BaseItem> completeCallback) {
-        mReceiptItem = receiptItem;
-        mCompleteCallback = completeCallback;
-        mDialogTag = mCompleteCallback.getDialogTag();
-
-        if (!mDialogTag.equals("edit_bookmark")) {
-            if (receiptItem.getMaterialGroups().size() == 0) {
-                mReceiptItem.getMaterialGroups().add(new MaterialGroup("準備材料", new ArrayList<String>()));
-            }
-
-            if (receiptItem.getSteps().size() == 0) {
-                mReceiptItem.getSteps().add(new Step("", new ArrayList<String>()));
-            }
-        }
+        if (recipeItem.getSteps().size() == 0) mRecipeItem.getSteps().add(new Step());
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        mContext = parent.getContext();
-        LayoutInflater inflater = LayoutInflater.from(mContext);
+        LayoutInflater inflater = LayoutInflater.from(mEditCallback.getContext());
         View view;
         switch (viewType) {
-            case VIEW_TYPE_IMAGE:
-                return new ImageViewHolder(inflater.inflate(R.layout.item_edit_images, parent, false));
-            case VIEW_TYPE_HEAD:
-                view = inflater.inflate(R.layout.item_edit_descriptions, parent, false);
-                return new DescriptionViewHolder(view, new BeChefTextWatcher(this));
-            case VIEW_TYPE_BODY:
+            case Constants.VIEW_TYPE_IMAGE:
+                view = inflater.inflate(R.layout.item_thumbnail_image, parent, false);
+                if (mEditCallback.isFromBookmark()) return new ThumbnailImageViewHolder(view);
+                return new ThumbnailImageViewHolder(view, mEditCallback);
+            case Constants.VIEW_TYPE_INFO:
+                view = inflater.inflate(R.layout.item_edit_info, parent, false);
+                return new EditInfoViewHolder(view, new BeChefTextWatcher(this));
+            case Constants.VIEW_TYPE_MATERIALS:
                 view = inflater.inflate(R.layout.item_edit_materials, parent, false);
-                return new MaterialsViewHolder(view, new BeChefTextWatcher(this));
+                return new EditMaterialsViewHolder(view, new BeChefTextWatcher(this));
             default:
                 view = inflater.inflate(R.layout.item_edit_steps, parent, false);
-                return new StepsViewHolder(view, new BeChefTextWatcher(this));
+                return new EditStepsViewHolder(view, new BeChefTextWatcher(this));
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         switch (holder.getItemViewType()) {
-            case VIEW_TYPE_IMAGE:
-                ((ImageViewHolder) holder).bindView();
-                break;
-            case VIEW_TYPE_HEAD:
-                ((DescriptionViewHolder) holder).bindView(position);
-                break;
-            case VIEW_TYPE_BODY:
-                ((MaterialsViewHolder) holder).bindView(position);
-                break;
+            case Constants.VIEW_TYPE_IMAGE:
+                ((ThumbnailImageViewHolder) holder).bindView(mContext, mRecipeItem.getImageUrl());
+                return;
+            case Constants.VIEW_TYPE_INFO:
+                ((EditInfoViewHolder) holder).bindView(position);
+                return;
+            case Constants.VIEW_TYPE_MATERIALS:
+                ((EditMaterialsViewHolder) holder).bindView(position);
+                return;
+            case Constants.VIEW_TYPE_STEPS:
+                ((EditStepsViewHolder) holder).bindView(position);
+                return;
             default:
-                ((StepsViewHolder) holder).bindView(position);
-                break;
         }
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position == 0) return VIEW_TYPE_IMAGE;
-        else if (position <= DESCRIPTION_SIZE) return VIEW_TYPE_HEAD;
-        else if (position <= DESCRIPTION_SIZE + mReceiptItem.getMaterialGroups().size())
-            return VIEW_TYPE_BODY;
-        else return VIEW_TYPE_FOOT;
+        if (position == 0) return Constants.VIEW_TYPE_IMAGE;
+        if (isInInfo(position)) return Constants.VIEW_TYPE_INFO;
+        if (isInMaterial(position)) return Constants.VIEW_TYPE_MATERIALS;
+        return Constants.VIEW_TYPE_STEPS;
     }
 
     @Override
     public int getItemCount() {
-        if (mDialogTag.equals("edit_bookmark"))
-            return 1 + DESCRIPTION_SIZE - 2;
-        else
-            return 1 + DESCRIPTION_SIZE
-                    + mReceiptItem.getMaterialGroups().size()
-                    + mReceiptItem.getSteps().size();
+        // image + variables (tags, title, rating, description) for BookmarkItem
+        if (mEditCallback.isFromBookmark()) return 1 + Constants.INFO_SIZE - 2;
+
+        /* image + variables (tags, title, rating, duration, weight, description) for RecipeItem
+         + MaterialGroups + Steps */
+        return 1 + Constants.INFO_SIZE + mRecipeItem.getMaterialGroups().size()
+                + mRecipeItem.getSteps().size();
     }
 
     public void onCompleteClicked() {
-        if ("".equals(mReceiptItem.getTitle())) {
-            Toast.makeText(mContext, "請輸入標題", Toast.LENGTH_SHORT).show();
+        if (mRecipeItem.getTitle().isEmpty()) {
+            Toast.makeText(mContext, mContext.getString(R.string.toast_require_title),
+                    Toast.LENGTH_SHORT).show();
             return;
         }
-        if (!mDialogTag.equals("edit_bookmark")) {
-            if (isMaterialEmpty()) {
-                Toast.makeText(mContext, "請輸入準備材料", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (isStepEmpty()) {
-                Toast.makeText(mContext, "請輸入步驟", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            // replace empty group name and remove empty content
-            ArrayList<MaterialGroup> materialGroups = mReceiptItem.getMaterialGroups();
-            for (MaterialGroup group : materialGroups) {
-                group.getMaterialContents().removeAll(Collections.singleton(""));
-                if ("".equals(group.getGroupName())) {
-                    if (group.getMaterialContents().size() == 0) materialGroups.remove(group);
-                    group.setGroupName("未命名類別");
-                }
-            }
-            mReceiptItem.setMaterialGroups(materialGroups);
-
-            // remove image if url is empty
-            ArrayList<Step> steps = mReceiptItem.getSteps();
-            for (Step step : steps) {
-                step.getImageUrls().removeAll(Collections.singleton(""));
-                if (step.getStepDescription().isEmpty() && step.getImageUrls().size() == 0)
-                    steps.remove(step);
-            }
-            mReceiptItem.setSteps(steps);
+        if (!mEditCallback.isFromBookmark()) {
+            if (isMaterialEmpty()) return;
+            if (isStepEmpty()) return;
         }
-        new LoadDataTask<>(new LoadDataCallback<ItemDatabase>() {
-            private BookmarkItem mBookmarkItem;
-
+        new Thread(new Runnable() {
             @Override
-            public ItemDatabase getDao() {
-                if (mDialogTag.equals("edit_bookmark"))
-                    return ItemDatabase.getBookmarkInstance(mContext);
-                else
-                    return ItemDatabase.getReceiptInstance(mContext);
-            }
-
-            @Override
-            public void doInBackground(ItemDatabase database) {
-                switch (mDialogTag) {
-                    case "edit_receipt":
-                        database.receiptDao().updateItem(mReceiptItem);
-                        break;
-                    case "new":
-                        database.receiptDao().insert(mReceiptItem);
-                        break;
-                    case "edit_bookmark":
-                        mBookmarkItem = new BookmarkItem(mReceiptItem);
-                        database.bookmarkDao().updateItem(mBookmarkItem);
-                        break;
+            public void run() {
+                ItemDatabase database = ItemDatabase.getItemInstance(mContext);
+                if (mEditCallback.isFromBookmark()) {
+                    database.bookmarkDao().updateItem(new BookmarkItem(mRecipeItem));
+                } else {
+                    database.recipeDao().insert(mRecipeItem);
+                }
+                if (mContext != null) {
+                    ((Activity) mContext).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // TODO: custom toast layout for saved data
+                            if (mEditCallback.isFromBookmark()) {
+                                mEditCallback.onSaveDataComplete(new BookmarkItem(mRecipeItem));
+                            } else {
+                                mEditCallback.onSaveDataComplete(mRecipeItem);
+                            }
+                        }
+                    });
                 }
             }
+        }).start();
+    }
 
-            @Override
-            public void onCompleted() {
-                // TODO: custom toast layout for saved data
-                if (mBookmarkItem != null)
-                    mCompleteCallback.onSaveDataComplete(mBookmarkItem);
-                else
-                    mCompleteCallback.onSaveDataComplete(mReceiptItem);
+    private ArrayList<MaterialGroup> rearrangeMaterialGroups() {
+        ArrayList<MaterialGroup> materialGroups = mRecipeItem.getMaterialGroups();
+        MaterialGroup group;
+        for (int i = 0; i < materialGroups.size(); i++) {
+            group = materialGroups.get(i);
+            group.getMaterialContents().removeAll(Collections.singleton(""));
+            if (!group.getGroupName().isEmpty()) continue;
+            // Set name and remove empty content for a group
+            group.setGroupName(mContext.getString(R.string.nameless_group_name));
+            if (group.getMaterialContents().size() == 0) materialGroups.remove(group);
+        }
+        return materialGroups;
+    }
+
+    private ArrayList<Step> rearrangeSteps() {
+        ArrayList<Step> steps = mRecipeItem.getSteps();
+        Step step;
+        for (int i = 0; i < steps.size(); i++) {
+            step = steps.get(i);
+            step.getImageUrls().removeAll(Collections.singleton(""));
+            if (step.getImageUrls().size() == 0 && step.getStepDescription().isEmpty()) {
+                steps.remove(step);
             }
-        }).execute();
+        }
+        return steps;
     }
 
     private boolean isMaterialEmpty() {
-        ArrayList<String> materialContents = new ArrayList<>(mReceiptItem.getMaterialGroups().get(0).getMaterialContents());
-        materialContents.removeAll(Collections.singleton(""));
-        return materialContents.size() == 0;
+        ArrayList<MaterialGroup> rearrangedMaterialGroups = rearrangeMaterialGroups();
+        if (rearrangedMaterialGroups.size() == 0) {
+            Toast.makeText(mContext, mContext.getString(R.string.toast_require_material),
+                    Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        mRecipeItem.setMaterialGroups(rearrangedMaterialGroups);
+        return false;
     }
 
     private boolean isStepEmpty() {
-        ArrayList<Step> steps = mReceiptItem.getSteps();
-        for (Step step : steps) {
-            if (!step.getStepDescription().isEmpty()) return false;
+        ArrayList<Step> rearrangedSteps = rearrangeSteps();
+        if (rearrangedSteps.size() == 0) {
+            Toast.makeText(mContext, mContext.getString(R.string.toast_require_step),
+                    Toast.LENGTH_SHORT).show();
+            return true;
         }
-        return true;
+        mRecipeItem.setSteps(rearrangedSteps);
+        return false;
     }
 
     @Override
     public void afterTextChanged(int position, String textContent) {
-        if (position <= DESCRIPTION_SIZE) {
-            mReceiptItem.setParams(position - 1, textContent);
-            return;
+        if (isInInfo(position)) {
+            mRecipeItem.setParams(position - 1, textContent);
+        } else if (isInMaterial(position)) {
+            mRecipeItem.getMaterialGroups().get(getMaterialPos(position)).setGroupName(textContent);
+        } else {
+            mRecipeItem.getSteps().get(getStepPos(position)).setStepDescription(textContent);
         }
-        if (position <= DESCRIPTION_SIZE + mReceiptItem.getMaterialGroups().size()) {
-            mReceiptItem.getMaterialGroups().get(position - DESCRIPTION_SIZE - 1).setGroupName(textContent);
-            return;
-        }
-        mReceiptItem.getSteps()
-                .get(position - DESCRIPTION_SIZE - 1 - mReceiptItem.getMaterialGroups().size())
-                .setStepDescription(textContent);
     }
 
-    public void updateData(ReceiptItem receiptItem) {
-        mReceiptItem = receiptItem;
-        notifyDataSetChanged();
+    private boolean isInInfo(int position) {
+        return position <= Constants.INFO_SIZE;
+    }
+
+    private boolean isInMaterial(int position) {
+        return position <= Constants.INFO_SIZE + mRecipeItem.getMaterialGroups().size();
+    }
+
+    private int getInfoPos(int position) {
+        return position - 1;
+    }
+
+    private int getMaterialPos(int position) {
+        return getInfoPos(position) - Constants.INFO_SIZE;
+    }
+
+    private int getStepPos(int position) {
+        return getMaterialPos(position) - mRecipeItem.getMaterialGroups().size();
     }
 
     private void notifyAdded(int currentPosition) {
-        notifyItemInserted(currentPosition + 1);
-        notifyItemRangeChanged(currentPosition + 1, getItemCount() - currentPosition - 1);
-        mCompleteCallback.onInsertComplete(currentPosition + 1);
+        int newPosition = currentPosition + 1;
+        notifyItemInserted(newPosition);
+        notifyItemRangeChanged(newPosition, getItemCount() - newPosition);
     }
 
     private void notifyRemoved(int currentPosition) {
@@ -254,42 +247,25 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
         notifyItemRangeChanged(currentPosition, getItemCount() - currentPosition);
     }
 
-    private class ImageViewHolder extends RecyclerView.ViewHolder {
-        private ImageView mIvThumbNail;
+    private class EditInfoViewHolder extends RecyclerView.ViewHolder {
+        private final TextView mTvDataName;
+        private final ImageButton mIbtnClear;
+        private final RatingBar mRatingBar;
+        private final EditText mEtDataContent;
+        private final BeChefTextWatcher mTextWatcher;
 
-        ImageViewHolder(@NonNull View itemView) {
+        EditInfoViewHolder(@NonNull View itemView, BeChefTextWatcher textWatcher) {
             super(itemView);
-            mIvThumbNail = itemView.findViewById(R.id.imageview_thumbnail);
-            itemView.setOnClickListener(new View.OnClickListener() {
+            mTvDataName = itemView.findViewById(R.id.textview_param_name);
+            mRatingBar = itemView.findViewById(R.id.rating_bar);
+            mRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                 @Override
-                public void onClick(View v) {
-                    mCompleteCallback.onChooseImages(-1, -1);
+                public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+                    mRecipeItem.setRating(rating);
                 }
             });
-        }
 
-        void bindView() {
-            String imageUrl = mReceiptItem.getImageUrl();
-            Picasso.with(mContext)
-                    .load(imageUrl.isEmpty() ? null : imageUrl)
-                    .error(R.drawable.all_picture_placeholder)
-                    .placeholder(R.drawable.all_picture_placeholder)
-                    .into(mIvThumbNail);
-        }
-    }
-
-    private class DescriptionViewHolder extends RecyclerView.ViewHolder {
-        private TextView mTvDataName;
-        private ImageButton mIbtnClear;
-        private RatingBar mRatingBar;
-        private EditText mEtDataContent;
-        private BeChefTextWatcher mTextWatcher;
-
-        DescriptionViewHolder(@NonNull View itemView, BeChefTextWatcher textWatcher) {
-            super(itemView);
-            mTvDataName = itemView.findViewById(R.id.textview_data_name);
-            mRatingBar = itemView.findViewById(R.id.rating_bar);
-            mEtDataContent = itemView.findViewById(R.id.edittext_data_content);
+            mEtDataContent = itemView.findViewById(R.id.edittext_param_content);
             mTextWatcher = textWatcher;
             mEtDataContent.addTextChangedListener(mTextWatcher);
             mIbtnClear = itemView.findViewById(R.id.imagebutton_clear);
@@ -298,55 +274,64 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
                 public void onClick(View v) {
                     int position = getAdapterPosition();
                     if (position < 0) return;
-                    mReceiptItem.setParams(position - 1, "");
+                    if (isInfoOfBookmarkItem(position)) {
+                        mRecipeItem.setParams(getInfoPos(position + 2), "");
+                    } else {
+                        mRecipeItem.setParams(getInfoPos(position), "");
+                    }
                     notifyItemChanged(position);
                 }
             });
         }
 
+        private boolean isInfoOfBookmarkItem(int position) {
+            return mEditCallback.isFromBookmark() && position == getItemCount() - 1;
+        }
+
         void bindView(int position) {
-            if (mDialogTag.equals("edit_bookmark") && position == DESCRIPTION_SIZE - 2) position += 2;
-            mTvDataName.setText(mDescriptionNames.get(position - 1));
-            mRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-                @Override
-                public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                    mReceiptItem.setRating(rating);
-                }
-            });
-
-            if (position - 1 == 4)
-                // SetInputType for weight
-                mEtDataContent.setInputType(InputType.TYPE_CLASS_NUMBER);
-            else if (position - 1 == 5)
-                // SetInputType for description
-                mEtDataContent.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
-            else mEtDataContent.setInputType(InputType.TYPE_CLASS_TEXT);
-
-            if (position - 1 == 2) {
-                // UI for RatingBar
+            // drop setting duration and weight for BookmarkItem
+            if (isInfoOfBookmarkItem(position)) position += 2;
+            int currentParamIndex = getInfoPos(position);
+            String infoName = mInfoNames.get(currentParamIndex);
+            mTvDataName.setText(String.format(mContext.getString(R.string.param), infoName));
+            // Set UI for rating
+            if (infoName.equals(mContext.getString(R.string.rating))) {
+                // Set UI for rating
                 mEtDataContent.setVisibility(View.INVISIBLE);
                 mIbtnClear.setVisibility(View.GONE);
                 mRatingBar.setVisibility(View.VISIBLE);
-                mRatingBar.setRating((float) mReceiptItem.getRating());
-            } else {
-                mEtDataContent.setVisibility(View.VISIBLE);
-                mIbtnClear.setVisibility(View.VISIBLE);
-                mRatingBar.setVisibility(View.GONE);
+                mRatingBar.setRating((float) mRecipeItem.getRating());
+                return;
+            }
 
-                mTextWatcher.bindPosition(position);
-                mEtDataContent.setText(mReceiptItem.getParams(position - 1));
-                mEtDataContent.setHint(mDescriptionHints.get(position - 1));
+            mEtDataContent.setVisibility(View.VISIBLE);
+            mIbtnClear.setVisibility(View.VISIBLE);
+            mRatingBar.setVisibility(View.GONE);
+            mTextWatcher.bindPosition(position);
+            mEtDataContent.setText(mRecipeItem.getParams(currentParamIndex));
+            mEtDataContent.setHint(mInfoHints.get(currentParamIndex));
+
+            // SetInputType for EditText
+            if (infoName.equals(mContext.getString(R.string.weight))) {
+                // SetInputType for weight
+                mEtDataContent.setInputType(InputType.TYPE_CLASS_NUMBER);
+            } else if (infoName.equals(mContext.getString(R.string.description))) {
+                // SetInputType for description
+                mEtDataContent.setInputType(InputType.TYPE_CLASS_TEXT
+                        | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+            } else {
+                mEtDataContent.setInputType(InputType.TYPE_CLASS_TEXT);
             }
         }
     }
 
-    private class MaterialsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private EditText mEtMaterialGroup;
-        private BeChefTextWatcher mTextWatcher;
-        private RecyclerView mRecyclerView;
-        private ImageButton mIbtnRemove, mIbtnClear;
+    private class EditMaterialsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private final EditText mEtMaterialGroup;
+        private final BeChefTextWatcher mTextWatcher;
+        private final RecyclerView mRecyclerView;
+        private final ImageButton mIbtnRemove, mIbtnClear;
 
-        MaterialsViewHolder(@NonNull View itemView, BeChefTextWatcher textWatcher) {
+        EditMaterialsViewHolder(@NonNull View itemView, BeChefTextWatcher textWatcher) {
             super(itemView);
             itemView.findViewById(R.id.imagebutton_add).setOnClickListener(this);
             mIbtnRemove = itemView.findViewById(R.id.imagebutton_remove);
@@ -354,142 +339,199 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
             mIbtnClear = itemView.findViewById(R.id.imagebutton_clear);
             mIbtnClear.setOnClickListener(this);
             mRecyclerView = itemView.findViewById(R.id.recyclerview_material_content);
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
 
             mEtMaterialGroup = itemView.findViewById(R.id.edittext_material_group);
             mTextWatcher = textWatcher;
             mEtMaterialGroup.addTextChangedListener(mTextWatcher);
         }
 
-        void bindView(int position) {
-            int currentIndex = position - DESCRIPTION_SIZE - 1;
-            mIbtnRemove.setImageDrawable(mContext.getResources()
-                    .getDrawable(currentIndex == 0 ? R.drawable.ic_remove_gray : R.drawable.ic_remove));
-            mIbtnClear.setImageDrawable(mContext.getResources()
-                    .getDrawable(currentIndex == 0 ? R.drawable.ic_clear_gray : R.drawable.ic_clear));
+        void bindView(final int position) {
+            int materialPos = getMaterialPos(position);
+            boolean isFirstOne = materialPos == 0;
+            int removeDrawableId = getRemoveDrawableId(isFirstOne);
+            setImageDrawable(mIbtnRemove, mContext, removeDrawableId);
+            int clearDrawableId = getClearDrawableId(isFirstOne);
+            setImageDrawable(mIbtnClear, mContext, clearDrawableId);
 
-            mEtMaterialGroup.setEnabled(currentIndex != 0);
+            MaterialGroup currentGroup = mRecipeItem.getMaterialGroups().get(materialPos);
+            mEtMaterialGroup.setEnabled(!isFirstOne);
             mTextWatcher.bindPosition(position);
-            MaterialGroup currentGroup = mReceiptItem.getMaterialGroups().get(currentIndex);
             mEtMaterialGroup.setText(currentGroup.getGroupName());
 
             ArrayList<String> currentContents = currentGroup.getMaterialContents();
             MaterialContentAdapter materialContentAdapter = new MaterialContentAdapter(currentContents);
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+            materialContentAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                @Override
+                public void onItemRangeInserted(int positionStart, int itemCount) {
+                    calculateSpaceAndScroll(mRecyclerView, positionStart);
+                }
+            });
             mRecyclerView.setAdapter(materialContentAdapter);
-
             ItemTouchHelperCallback callback = new ItemTouchHelperCallback(materialContentAdapter);
-            ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-            touchHelper.attachToRecyclerView(mRecyclerView);
+            new ItemTouchHelper(callback).attachToRecyclerView(mRecyclerView);
+        }
+
+        private int getClearDrawableId(boolean isDisable) {
+            return isDisable ? R.drawable.ic_clear_gray : R.drawable.ic_clear;
         }
 
         @Override
         public void onClick(View v) {
-            int currentPosition = getAdapterPosition();
-            if (currentPosition < 0) return;
-            int currentIndex = currentPosition - DESCRIPTION_SIZE - 1;
-            ArrayList<MaterialGroup> materialGroups = mReceiptItem.getMaterialGroups();
-            switch (v.getId()) {
-                case R.id.imagebutton_add:
-                    materialGroups.add(currentIndex + 1, new MaterialGroup());
-                    notifyAdded(currentPosition);
-                    break;
-                case R.id.imagebutton_remove:
-                    if (currentIndex == 0) return;
-                    materialGroups.remove(currentIndex);
-                    notifyRemoved(currentPosition);
-                    break;
-                case R.id.imagebutton_clear:
-                    if (currentIndex == 0) return;
-                    materialGroups.get(currentIndex).setGroupName("");
-                    notifyItemChanged(currentPosition);
-                    break;
+            int position = getAdapterPosition();
+            if (position < 0) return;
+            int materialPos = getMaterialPos(position);
+            ArrayList<MaterialGroup> materialGroups = mRecipeItem.getMaterialGroups();
+            int currentViewId = v.getId();
+            if (currentViewId == R.id.imagebutton_add) {
+                materialGroups.add(materialPos + 1, new MaterialGroup());
+                notifyAdded(position);
+            } else if (currentViewId == R.id.imagebutton_remove) {
+                if (materialPos == 0) return;
+                materialGroups.remove(materialPos);
+                notifyRemoved(position);
+            } else if (currentViewId == R.id.imagebutton_clear) {
+                if (materialPos == 0) return;
+                materialGroups.get(materialPos).setGroupName("");
+                notifyItemChanged(position);
             }
         }
     }
 
-    private class StepsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private TextView mTvStepNumber;
-        private EditText mEtStepDescription;
-        private BeChefTextWatcher mTextWatcher;
-        private RecyclerView mRecyclerView;
-        private ImageButton mIbtnRemove, mIbtnMoveUp, mIbtnMoveDown;
+    public class EditStepsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private final TextView mTvStepNumber;
+        private final EditText mEtStepDescription;
+        private final BeChefTextWatcher mTextWatcher;
+        private final RecyclerView mRecyclerView;
+        private final ImageButton mIbtnRemove, mIbtnMoveUp, mIbtnMoveDown;
 
-        StepsViewHolder(@NonNull View itemView, BeChefTextWatcher textWatcher) {
+        EditStepsViewHolder(@NonNull View itemView, BeChefTextWatcher textWatcher) {
             super(itemView);
             mTvStepNumber = itemView.findViewById(R.id.textview_step_number);
             itemView.findViewById(R.id.imagebutton_add).setOnClickListener(this);
+            itemView.findViewById(R.id.imagebutton_clear).setOnClickListener(this);
             mIbtnMoveUp = itemView.findViewById(R.id.imagebutton_move_up);
             mIbtnMoveUp.setOnClickListener(this);
             mIbtnMoveDown = itemView.findViewById(R.id.imagebutton_move_down);
             mIbtnMoveDown.setOnClickListener(this);
             mIbtnRemove = itemView.findViewById(R.id.imagebutton_remove);
             mIbtnRemove.setOnClickListener(this);
-            itemView.findViewById(R.id.imagebutton_clear).setOnClickListener(this);
             mRecyclerView = itemView.findViewById(R.id.recyclerview_step_image);
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+            mRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+                @Override
+                public void getItemOffsets(@NonNull Rect outRect,
+                                           @NonNull View view,
+                                           @NonNull RecyclerView parent,
+                                           @NonNull RecyclerView.State state) {
+                    super.getItemOffsets(outRect, view, parent, state);
+                    if (outRect.bottom == 0) {
+                        outRect.bottom = Utils.convertDpToPixel(Constants.NORMAL_PADDING, mContext);
+                    }
+                }
+            });
 
             mEtStepDescription = itemView.findViewById(R.id.edittext_step_description);
             mTextWatcher = textWatcher;
             mEtStepDescription.addTextChangedListener(mTextWatcher);
         }
 
-        void bindView(int position) {
-            mIbtnRemove.setImageDrawable(mContext.getResources()
-                    .getDrawable(mReceiptItem.getSteps().size() == 1 ? R.drawable.ic_remove_gray : R.drawable.ic_remove));
-
-            int currentIndex = position - DESCRIPTION_SIZE - 1 - mReceiptItem.getMaterialGroups().size();
-            mIbtnMoveUp.setImageDrawable(mContext.getResources()
-                    .getDrawable(currentIndex == 0 ? R.drawable.ic_move_up_gray : R.drawable.ic_move_up));
-            mIbtnMoveDown.setImageDrawable(mContext.getResources()
-                    .getDrawable(currentIndex == getItemCount() - 1 ? R.drawable.ic_move_down_gray : R.drawable.ic_move_down));
-            Step currentStep = mReceiptItem.getSteps().get(currentIndex);
-            mTvStepNumber.setText(String.valueOf(currentIndex + 1));
+        void bindView(final int position) {
+            int removeDrawableId = getRemoveDrawableId(mRecipeItem.getSteps().size() <= 1);
+            setImageDrawable(mIbtnRemove, mContext, removeDrawableId);
+            int stepPos = getStepPos(position);
+            int moveUpDrawableId = getMoveUpDrawableId(stepPos == 0);
+            setImageDrawable(mIbtnMoveUp, mContext, moveUpDrawableId);
+            int moveDownDrawableId = getMoveDownDrawableId(isLastStep(stepPos));
+            setImageDrawable(mIbtnMoveDown, mContext, moveDownDrawableId);
 
             mTextWatcher.bindPosition(position);
-            Step step = mReceiptItem.getSteps().get(currentIndex);
-            mEtStepDescription.setText(step.getStepDescription());
+            mTvStepNumber.setText(String.valueOf(stepPos + 1));
+            Step currentStep = mRecipeItem.getSteps().get(stepPos);
+            mEtStepDescription.setText(currentStep.getStepDescription());
 
             ArrayList<String> imageUrls = currentStep.getImageUrls();
-            StepImageAdapter stepImageAdapter = new StepImageAdapter(imageUrls, currentIndex, mCompleteCallback);
-            mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+            final StepImageAdapter stepImageAdapter = new StepImageAdapter(imageUrls, stepPos, mEditCallback);
+            stepImageAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                @Override
+                public void onItemRangeInserted(int positionStart, int itemCount) {
+                    if (position == getItemCount() - 1 &&
+                            positionStart == stepImageAdapter.getItemCount() - 1) {
+                        mEditCallback.scrollToBottom();
+                        return;
+                    }
+                    calculateSpaceAndScroll(mRecyclerView, positionStart);
+                }
+            });
             mRecyclerView.setAdapter(stepImageAdapter);
-            mRecyclerView.addItemDecoration(dec);
-
             ItemTouchHelperCallback callback = new ItemTouchHelperCallback(stepImageAdapter);
-            ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-            touchHelper.attachToRecyclerView(mRecyclerView);
+            new ItemTouchHelper(callback).attachToRecyclerView(mRecyclerView);
+        }
+
+        public void removeSpecifiedStepImage(int imagePos) {
+            ((StepImageAdapter) mRecyclerView.getAdapter()).notifyRemoved(imagePos);
+        }
+
+        public void setSpecifiedStepImage(int imagePos, String urlString) {
+            ((StepImageAdapter) mRecyclerView.getAdapter()).notifyChanged(imagePos, urlString);
+        }
+
+        private int getMoveDownDrawableId(boolean isDisable) {
+            return isDisable ? R.drawable.ic_move_down_gray : R.drawable.ic_move_down;
+        }
+
+        private int getMoveUpDrawableId(boolean isDisable) {
+            return isDisable ? R.drawable.ic_move_up_gray : R.drawable.ic_move_up;
+        }
+
+        private boolean isLastStep(int stepPos) {
+            return stepPos == mRecipeItem.getSteps().size() - 1;
         }
 
         @Override
         public void onClick(View v) {
-            int currentPosition = getAdapterPosition();
-            if (currentPosition < 0) return;
-            int currentIndex = currentPosition - DESCRIPTION_SIZE - 1 - mReceiptItem.getMaterialGroups().size();
-            ArrayList<Step> steps = mReceiptItem.getSteps();
-            switch (v.getId()) {
-                case R.id.imagebutton_add:
-                    steps.add(currentIndex + 1, new Step());
-                    notifyAdded(currentPosition);
-                    break;
-                case R.id.imagebutton_remove:
-                    if (mReceiptItem.getSteps().size() == 1) return;
-                    steps.remove(currentIndex);
-                    notifyRemoved(currentPosition);
-                    break;
-                case R.id.imagebutton_clear:
-                    steps.get(currentIndex).setStepDescription("");
-                    notifyItemChanged(currentPosition);
-                    break;
-                case R.id.imagebutton_move_up:
-                    if (currentIndex == 0) return;
-                    Collections.swap(steps, currentIndex, currentIndex - 1);
-                    notifyItemRangeChanged(currentPosition - 1, 2);
-                    break;
-                case R.id.imagebutton_move_down:
-                    if (currentIndex == mReceiptItem.getSteps().size() - 1) return;
-                    Collections.swap(steps, currentIndex, currentIndex + 1);
-                    notifyItemRangeChanged(currentPosition, 2);
-                    break;
+            int position = getAdapterPosition();
+            if (position < 0) return;
+            int stepPos = getStepPos(position);
+            ArrayList<Step> steps = mRecipeItem.getSteps();
+            int currentViewId = v.getId();
+            if (currentViewId == R.id.imagebutton_add) {
+                steps.add(stepPos + 1, new Step());
+                notifyAdded(position);
+            } else if (currentViewId == R.id.imagebutton_remove) {
+                if (mRecipeItem.getSteps().size() == 1) return;
+                steps.remove(stepPos);
+                notifyRemoved(position);
+            } else if (currentViewId == R.id.imagebutton_clear) {
+                steps.get(stepPos).setStepDescription("");
+                notifyItemChanged(position);
+            } else if (currentViewId == R.id.imagebutton_move_up) {
+                if (stepPos == 0) return;
+                Collections.swap(steps, stepPos, stepPos - 1);
+                notifyItemRangeChanged(position - 1, 2);
+            } else if (currentViewId == R.id.imagebutton_move_down) {
+                if (isLastStep(stepPos)) return;
+                Collections.swap(steps, stepPos, stepPos + 1);
+                notifyItemRangeChanged(position, 2);
             }
         }
+    }
+
+    private void calculateSpaceAndScroll(RecyclerView recyclerView, int positionStart) {
+        int height = recyclerView.getChildAt(positionStart - 1).getHeight();
+        int[] prevLocations = new int[2];
+        recyclerView.getChildAt(positionStart - 1).getLocationOnScreen(prevLocations);
+        int prevTopToBottom = Resources.getSystem().getDisplayMetrics().heightPixels
+                - prevLocations[1];
+        if (prevTopToBottom >= 2 * height) return;
+        mEditCallback.scrollByY(2 * height - prevTopToBottom);
+    }
+
+    private int getRemoveDrawableId(boolean isDisable) {
+        return isDisable ? R.drawable.ic_remove_gray : R.drawable.ic_remove;
+
+    }
+    private void setImageDrawable(ImageButton imageButton, Context context, int drawableId) {
+        imageButton.setImageDrawable(ContextCompat.getDrawable(context, drawableId));
     }
 }

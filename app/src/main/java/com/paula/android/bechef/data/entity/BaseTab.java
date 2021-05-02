@@ -2,6 +2,7 @@ package com.paula.android.bechef.data.entity;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 public class BaseTab {
@@ -14,6 +15,12 @@ public class BaseTab {
 
     public BaseTab(@NonNull String tabName) {
         mTabName = tabName;
+    }
+
+    @Ignore
+    public BaseTab(@NonNull BaseTab baseTab) {
+        uid = baseTab.getUid();
+        mTabName = baseTab.getTabName();
     }
 
     public long getUid() {
@@ -29,7 +36,7 @@ public class BaseTab {
         return mTabName;
     }
 
-    public void setTabName(String tabName) {
+    public void setTabName(@NonNull String tabName) {
         mTabName = tabName;
     }
 

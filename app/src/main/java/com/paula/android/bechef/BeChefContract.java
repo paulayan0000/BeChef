@@ -10,11 +10,11 @@ public interface BeChefContract extends BaseContract {
 
         void transToBookmark();
 
-        void transToReceipt();
+        void transToRecipe();
 
         void transToDetail(Object content, boolean isBottomShown);
 
-        void transToSearch(BaseContract.MainPresenter presenter);
+        void transToSearch(MainPresenter presenter);
 
         void showToolbar(int itemId);
     }
