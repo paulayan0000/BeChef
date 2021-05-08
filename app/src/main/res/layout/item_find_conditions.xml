@@ -5,13 +5,14 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/find_condition_background"
-    android:padding="@dimen/normal_padding">
+    android:paddingHorizontal="@dimen/normal_padding">
 
     <TextView
         android:id="@+id/textview_filter_name"
         android:layout_height="0dp"
         android:layout_width="wrap_content"
         android:layout_marginStart="@dimen/normal_margin"
+        android:gravity="center_vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/spinner_tab_name"
         app:layout_constraintEnd_toStartOf="@id/spinner_tab_name"

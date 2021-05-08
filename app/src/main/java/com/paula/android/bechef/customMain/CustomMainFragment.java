@@ -2,6 +2,8 @@ package com.paula.android.bechef.customMain;
 
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
@@ -23,7 +25,6 @@ import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class CustomMainFragment extends BaseMainFragment implements BaseContract.CustomView {
     private BaseContract.CustomPresenter mCustomPresenter;
-
     private AlertDialog mEditTabAlertDialog;
 
     public CustomMainFragment() {
@@ -113,6 +114,10 @@ public class CustomMainFragment extends BaseMainFragment implements BaseContract
         EditTabAlertDialogBuilder builder = new EditTabAlertDialogBuilder(mContext, mCustomPresenter.getTabs());
         mEditTabAlertDialog = builder.create();
         mEditTabAlertDialog.show();
+        Window window = mEditTabAlertDialog.getWindow();
+        if (window == null) return;
+        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
     @Override

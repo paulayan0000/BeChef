@@ -71,7 +71,8 @@ public class LoginActivity extends BaseActivity {
     private void updateUI(GoogleSignInAccount account) {
         if (account != null) {
             mSignInButtonGoogle.setVisibility(View.GONE);
-            Toast.makeText(this, account.getDisplayName() + getString(R.string.login_success_msg), Toast.LENGTH_SHORT).show();
+            String accountName = account.getDisplayName() == null ? "" : account.getDisplayName();
+            Toast.makeText(this, accountName + getString(R.string.login_success_msg), Toast.LENGTH_SHORT).show();
             setResult(Constants.LOGIN_SUCCESS);
             finish();
         } else {

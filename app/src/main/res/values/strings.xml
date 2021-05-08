@@ -123,7 +123,7 @@
         <item>@string/description</item>
     </string-array>
     <string-array name="info_hints">
-        <item>#氣炸鍋 #烤箱</item>
+        <item>氣炸鍋;烤箱</item>
         <item>宮保雞丁 , 必填</item>
         <item />
         <item>1 小時 30 分鐘</item>

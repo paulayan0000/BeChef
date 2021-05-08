@@ -1,7 +1,10 @@
 package com.paula.android.bechef.viewHolders;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -13,7 +16,7 @@ import com.paula.android.bechef.R;
 import com.paula.android.bechef.utils.BeChefTextWatcher;
 
 public class EditTabViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    private EditText mEtTabName;
+    protected EditText mEtTabName;
     protected ImageButton mIbtnRemove;
     protected BeChefTextWatcher mTextWatcher;
 
@@ -27,7 +30,7 @@ public class EditTabViewHolder extends RecyclerView.ViewHolder implements View.O
     }
 
     // Constructor for edit bookmarkTab or recipeTab
-    public EditTabViewHolder(@NonNull View itemView, BeChefTextWatcher textWatcher) {
+    public EditTabViewHolder(@NonNull final View itemView, BeChefTextWatcher textWatcher) {
         super(itemView);
         setBasicView();
         itemView.findViewById(R.id.imagebutton_add).setOnClickListener(this);
@@ -39,6 +42,8 @@ public class EditTabViewHolder extends RecyclerView.ViewHolder implements View.O
 
     private void setBasicView() {
         mEtTabName = itemView.findViewById(R.id.edittext_material_content);
+        mEtTabName.setSingleLine(true);
+        mEtTabName.setEllipsize(TextUtils.TruncateAt.END);
         mIbtnRemove = itemView.findViewById(R.id.imagebutton_remove);
         mIbtnRemove.setOnClickListener(this);
     }
