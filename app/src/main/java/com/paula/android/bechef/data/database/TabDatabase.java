@@ -1,17 +1,19 @@
 package com.paula.android.bechef.data.database;
 
-import android.content.Context;
-
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
+import com.paula.android.bechef.BeChef;
+import com.paula.android.bechef.R;
 import com.paula.android.bechef.data.dao.BookmarkTabDao;
 import com.paula.android.bechef.data.dao.DiscoverTabDao;
 import com.paula.android.bechef.data.dao.RecipeTabDao;
 import com.paula.android.bechef.data.entity.BookmarkTab;
 import com.paula.android.bechef.data.entity.DiscoverTab;
 import com.paula.android.bechef.data.entity.RecipeTab;
+import com.paula.android.bechef.thread.BeChefRunnableInterface;
+import com.paula.android.bechef.thread.BeChefRunnable;
 import com.paula.android.bechef.utils.Constants;
 import com.paula.android.bechef.utils.Utils;
 
@@ -27,16 +29,16 @@ public abstract class TabDatabase extends RoomDatabase {
 
     private static volatile TabDatabase mTabDatabaseInstance;
 
-    public static TabDatabase getTabInstance(Context context) {
+    public static TabDatabase getTabInstance() {
         if (mTabDatabaseInstance == null) {
             synchronized (TabDatabase.class) {
                 if (mTabDatabaseInstance == null) {
-                    mTabDatabaseInstance = Room.databaseBuilder(context,
+                    mTabDatabaseInstance = Room.databaseBuilder(BeChef.getAppContext(),
                             TabDatabase.class,
                             Constants.TAB_TABLE)
                             .build();
 
-                    if (Utils.doesDatabaseExist(context, Constants.TAB_TABLE))
+                    if (Utils.doesDatabaseExist(Constants.TAB_TABLE))
                         return mTabDatabaseInstance;
                     // TODO: read Json file (DefaultChannelId.json),
                     // add default data
@@ -61,18 +63,17 @@ public abstract class TabDatabase extends RoomDatabase {
                     discoverTabs.add(discoverTab5);
 
                     // add default data
-                    final BookmarkTab bookmarkTab = new BookmarkTab(
-                            "未命名書籤");
-                    final RecipeTab recipeTab = new RecipeTab(
-                            "未命名書籤");
-                    new Thread(new Runnable() {
+                    String defaultTabName = BeChef.getAppContext().getString(R.string.default_tab_name);
+                    final BookmarkTab bookmarkTab = new BookmarkTab(defaultTabName);
+                    final RecipeTab recipeTab = new RecipeTab(defaultTabName);
+                    new Thread(new BeChefRunnable(new BeChefRunnableInterface() {
                         @Override
-                        public void run() {
+                        public void runTasksOnNewThread() {
                             mTabDatabaseInstance.discoverDao().insert(discoverTabs);
                             mTabDatabaseInstance.bookmarkDao().insert(bookmarkTab);
                             mTabDatabaseInstance.recipeDao().insert(recipeTab);
                         }
-                    }).start();
+                    })).start();
                 }
             }
         }

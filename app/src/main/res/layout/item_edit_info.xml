@@ -16,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
+    <com.paula.android.bechef.utils.BeChefEditText
         android:id="@+id/edittext_param_content"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

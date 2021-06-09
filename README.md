@@ -64,7 +64,7 @@ BeChef 是一款學習烹飪的協助小幫手，可跟著 YouTube 影片一起�
     * YouTube Player API
 
 * Core Functions
-    * Google Login
+    * Google Sign-In SDK
 
 * User Interface
     * ViewPager2
@@ -79,16 +79,21 @@ BeChef 是一款學習烹飪的協助小幫手，可跟著 YouTube 影片一起�
     * OkHttp3
     * Picasso
     * Room
+    * LeakCanary
 
 ## Requirement
 
 * Android Studio 4.1.3+
 * Android SDK 19+
 * Gradle 4.1.3
+* Google Play Services 15.0.0+ (for Google Sign SDK)
+* YouTube 4.2.16+ (for YouTube Player API)
 
 ## Version
 
+* 1.0.2 : Modified UI and fixed some bugs.
 * 1.0.1 : Modified UI and fixed some bugs.
+* 1.0.0 : Refactored code.
 
 ## Contact
 

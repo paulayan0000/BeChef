@@ -52,7 +52,6 @@ public class Constants {
 
     // YouTube data API
     public static final String URL = "https://www.googleapis.com/youtube/v3/%s?key=%s";
-//    public static final String DEVELOPER_KEY = "AIzaSyAajGSZR9eHL_IKeV34fd_nN58tYUVf5FQ";
     public static final String QUERY_PARAMS = "&%s=%s";
     public static final String API_SEARCH = "search";
     public static final String API_VIDEOS = "videos";

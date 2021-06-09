@@ -1,6 +1,5 @@
 package com.paula.android.bechef.adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Rect;
@@ -12,7 +11,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RatingBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -20,11 +18,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.data.MaterialGroup;
 import com.paula.android.bechef.data.Step;
-import com.paula.android.bechef.data.database.ItemDatabase;
-import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.RecipeItem;
 import com.paula.android.bechef.utils.BeChefTextWatcher;
 import com.paula.android.bechef.utils.Constants;
@@ -41,21 +38,20 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
     private final ArrayList<String> mInfoNames;
     private final ArrayList<String> mInfoHints;
     private final EditCallback mEditCallback;
-    private final Context mContext;
     private final RecipeItem mRecipeItem;
+    private Context mContext;
 
     public EditItemAdapter(RecipeItem recipeItem, EditCallback editCallback) {
         mRecipeItem = recipeItem;
         mEditCallback = editCallback;
-        mContext = editCallback.getContext();
-        mInfoNames = new ArrayList<>(Arrays.asList(mContext.getResources()
+        mInfoNames = new ArrayList<>(Arrays.asList(BeChef.getAppContext().getResources()
                 .getStringArray(R.array.info_names)));
-        mInfoHints = new ArrayList<>(Arrays.asList(mContext.getResources()
+        mInfoHints = new ArrayList<>(Arrays.asList(BeChef.getAppContext().getResources()
                 .getStringArray(R.array.info_hints)));
         if (mEditCallback.isFromBookmark()) return;
         if (recipeItem.getMaterialGroups().size() == 0) {
             mRecipeItem.getMaterialGroups().add(
-                    new MaterialGroup(mContext.getString(R.string.default_group_name)));
+                    new MaterialGroup(BeChef.getAppContext().getString(R.string.default_group_name)));
         }
         if (recipeItem.getSteps().size() == 0) mRecipeItem.getSteps().add(new Step());
     }
@@ -63,7 +59,8 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(mEditCallback.getContext());
+        mContext = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         View view;
         switch (viewType) {
             case Constants.VIEW_TYPE_IMAGE:
@@ -86,7 +83,7 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         switch (holder.getItemViewType()) {
             case Constants.VIEW_TYPE_IMAGE:
-                ((ThumbnailImageViewHolder) holder).bindView(mContext, mRecipeItem.getImageUrl());
+                ((ThumbnailImageViewHolder) holder).bindView(mRecipeItem.getImageUrl());
                 return;
             case Constants.VIEW_TYPE_INFO:
                 ((EditInfoViewHolder) holder).bindView(position);
@@ -120,89 +117,8 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
                 + mRecipeItem.getSteps().size();
     }
 
-    public void onCompleteClicked() {
-        if (mRecipeItem.getTitle().isEmpty()) {
-            Toast.makeText(mContext, mContext.getString(R.string.toast_require_title),
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!mEditCallback.isFromBookmark()) {
-            if (isMaterialEmpty()) return;
-            if (isStepEmpty()) return;
-        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                ItemDatabase database = ItemDatabase.getItemInstance(mContext);
-                if (mEditCallback.isFromBookmark()) {
-                    database.bookmarkDao().updateItem(new BookmarkItem(mRecipeItem));
-                } else {
-                    database.recipeDao().insert(mRecipeItem);
-                }
-                if (mContext != null) {
-                    ((Activity) mContext).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // TODO: custom toast layout for saved data
-                            if (mEditCallback.isFromBookmark()) {
-                                mEditCallback.onSaveDataComplete(new BookmarkItem(mRecipeItem));
-                            } else {
-                                mEditCallback.onSaveDataComplete(mRecipeItem);
-                            }
-                        }
-                    });
-                }
-            }
-        }).start();
-    }
-
-    private ArrayList<MaterialGroup> rearrangeMaterialGroups() {
-        ArrayList<MaterialGroup> materialGroups = mRecipeItem.getMaterialGroups();
-        MaterialGroup group;
-        for (int i = 0; i < materialGroups.size(); i++) {
-            group = materialGroups.get(i);
-            group.getMaterialContents().removeAll(Collections.singleton(""));
-            if (!group.getGroupName().isEmpty()) continue;
-            // Set name and remove empty content for a group
-            group.setGroupName(mContext.getString(R.string.nameless_group_name));
-            if (group.getMaterialContents().size() == 0) materialGroups.remove(group);
-        }
-        return materialGroups;
-    }
-
-    private ArrayList<Step> rearrangeSteps() {
-        ArrayList<Step> steps = mRecipeItem.getSteps();
-        Step step;
-        for (int i = 0; i < steps.size(); i++) {
-            step = steps.get(i);
-            step.getImageUrls().removeAll(Collections.singleton(""));
-            if (step.getImageUrls().size() == 0 && step.getStepDescription().isEmpty()) {
-                steps.remove(step);
-            }
-        }
-        return steps;
-    }
-
-    private boolean isMaterialEmpty() {
-        ArrayList<MaterialGroup> rearrangedMaterialGroups = rearrangeMaterialGroups();
-        if (rearrangedMaterialGroups.size() == 0) {
-            Toast.makeText(mContext, mContext.getString(R.string.toast_require_material),
-                    Toast.LENGTH_SHORT).show();
-            return true;
-        }
-        mRecipeItem.setMaterialGroups(rearrangedMaterialGroups);
-        return false;
-    }
-
-    private boolean isStepEmpty() {
-        ArrayList<Step> rearrangedSteps = rearrangeSteps();
-        if (rearrangedSteps.size() == 0) {
-            Toast.makeText(mContext, mContext.getString(R.string.toast_require_step),
-                    Toast.LENGTH_SHORT).show();
-            return true;
-        }
-        mRecipeItem.setSteps(rearrangedSteps);
-        return false;
+    public RecipeItem getRecipeItem() {
+        return mRecipeItem;
     }
 
     @Override
@@ -215,6 +131,7 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
             mRecipeItem.getSteps().get(getStepPos(position)).setStepDescription(textContent);
         }
     }
+
 
     private boolean isInInfo(int position) {
         return position <= Constants.INFO_SIZE;
@@ -293,9 +210,9 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
             if (isInfoOfBookmarkItem(position)) position += 2;
             int currentParamIndex = getInfoPos(position);
             String infoName = mInfoNames.get(currentParamIndex);
-            mTvDataName.setText(String.format(mContext.getString(R.string.param), infoName));
+            mTvDataName.setText(String.format(BeChef.getAppContext().getString(R.string.param), infoName));
             // Set UI for rating
-            if (infoName.equals(mContext.getString(R.string.rating))) {
+            if (infoName.equals(BeChef.getAppContext().getString(R.string.rating))) {
                 // Set UI for rating
                 mEtDataContent.setVisibility(View.INVISIBLE);
                 mIbtnClear.setVisibility(View.GONE);
@@ -312,10 +229,10 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
             mEtDataContent.setHint(mInfoHints.get(currentParamIndex));
 
             // SetInputType for EditText
-            if (infoName.equals(mContext.getString(R.string.weight))) {
+            if (infoName.equals(BeChef.getAppContext().getString(R.string.weight))) {
                 // SetInputType for weight
                 mEtDataContent.setInputType(InputType.TYPE_CLASS_NUMBER);
-            } else if (infoName.equals(mContext.getString(R.string.description))) {
+            } else if (infoName.equals(BeChef.getAppContext().getString(R.string.description))) {
                 // SetInputType for description
                 mEtDataContent.setInputType(InputType.TYPE_CLASS_TEXT
                         | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
@@ -350,9 +267,9 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
             int materialPos = getMaterialPos(position);
             boolean isFirstOne = materialPos == 0;
             int removeDrawableId = getRemoveDrawableId(isFirstOne);
-            setImageDrawable(mIbtnRemove, mContext, removeDrawableId);
+            setImageDrawable(mIbtnRemove, removeDrawableId);
             int clearDrawableId = getClearDrawableId(isFirstOne);
-            setImageDrawable(mIbtnClear, mContext, clearDrawableId);
+            setImageDrawable(mIbtnClear, clearDrawableId);
 
             MaterialGroup currentGroup = mRecipeItem.getMaterialGroups().get(materialPos);
             mEtMaterialGroup.setEnabled(!isFirstOne);
@@ -426,7 +343,7 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
                                            @NonNull RecyclerView.State state) {
                     super.getItemOffsets(outRect, view, parent, state);
                     if (outRect.bottom == 0) {
-                        outRect.bottom = Utils.convertDpToPixel(Constants.NORMAL_PADDING, mContext);
+                        outRect.bottom = Utils.convertDpToPixel(Constants.NORMAL_PADDING);
                     }
                 }
             });
@@ -438,12 +355,12 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
 
         void bindView(final int position) {
             int removeDrawableId = getRemoveDrawableId(mRecipeItem.getSteps().size() <= 1);
-            setImageDrawable(mIbtnRemove, mContext, removeDrawableId);
+            setImageDrawable(mIbtnRemove, removeDrawableId);
             int stepPos = getStepPos(position);
             int moveUpDrawableId = getMoveUpDrawableId(stepPos == 0);
-            setImageDrawable(mIbtnMoveUp, mContext, moveUpDrawableId);
+            setImageDrawable(mIbtnMoveUp, moveUpDrawableId);
             int moveDownDrawableId = getMoveDownDrawableId(isLastStep(stepPos));
-            setImageDrawable(mIbtnMoveDown, mContext, moveDownDrawableId);
+            setImageDrawable(mIbtnMoveDown, moveDownDrawableId);
 
             mTextWatcher.bindPosition(position);
             mTvStepNumber.setText(String.valueOf(stepPos + 1));
@@ -451,7 +368,8 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
             mEtStepDescription.setText(currentStep.getStepDescription());
 
             ArrayList<String> imageUrls = currentStep.getImageUrls();
-            final StepImageAdapter stepImageAdapter = new StepImageAdapter(imageUrls, stepPos, mEditCallback);
+            final StepImageAdapter stepImageAdapter
+                    = new StepImageAdapter(imageUrls, stepPos, mEditCallback);
             stepImageAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override
                 public void onItemRangeInserted(int positionStart, int itemCount) {
@@ -469,11 +387,13 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
         }
 
         public void removeSpecifiedStepImage(int imagePos) {
-            ((StepImageAdapter) mRecyclerView.getAdapter()).notifyRemoved(imagePos);
+            StepImageAdapter stepImageAdapter = ((StepImageAdapter) mRecyclerView.getAdapter());
+            if (stepImageAdapter != null) stepImageAdapter.notifyRemoved(imagePos);
         }
 
         public void setSpecifiedStepImage(int imagePos, String urlString) {
-            ((StepImageAdapter) mRecyclerView.getAdapter()).notifyChanged(imagePos, urlString);
+            StepImageAdapter stepImageAdapter = ((StepImageAdapter) mRecyclerView.getAdapter());
+            if (stepImageAdapter != null) stepImageAdapter.notifyChanged(imagePos, urlString);
         }
 
         private int getMoveDownDrawableId(boolean isDisable) {
@@ -531,7 +451,8 @@ public class EditItemAdapter extends RecyclerView.Adapter implements EditTextCha
         return isDisable ? R.drawable.ic_remove_gray : R.drawable.ic_remove;
 
     }
-    private void setImageDrawable(ImageButton imageButton, Context context, int drawableId) {
-        imageButton.setImageDrawable(ContextCompat.getDrawable(context, drawableId));
+
+    private void setImageDrawable(ImageButton imageButton, int drawableId) {
+        imageButton.setImageDrawable(ContextCompat.getDrawable(BeChef.getAppContext(), drawableId));
     }
 }

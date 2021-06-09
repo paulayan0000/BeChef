@@ -1,6 +1,6 @@
 package com.paula.android.bechef;
 
-import android.content.Context;
+import android.app.Activity;
 
 import androidx.fragment.app.FragmentManager;
 
@@ -11,14 +11,12 @@ import java.util.ArrayList;
 public interface BaseContract {
     interface BaseView<P> {
         void setCustomMainPresenter(P customMainPresenter);
-
-        Context getContext();
     }
 
     interface BasePresenter {
         void start();
 
-        Context getContext();
+        Activity getActivity();
     }
 
     interface MainPresenter extends BasePresenter {
@@ -37,7 +35,7 @@ public interface BaseContract {
         int getChosenItemsCount();
     }
 
-    interface CustomPresenterForAction extends BasePresenter{
+    interface CustomPresenterForAction extends BasePresenter {
         void leaveChooseMode();
 
         ArrayList<BaseTab> getOtherTabs();

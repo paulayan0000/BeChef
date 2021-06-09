@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:background="@color/white">
 
-    <EditText
+    <com.paula.android.bechef.utils.BeChefEditText
         android:id="@+id/edittext_material_group"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

@@ -1,6 +1,6 @@
 package com.paula.android.bechef.customChild;
 
-import android.content.Context;
+import android.app.Activity;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -28,11 +28,6 @@ public class CustomChildPresenter<I> implements ChildContract.CustomChildPresent
     }
 
     @Override
-    public Context getContext() {
-        return mCustomChildFragment.getContext();
-    }
-
-    @Override
     public void openDetail(Object content, boolean isBottomShown) {
         mCustomChildFragment.showDetailUi(content, isBottomShown);
     }
@@ -49,6 +44,11 @@ public class CustomChildPresenter<I> implements ChildContract.CustomChildPresent
     @Override
     public void start() {
         loadSpecificItems(Constants.FILTER_WITH_TIME_DESC);
+    }
+
+    @Override
+    public Activity getActivity() {
+        return ((CustomChildFragment<I>) mCustomChildFragment).getActivity();
     }
 
     public FragmentManager getFragmentManager() {

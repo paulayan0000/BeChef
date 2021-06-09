@@ -23,7 +23,7 @@ public class RecipePresenter extends CustomMainPresenter {
     }
 
     private void loadRecipeTabs() {
-        TabDatabase.getTabInstance(getContext()).recipeDao().getAllLive()
+        TabDatabase.getTabInstance().recipeDao().getAllLive()
                 .observe(mCustomMainView, new Observer<List<RecipeTab>>() {
                     @Override
                     public void onChanged(List<RecipeTab> recipeTabs) {

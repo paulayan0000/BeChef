@@ -2,11 +2,13 @@ package com.paula.android.bechef.dialog;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.KeyEvent;
@@ -21,12 +23,19 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.adapters.EditItemAdapter;
+import com.paula.android.bechef.data.MaterialGroup;
+import com.paula.android.bechef.data.Step;
+import com.paula.android.bechef.data.dao.BaseDao;
+import com.paula.android.bechef.data.database.ItemDatabase;
 import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.RecipeItem;
 import com.paula.android.bechef.detail.DetailContract;
 import com.paula.android.bechef.R;
+import com.paula.android.bechef.thread.BeChefRunnableInterface;
+import com.paula.android.bechef.thread.BeChefRunnable;
 import com.paula.android.bechef.utils.Constants;
 import com.paula.android.bechef.utils.EditCallback;
 import com.paula.android.bechef.utils.Utils;
@@ -35,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -47,8 +57,8 @@ import static android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS;
 import static androidx.core.content.ContextCompat.checkSelfPermission;
 import static androidx.core.content.FileProvider.getUriForFile;
 
-public class EditItemDialog extends DialogFragment implements View.OnClickListener,
-        AlertDialogClickCallback, EditCallback {
+public class EditItemDialog extends DialogFragment
+        implements View.OnClickListener, AlertDialogClickCallback, EditCallback {
     private final RecipeItem mRecipeItem;
     private Context mContext;
     private DetailContract.Presenter mDetailPresenter;
@@ -111,7 +121,7 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
                 if (parent.getChildAdapterPosition(view) <= Constants.INFO_SIZE) {
                     outRect.top = 0;
                 } else if (outRect.top == 0) {
-                    outRect.top = Utils.convertDpToPixel(Constants.NORMAL_PADDING, mContext);
+                    outRect.top = Utils.convertDpToPixel(Constants.NORMAL_PADDING);
                 }
             }
         });
@@ -140,7 +150,7 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
         if (currentViewId == R.id.imagebutton_toolbar_back) {
             createLeaveAlertDialog();
         } else if (currentViewId == R.id.imagebutton_toolbar_complete) {
-            mEditItemAdapter.onCompleteClicked();
+            saveData();
         }
     }
 
@@ -161,37 +171,137 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
 
     @Override
     public boolean isFromBookmark() {
-        return getTag().equals(BookmarkItem.class.getSimpleName());
+        if (getTag() != null) {
+            return getTag().equals(BookmarkItem.class.getSimpleName());
+        }
+        return false;
     }
 
-    @Override
-    public void onSaveDataComplete(BaseItem baseItem) {
-        if (mDetailPresenter != null) mDetailPresenter.refreshData(baseItem);
-        dismiss();
+    public void saveData() {
+        RecipeItem recipeItem = mEditItemAdapter.getRecipeItem();
+        if (!isReceiptItemCompleted(recipeItem)) return;
+        final BaseItem finalBaseItem;
+        final boolean finalIsFromBookmark = isFromBookmark();
+        final BaseDao baseDao;
+        if (finalIsFromBookmark) {
+            finalBaseItem = new BookmarkItem(recipeItem);
+            baseDao = ItemDatabase.getItemInstance().bookmarkDao();
+        } else {
+            finalBaseItem = recipeItem;
+            baseDao = ItemDatabase.getItemInstance().recipeDao();
+        }
+
+        new Thread(new BeChefRunnable(new BeChefRunnableInterface() {
+            @Override
+            public void runTasksOnNewThread() {
+                // TODO: custom toast layout for saved data
+                baseDao.insert(finalBaseItem);
+                if (mDetailPresenter == null) {
+                    dismiss();
+                    return;
+                }
+                Activity activity = mDetailPresenter.getActivity();
+                if (activity != null) {
+                    activity.runOnUiThread(new BeChefRunnable(new BeChefRunnableInterface() {
+                        @Override
+                        public void runTasksOnNewThread() {
+                            mDetailPresenter.refreshData(finalBaseItem);
+                            dismiss();
+                        }
+                    }));
+                }
+            }
+        })).start();
+    }
+
+    private boolean isReceiptItemCompleted(RecipeItem recipeItem) {
+        if (recipeItem.getTitle().isEmpty()) {
+            Toast.makeText(mContext, BeChef.getAppContext().getString(R.string.toast_require_title),
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (isFromBookmark()) return true;
+        if (isMaterialEmpty()) {
+            Toast.makeText(mContext, BeChef.getAppContext().getString(R.string.toast_require_material),
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (isStepEmpty()) {
+            Toast.makeText(mContext, BeChef.getAppContext().getString(R.string.toast_require_step),
+                    Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private ArrayList<MaterialGroup> rearrangeMaterialGroups() {
+        ArrayList<MaterialGroup> materialGroups = mRecipeItem.getMaterialGroups();
+        MaterialGroup group;
+        for (int i = 0; i < materialGroups.size(); i++) {
+            group = materialGroups.get(i);
+            group.getMaterialContents().removeAll(Collections.singleton(""));
+            if (!group.getGroupName().isEmpty()) continue;
+            // Set name and remove empty content for a group
+            group.setGroupName(BeChef.getAppContext().getString(R.string.nameless_group_name));
+            if (group.getMaterialContents().size() == 0) materialGroups.remove(group);
+        }
+        return materialGroups;
+    }
+
+    private ArrayList<Step> rearrangeSteps() {
+        ArrayList<Step> steps = mRecipeItem.getSteps();
+        Step step;
+        for (int i = 0; i < steps.size(); i++) {
+            step = steps.get(i);
+            step.getImageUrls().removeAll(Collections.singleton(""));
+            if (step.getImageUrls().size() == 0 && step.getStepDescription().isEmpty()) {
+                steps.remove(step);
+            }
+        }
+        return steps;
+    }
+
+    private boolean isMaterialEmpty() {
+        ArrayList<MaterialGroup> rearrangedMaterialGroups = rearrangeMaterialGroups();
+        if (rearrangedMaterialGroups.size() == 0) {
+            return true;
+        }
+        mRecipeItem.setMaterialGroups(rearrangedMaterialGroups);
+        return false;
+    }
+
+    private boolean isStepEmpty() {
+        ArrayList<Step> rearrangedSteps = rearrangeSteps();
+        if (rearrangedSteps.size() == 0) {
+            return true;
+        }
+        mRecipeItem.setSteps(rearrangedSteps);
+        return false;
     }
 
     @Override
     public void onChooseImages(final int stepPosition, final int imagePosition) {
         mStepPosition = stepPosition;
         mImagePosition = imagePosition;
-        new BeChefAlertDialogBuilder(mContext).setItems(R.array.image_resource_item
-                , new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                List<String> imageResources = Arrays.asList(getResources()
-                        .getStringArray(R.array.image_resource_item));
-                if (which == imageResources.indexOf(getString(R.string.image_resource_remove))) {
-                    setImage("");
-                    return;
-                }
-                if (which == imageResources.indexOf(getString(R.string.image_resource_from_camera))) {
-                    askPermissions();
-                } else {
-                    Intent gallery = new Intent(Intent.ACTION_PICK, EXTERNAL_CONTENT_URI);
-                    startActivityForResult(gallery, Constants.GALLERY_REQUEST_CODE);
-                }
-            }
-        }).setTitle(R.string.image_resource_title).create().show();
+        new BeChefAlertDialogBuilder(mContext)
+                .setItems(R.array.image_resource_item, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        List<String> imageResources = Arrays.asList(getResources()
+                                .getStringArray(R.array.image_resource_item));
+                        if (which == imageResources.indexOf(getString(R.string.image_resource_remove))) {
+                            setImage("");
+                            return;
+                        }
+                        if (which == imageResources
+                                .indexOf(getString(R.string.image_resource_from_camera))) {
+                            askPermissions();
+                        } else {
+                            Intent gallery = new Intent(Intent.ACTION_PICK, EXTERNAL_CONTENT_URI);
+                            startActivityForResult(gallery, Constants.GALLERY_REQUEST_CODE);
+                        }
+                    }
+                }).setTitle(R.string.image_resource_title).create().show();
     }
 
     @Override
@@ -215,9 +325,9 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
         }
     }
 
-    private void addPermissionCheckResults(List<String>listPermissionsNeeded, String... permissions) {
+    private void addPermissionCheckResults(List<String> listPermissionsNeeded, String... permissions) {
         for (String permission : permissions) {
-            if (checkSelfPermission(mContext, permission) != PERMISSION_GRANTED) {
+            if (checkSelfPermission(BeChef.getAppContext(), permission) != PERMISSION_GRANTED) {
                 listPermissionsNeeded.add(permission);
             }
         }
@@ -225,13 +335,18 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(mContext.getPackageManager()) != null) {
+        if (takePictureIntent.resolveActivity(BeChef.getAppContext().getPackageManager()) != null) {
             File photoFile;
             photoFile = createImageFile();
-            Uri photoURI = getUriForFile(mContext,
+            Uri photoURI = getUriForFile(BeChef.getAppContext(),
                     Constants.FILE_PROVIDER_AUTHORITY,
                     photoFile);
             takePictureIntent.putExtra(EXTRA_OUTPUT, photoURI);
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP) {
+                takePictureIntent.setClipData(ClipData.newRawUri("", photoURI));
+                takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
             startActivityForResult(takePictureIntent, Constants.CAMERA_REQUEST_CODE);
         }
     }
@@ -290,14 +405,15 @@ public class EditItemDialog extends DialogFragment implements View.OnClickListen
             } else if (isAnyPermissionRejected) {
                 openAppSettingsIntent();
             } else {
-                Toast.makeText(mContext, getString(R.string.toast_require_camera_permission), Toast.LENGTH_SHORT).show();
+                Toast.makeText(BeChef.getAppContext(),
+                        getString(R.string.toast_require_camera_permission), Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     private void openAppSettingsIntent() {
         Intent intent = new Intent(ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.fromParts("package", mContext.getPackageName(), null));
+                Uri.fromParts("package", BeChef.getAppContext().getPackageName(), null));
         startActivity(intent);
     }
 

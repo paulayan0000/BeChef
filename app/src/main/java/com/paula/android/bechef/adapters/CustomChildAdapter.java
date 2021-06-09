@@ -1,6 +1,5 @@
 package com.paula.android.bechef.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +15,10 @@ import com.paula.android.bechef.viewHolders.DefaultViewHolder;
 
 import java.util.ArrayList;
 
-public class CustomChildAdapter<I> extends RecyclerView.Adapter<CustomChildAdapter<I>.DefaultChildViewHolder> {
+public class CustomChildAdapter<I>
+        extends RecyclerView.Adapter<CustomChildAdapter<I>.DefaultChildViewHolder> {
     private final ChildContract.CustomChildPresenter mChildPresenter;
     private final ArrayList<Long> mChosenUids = new ArrayList<>();
-    private Context mContext;
     private Boolean mIsSelectable;
     private ArrayList<I> mBaseItems;
 
@@ -33,14 +32,14 @@ public class CustomChildAdapter<I> extends RecyclerView.Adapter<CustomChildAdapt
     @NonNull
     @Override
     public DefaultChildViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        mContext = parent.getContext();
-        View view = LayoutInflater.from(mContext)
+        View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_custom_child_recycler, parent, false);
         return new DefaultChildViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CustomChildAdapter.DefaultChildViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CustomChildAdapter.DefaultChildViewHolder holder,
+                                 int position) {
         holder.bindCustomView((BaseItem) mBaseItems.get(position));
     }
 
@@ -81,7 +80,7 @@ public class CustomChildAdapter<I> extends RecyclerView.Adapter<CustomChildAdapt
         }
 
         public void bindCustomView(BaseItem baseItem) {
-            bindView(mContext, baseItem);
+            bindView(baseItem);
             if (mIsSelectable) {
                 mIbtnChoose.setVisibility(View.VISIBLE);
                 mIbtnChoose.setSelected(mChosenUids.contains(baseItem.getUid()));

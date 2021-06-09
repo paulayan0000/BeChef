@@ -1,15 +1,22 @@
 package com.paula.android.bechef;
 
 import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.LruCache;
 
 public class BeChef extends Application {
+    private static Context mAppContext;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        mAppContext = this;
         initLruCache();
+    }
+
+    public static Context getAppContext() {
+        return mAppContext;
     }
 
     private void initLruCache() {

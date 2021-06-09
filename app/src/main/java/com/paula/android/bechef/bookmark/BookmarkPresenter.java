@@ -23,7 +23,7 @@ public class BookmarkPresenter extends CustomMainPresenter {
     }
 
     private void loadBookmarkTabs() {
-        TabDatabase.getTabInstance(getContext()).bookmarkDao().getAllLive()
+        TabDatabase.getTabInstance().bookmarkDao().getAllLive()
                 .observe(mCustomMainView, new Observer<List<BookmarkTab>>() {
                     @Override
                     public void onChanged(List<BookmarkTab> bookmarkTabs) {

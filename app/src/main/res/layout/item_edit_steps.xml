@@ -55,7 +55,7 @@
         app:layout_constraintTop_toTopOf="@id/edittext_step_description"
         app:layout_constraintBottom_toBottomOf="@id/edittext_step_description"/>
 
-    <EditText
+    <com.paula.android.bechef.utils.BeChefEditText
         android:id="@+id/edittext_step_description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

@@ -20,19 +20,19 @@ public class RecipeChildPresenter extends CustomChildPresenter<RecipeItem> {
         LiveData<List<RecipeItem>> liveData;
         switch (mDataFilterType) {
             case Constants.FILTER_WITH_TIME_ASC:
-                liveData = ItemDatabase.getItemInstance(getContext()).recipeDao()
+                liveData = ItemDatabase.getItemInstance().recipeDao()
                         .getAllWithTimeAscLive(mTabUid);
                 break;
             case Constants.FILTER_WITH_TIME_DESC:
-                liveData = ItemDatabase.getItemInstance(getContext()).recipeDao()
+                liveData = ItemDatabase.getItemInstance().recipeDao()
                         .getAllWithTimeDescLive(mTabUid);
                 break;
             case Constants.FILTER_WITH_RATING_ASC:
-                liveData = ItemDatabase.getItemInstance(getContext()).recipeDao()
+                liveData = ItemDatabase.getItemInstance().recipeDao()
                         .getAllWithRatingAscLive(mTabUid);
                 break;
             case Constants.FILTER_WITH_RATING_DESC:
-                liveData = ItemDatabase.getItemInstance(getContext()).recipeDao()
+                liveData = ItemDatabase.getItemInstance().recipeDao()
                         .getAllWithRatingDescLive(mTabUid);
                 break;
             default:

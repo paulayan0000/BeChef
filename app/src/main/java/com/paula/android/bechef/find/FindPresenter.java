@@ -1,17 +1,17 @@
 package com.paula.android.bechef.find;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.api.beans.YouTubeData;
 import com.paula.android.bechef.api.BeChefApiHelper;
-import com.paula.android.bechef.api.callbacks.GetYouTubeDataCallback;
+import com.paula.android.bechef.thread.GetDataTaskCallback;
 import com.paula.android.bechef.api.exceptions.NoResourceException;
-import com.paula.android.bechef.api.GetYouTubeDataTask;
+import com.paula.android.bechef.thread.GetDataAsyncTask;
 import com.paula.android.bechef.data.dao.BookmarkItemDao;
 import com.paula.android.bechef.data.dao.RecipeItemDao;
 import com.paula.android.bechef.data.database.ItemDatabase;
@@ -30,7 +30,8 @@ import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 public class FindPresenter implements FindContract.Presenter {
     private final FindContract.View mFindFragment;
     private ArrayList<BaseTab> mBaseTabs = null;
-    private GetYouTubeDataTask mGetYouTubeDataTask;
+    private GetDataAsyncTask<YouTubeData> mGetDataAsyncTask;
+    private GetDataAsyncTask<ArrayList<BaseItem>> mGetItemDataTask;
     private String mNextPagingId = "";
     private boolean mLoading = false;
     private int mLastVisibleItemPosition;
@@ -71,8 +72,8 @@ public class FindPresenter implements FindContract.Presenter {
     }
 
     @Override
-    public Context getContext() {
-        return mFindFragment.getContext();
+    public Activity getActivity() {
+        return ((FindFragment) mFindFragment).getActivity();
     }
 
     @Override
@@ -82,11 +83,17 @@ public class FindPresenter implements FindContract.Presenter {
 
     @Override
     public void cancelTask() {
-        if (mGetYouTubeDataTask != null && !mGetYouTubeDataTask.isCancelled() &&
-                mGetYouTubeDataTask.getStatus() == AsyncTask.Status.RUNNING) {
-            mGetYouTubeDataTask.cancel(true);
-            mLoading = false;
+        if (mGetDataAsyncTask != null && !mGetDataAsyncTask.isCancelled() &&
+                mGetDataAsyncTask.getStatus() == AsyncTask.Status.RUNNING) {
+            mGetDataAsyncTask.cancel(true);
+            mGetDataAsyncTask = null;
         }
+        if (mGetItemDataTask != null && !mGetItemDataTask.isCancelled() &&
+                mGetItemDataTask.getStatus() == AsyncTask.Status.RUNNING) {
+            mGetItemDataTask.cancel(true);
+            mGetItemDataTask = null;
+        }
+        mLoading = false;
     }
 
     @Override
@@ -106,50 +113,64 @@ public class FindPresenter implements FindContract.Presenter {
         final String filterRange = mFindFragment.getChosenFilterRange();
         final String keyword = mFindFragment.getCurrentKeyword();
         final boolean isFromBookmark = mBaseTabs.get(0) instanceof BookmarkTab;
-        Runnable runnableOnNewThread;
-        runnableOnNewThread = new Runnable() {
+
+        mGetItemDataTask = new GetDataAsyncTask<>(new GetDataTaskCallback<ArrayList<BaseItem>>() {
             @Override
-            public void run() {
-                final ArrayList<BaseItem> baseItems;
+            public ArrayList<BaseItem> doInBackground() {
+                ArrayList<BaseItem> baseItems;
                 if (isFromBookmark) {
-                    BookmarkItemDao dao = ItemDatabase.getItemInstance(getContext()).bookmarkDao();
+                    BookmarkItemDao dao = ItemDatabase.getItemInstance().bookmarkDao();
                     switch (filterRange) {
                         case Constants.VARIABLE_NAME_TITLE:
-                            baseItems = new ArrayList<BaseItem>(dao.findRelatedTitles(keyword, tabUid));
+                            baseItems = new ArrayList<BaseItem>(dao
+                                    .findRelatedTitles(keyword, tabUid));
                             break;
                         case Constants.VARIABLE_NAME_TAGS:
-                            baseItems = new ArrayList<BaseItem>(dao.findRelatedTags(keyword, tabUid));
+                            baseItems = new ArrayList<BaseItem>(dao
+                                    .findRelatedTags(keyword, tabUid));
                             break;
                         default:
-                            baseItems = new ArrayList<BaseItem>(dao.findRelatedDescriptions(keyword, tabUid));
+                            baseItems = new ArrayList<BaseItem>(dao
+                                    .findRelatedDescriptions(keyword, tabUid));
                             break;
                     }
                 } else {
-                    RecipeItemDao dao = ItemDatabase.getItemInstance(getContext()).recipeDao();
+                    RecipeItemDao dao = ItemDatabase.getItemInstance().recipeDao();
                     switch (filterRange) {
                         case Constants.VARIABLE_NAME_TITLE:
-                            baseItems = new ArrayList<BaseItem>(dao.findRelatedTitles(keyword, tabUid));
+                            baseItems = new ArrayList<BaseItem>(dao
+                                    .findRelatedTitles(keyword, tabUid));
                             break;
                         case Constants.VARIABLE_NAME_TAGS:
-                            baseItems = new ArrayList<BaseItem>(dao.findRelatedTags(keyword, tabUid));
+                            baseItems = new ArrayList<BaseItem>(dao
+                                    .findRelatedTags(keyword, tabUid));
                             break;
                         default:
-                            baseItems = new ArrayList<BaseItem>(dao.findRelatedDescriptions(keyword, tabUid));
+                            baseItems = new ArrayList<BaseItem>(dao
+                                    .findRelatedDescriptions(keyword, tabUid));
                             break;
                     }
                 }
-                if (getContext() != null) {
-                    ((Activity) getContext()).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mFindFragment.updateFilterResult(baseItems);
-                            mLoading = false;
-                        }
-                    });
-                }
+                return baseItems;
             }
-        };
-        new Thread(runnableOnNewThread).start();
+
+            @Override
+            public void onCompleted(ArrayList<BaseItem> baseItems) {
+                if (mGetItemDataTask.isCancelled()) {
+                    mLoading = false;
+                    return;
+                }
+                mFindFragment.updateFilterResult(baseItems);
+                mLoading = false;
+            }
+
+            @Override
+            public void onError(Exception error) {
+            }
+        });
+        if (!mGetItemDataTask.isCancelled()) {
+            mGetItemDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     private void showLoading() {
@@ -165,11 +186,11 @@ public class FindPresenter implements FindContract.Presenter {
             queryParameters.put("maxResults", Constants.API_MAX_RESULTS);
             queryParameters.put("q", mFindFragment.getCurrentKeyword());
 
-            mGetYouTubeDataTask = new GetYouTubeDataTask(queryParameters, new GetYouTubeDataCallback() {
+            mGetDataAsyncTask = new GetDataAsyncTask<>(new GetDataTaskCallback<YouTubeData>() {
                 Exception error;
 
                 @Override
-                public YouTubeData doInBackground(Map<String, String> queryParameters) {
+                public YouTubeData doInBackground() {
                     YouTubeData bean = null;
                     try {
                         bean = BeChefApiHelper.GetYoutubeData(queryParameters, Constants.API_SEARCH);
@@ -181,6 +202,10 @@ public class FindPresenter implements FindContract.Presenter {
 
                 @Override
                 public void onCompleted(YouTubeData bean) {
+                    if (mGetDataAsyncTask.isCancelled()) {
+                        mLoading = false;
+                        return;
+                    }
                     if (bean != null && error == null) {
                         mFindFragment.updateSearchResult(bean);
                         mNextPagingId = bean.getNextPageToken();
@@ -196,8 +221,8 @@ public class FindPresenter implements FindContract.Presenter {
                     mLoading = false;
                 }
             });
-            if (!mGetYouTubeDataTask.isCancelled()) {
-                mGetYouTubeDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            if (!mGetDataAsyncTask.isCancelled()) {
+                mGetDataAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
     }
@@ -205,9 +230,9 @@ public class FindPresenter implements FindContract.Presenter {
     private YouTubeData setErrorMsg(Exception error) {
         YouTubeData bean = new YouTubeData();
         if (error instanceof NoResourceException) {
-            bean.setErrorMsg(getContext().getResources().getString(R.string.adapter_search_nothing));
+            bean.setErrorMsg(BeChef.getAppContext().getResources().getString(R.string.adapter_search_nothing));
         } else {
-            bean.setErrorMsg(getContext().getResources().getString(R.string.adapter_error));
+            bean.setErrorMsg(BeChef.getAppContext().getResources().getString(R.string.adapter_error));
         }
         return bean;
     }

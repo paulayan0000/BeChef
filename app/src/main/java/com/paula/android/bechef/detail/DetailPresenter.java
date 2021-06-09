@@ -1,8 +1,8 @@
 package com.paula.android.bechef.detail;
 
 import android.app.Activity;
-import android.content.Context;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.api.beans.YouTubeData;
 import com.paula.android.bechef.api.BeChefApiHelper;
 import com.paula.android.bechef.api.exceptions.NoResourceException;
@@ -16,6 +16,8 @@ import com.paula.android.bechef.data.entity.DiscoverTab;
 import com.paula.android.bechef.data.entity.RecipeItem;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.dialog.AddToBookmarkDialogBuilder;
+import com.paula.android.bechef.thread.BeChefRunnableInterface;
+import com.paula.android.bechef.thread.BeChefRunnable;
 import com.paula.android.bechef.utils.Constants;
 
 import java.util.ArrayList;
@@ -36,11 +38,6 @@ public class DetailPresenter implements DetailContract.Presenter {
     }
 
     @Override
-    public Context getContext() {
-        return mDetailView.getContext();
-    }
-
-    @Override
     public void setAllThreadCanceled() {
         mIsAllThreadCancel = true;
     }
@@ -53,19 +50,24 @@ public class DetailPresenter implements DetailContract.Presenter {
             mDetailView.showDetailUi((BookmarkItem) mDataContent);
         } else {
             mDetailView.showLoading(true);
-            Runnable runnable = getRunnableOnNewThread();
+            BeChefRunnable runnable = getRunnableOnNewThread();
             new Thread(runnable).start();
         }
     }
 
-    private Runnable getRunnableOnNewThread() {
-        Runnable runnable;
+    @Override
+    public Activity getActivity() {
+        return ((DetailFragment) mDetailView).getActivity();
+    }
+
+    private BeChefRunnable getRunnableOnNewThread() {
+        BeChefRunnable runnable;
         if (mDataContent instanceof DiscoverItem) {
-            runnable = new Runnable() {
+            runnable = new BeChefRunnable(new BeChefRunnableInterface() {
                 @Override
-                public void run() {
+                public void runTasksOnNewThread() {
                     // Runnable for detail from search
-                    DiscoverTab discoverTab = TabDatabase.getTabInstance(getContext()).discoverDao()
+                    DiscoverTab discoverTab = TabDatabase.getTabInstance().discoverDao()
                             .getTabWithChannelId(((DiscoverItem) mDataContent).getChannelId());
                     DiscoverItem discoverItem = (DiscoverItem) mDataContent;
                     discoverItem.setChannelInBeChef(discoverTab != null);
@@ -74,7 +76,7 @@ public class DetailPresenter implements DetailContract.Presenter {
                     mDataContent = discoverItem;
                     Map<String, String> queryParameters = new HashMap<>();
                     queryParameters.put("pageToken", "");
-                    Runnable runnable;
+                    BeChefRunnable runnable;
                     if (discoverItem.getVideoId().isEmpty()) {
                         // load channel
                         queryParameters.put("id", discoverItem.getChannelId());
@@ -84,47 +86,47 @@ public class DetailPresenter implements DetailContract.Presenter {
                         queryParameters.put("id", discoverItem.getVideoId());
                         runnable = loadVideo(queryParameters, Constants.API_VIDEOS);
                     }
-                    if (!mIsAllThreadCancel && getContext() != null) {
-                        ((Activity) getContext()).runOnUiThread(runnable);
+                    if (!mIsAllThreadCancel && getActivity() != null) {
+                        (getActivity()).runOnUiThread(runnable);
                     }
                 }
-            };
+            });
         } else {
-            runnable = new Runnable() {
+            runnable = new BeChefRunnable(new BeChefRunnableInterface() {
                 @Override
-                public void run() {
+                public void runTasksOnNewThread() {
                     // Runnable for detail from discover
-                    BookmarkItem bookmarkItem = ItemDatabase.getItemInstance(getContext())
+                    BookmarkItem bookmarkItem = ItemDatabase.getItemInstance()
                             .bookmarkDao().getItemWithVideoId((String) mDataContent);
                     if (mIsAllThreadCancel) return;
-                    Runnable runnable;
+                    BeChefRunnable runnable;
                     if (bookmarkItem != null) {
                         mDataContent = bookmarkItem;
-                        runnable = new Runnable() {
+                        runnable = new BeChefRunnable(new BeChefRunnableInterface() {
                             @Override
-                            public void run() {
+                            public void runTasksOnNewThread() {
                                 mDetailView.showDetailUi((BookmarkItem) mDataContent);
                             }
-                        };
+                        });
                     } else {
                         Map<String, String> queryParameters = new HashMap<>();
                         queryParameters.put("pageToken", "");
                         queryParameters.put("id", (String) mDataContent);
                         runnable = loadVideo(queryParameters, Constants.API_VIDEOS);
                     }
-                    if (!mIsAllThreadCancel && getContext() != null)
-                        ((Activity) getContext()).runOnUiThread(runnable);
+                    if (!mIsAllThreadCancel && getActivity() != null)
+                        (getActivity()).runOnUiThread(runnable);
                 }
-            };
+            });
         }
         return runnable;
     }
 
-    private Runnable loadVideo(Map<String, String> queryParameters, final String apiType) {
+    private BeChefRunnable loadVideo(Map<String, String> queryParameters, final String apiType) {
         queryParameters.put("part", Constants.API_PART_ALL);
         queryParameters.put("maxResults", Constants.API_MAX_RESULTS);
 
-        Runnable runnableOnUiThread;
+        BeChefRunnable runnableOnUiThread;
         if (mIsAllThreadCancel) return null;
         try {
             YouTubeData bean = BeChefApiHelper.GetYoutubeData(queryParameters, apiType);
@@ -133,19 +135,19 @@ public class DetailPresenter implements DetailContract.Presenter {
                 discoverItem.setChannelInBeChef(((DiscoverItem) mDataContent).isChannelInBeChef());
             }
             mDataContent = discoverItem;
-            runnableOnUiThread = new Runnable() {
+            runnableOnUiThread = new BeChefRunnable(new BeChefRunnableInterface() {
                 @Override
-                public void run() {
+                public void runTasksOnNewThread() {
                     mDetailView.showDetailUi(discoverItem);
                 }
-            };
+            });
         } catch (final Exception error) {
-            runnableOnUiThread = new Runnable() {
+            runnableOnUiThread = new BeChefRunnable(new BeChefRunnableInterface() {
                 @Override
-                public void run() {
+                public void runTasksOnNewThread() {
                     showErrorMsg(error);
                 }
-            };
+            });
         }
         if (mIsAllThreadCancel) return null;
         return runnableOnUiThread;
@@ -153,9 +155,9 @@ public class DetailPresenter implements DetailContract.Presenter {
 
     private void showErrorMsg(Exception error) {
         if (error instanceof NoResourceException) {
-            mDetailView.showErrorUi(getContext().getResources().getString(R.string.adapter_nothing));
+            mDetailView.showErrorUi(BeChef.getAppContext().getResources().getString(R.string.adapter_nothing));
         } else {
-            mDetailView.showErrorUi(getContext().getResources().getString(R.string.adapter_error));
+            mDetailView.showErrorUi(BeChef.getAppContext().getResources().getString(R.string.adapter_error));
         }
     }
 
@@ -177,41 +179,42 @@ public class DetailPresenter implements DetailContract.Presenter {
     @Override
     public void addToDiscover(final DiscoverItem discoverItem) {
         discoverItem.setChannelInBeChef(true);
-        new Thread(new Runnable() {
+        new Thread(new BeChefRunnable(new BeChefRunnableInterface() {
             @Override
-            public void run() {
-                TabDatabase.getTabInstance(getContext()).discoverDao()
+            public void runTasksOnNewThread() {
+                TabDatabase.getTabInstance().discoverDao()
                         .insert(new DiscoverTab(discoverItem.getChannelId(), discoverItem.getTitle()));
-                if (getContext() != null) {
-                    ((Activity) getContext()).runOnUiThread(new Runnable() {
+                if (getActivity() != null) {
+                    (getActivity()).runOnUiThread(new BeChefRunnable(new BeChefRunnableInterface() {
                         @Override
-                        public void run() {
+                        public void runTasksOnNewThread() {
                             updateData(discoverItem);
                         }
-                    });
+                    }));
                 }
             }
-        }).start();
+        }));
     }
 
     @Override
     public void addToBookmark() {
         final DetailPresenter detailPresenter = this;
-        new Thread(new Runnable() {
+        new Thread(new BeChefRunnable(new BeChefRunnableInterface() {
             @Override
-            public void run() {
+            public void runTasksOnNewThread() {
                 final ArrayList<BaseTab> baseTabs = new ArrayList<BaseTab>(TabDatabase
-                        .getTabInstance(getContext()).bookmarkDao().getAll());
-                if (getContext() != null) {
-                    ((Activity) getContext()).runOnUiThread(new Runnable() {
+                        .getTabInstance().bookmarkDao().getAll());
+                if (getActivity() != null) {
+                    (getActivity()).runOnUiThread(new BeChefRunnable(new BeChefRunnableInterface() {
                         @Override
-                        public void run() {
-                            new AddToBookmarkDialogBuilder(detailPresenter).setTabs(baseTabs)
+                        public void runTasksOnNewThread() {
+                            new AddToBookmarkDialogBuilder(((DetailFragment) mDetailView).getContext(),
+                                    detailPresenter).setTabs(baseTabs)
                                     .create().show();
                         }
-                    });
+                    }));
                 }
             }
-        }).start();
+        })).start();
     }
 }

@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,6 +19,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.activities.BeChefActivity;
 import com.paula.android.bechef.adapters.DiscoverChildAdapter;
 import com.paula.android.bechef.adapters.FindConditionAdapter;
@@ -40,7 +40,6 @@ import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class FindFragment extends Fragment implements FindContract.View {
     private FindContract.Presenter mPresenter;
-    private Context mContext;
     private FindConditionAdapter mFindConditionAdapter;
     private FilterResultAdapter mFilterResultAdapter;
     private DiscoverChildAdapter mSearchResultAdapter;
@@ -49,11 +48,7 @@ public class FindFragment extends Fragment implements FindContract.View {
     private View mViewMask;
     private String mOldKeyword;
 
-    private FindFragment() {
-    }
-
-    public static FindFragment newInstance() {
-        return new FindFragment();
+    public FindFragment() {
     }
 
     @Nullable
@@ -62,11 +57,10 @@ public class FindFragment extends Fragment implements FindContract.View {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_find, container, false);
-        mContext = root.getContext();
         root.findViewById(R.id.imagebutton_toolbar_back).setOnClickListener(new android.view.View.OnClickListener() {
             @Override
             public void onClick(android.view.View v) {
-                ((BeChefActivity) mContext).onBackPressed();
+                ((BeChefActivity) getActivity()).onBackPressed();
             }
         });
         mTvFindResult = root.findViewById(R.id.textview_total_find_result);
@@ -80,7 +74,7 @@ public class FindFragment extends Fragment implements FindContract.View {
     private void initFindConditionRecyclerView(View root) {
         RecyclerView recyclerViewFindCondition = root.findViewById(R.id.recyclerview_find_condition);
         recyclerViewFindCondition.setLayoutManager(
-                new LinearLayoutManager(mContext, RecyclerView.HORIZONTAL, false));
+                new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
         if (recyclerViewFindCondition.getItemDecorationCount() == 0)
             recyclerViewFindCondition.addItemDecoration(new RecyclerView.ItemDecoration() {
                 @Override
@@ -90,7 +84,7 @@ public class FindFragment extends Fragment implements FindContract.View {
                                            @NonNull RecyclerView.State state) {
                     super.getItemOffsets(outRect, view, parent, state);
                     if (parent.getChildAdapterPosition(view) != 0) {
-                        outRect.left = Utils.convertDpToPixel(Constants.NORMAL_PADDING, mContext);
+                        outRect.left = Utils.convertDpToPixel(Constants.NORMAL_PADDING);
                     }
                 }
             });
@@ -106,7 +100,7 @@ public class FindFragment extends Fragment implements FindContract.View {
             // Search from discover
             mSearchResultAdapter = new DiscoverChildAdapter(new YouTubeData(), mPresenter);
             recyclerViewResult.setAdapter(mSearchResultAdapter);
-            gridLayoutManager = new GridLayoutManager(mContext, 2);
+            gridLayoutManager = new GridLayoutManager(getContext(), 2);
             gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
                 public int getSpanSize(int position) {
@@ -136,7 +130,7 @@ public class FindFragment extends Fragment implements FindContract.View {
             mFilterResultAdapter = new FilterResultAdapter(new ArrayList<BaseItem>(),
                     (FindPresenter) mPresenter);
             recyclerViewResult.setAdapter(mFilterResultAdapter);
-            gridLayoutManager = new GridLayoutManager(mContext, 1);
+            gridLayoutManager = new GridLayoutManager(getContext(), 1);
             recyclerViewResult.clearOnScrollListeners();
         }
         recyclerViewResult.setLayoutManager(gridLayoutManager);
@@ -149,7 +143,7 @@ public class FindFragment extends Fragment implements FindContract.View {
                                            @NonNull RecyclerView.State state) {
                     super.getItemOffsets(outRect, view, parent, state);
                     if (outRect.bottom == 0) {
-                        outRect.bottom = Utils.convertDpToPixel(Constants.NORMAL_PADDING, mContext);
+                        outRect.bottom = Utils.convertDpToPixel(Constants.NORMAL_PADDING);
                     }
                 }
             });
@@ -159,12 +153,9 @@ public class FindFragment extends Fragment implements FindContract.View {
     private void setSearchView(android.view.View root) {
         mSearchView = root.findViewById(R.id.search_view);
         mSearchView.onActionViewExpanded();
-        ImageView deleteButton = mSearchView.findViewById(R.id.search_close_btn);
-        deleteButton.setBackgroundColor(getResources().getColor(R.color.white));
 
         // Set AutoCompleteTextView: do query once not hasFocus
         AutoCompleteTextView autoCompleteTextView = mSearchView.findViewById(R.id.search_src_text);
-        autoCompleteTextView.setBackgroundColor(getResources().getColor(R.color.white));
         autoCompleteTextView.getLayoutParams().height = MATCH_PARENT;
         autoCompleteTextView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -173,7 +164,7 @@ public class FindFragment extends Fragment implements FindContract.View {
                     mViewMask.setVisibility(View.VISIBLE);
                 } else {
                     mViewMask.setVisibility(View.GONE);
-                    ((InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE))
+                    ((InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE))
                             .hideSoftInputFromWindow(v.getWindowToken(), 0);
                     doQuery();
                 }
@@ -202,10 +193,10 @@ public class FindFragment extends Fragment implements FindContract.View {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         mPresenter.start();
-        ((BeChefActivity) mContext).showBottomNavigationView(false);
+        ((BeChefActivity) getActivity()).showBottomNavigationView(false);
     }
 
     @Override
@@ -214,15 +205,15 @@ public class FindFragment extends Fragment implements FindContract.View {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroyView() {
+        super.onDestroyView();
         mPresenter.cancelTask();
-        ((BeChefActivity) mContext).showBottomNavigationView(true);
+        ((BeChefActivity) getActivity()).showBottomNavigationView(true);
     }
 
     @Override
     public void showDetailUi(Object content, boolean isBottomShown) {
-        ((BeChefActivity) mContext).showDetailUi(content, false);
+        ((BeChefActivity) getActivity()).showDetailUi(content, false);
     }
 
     @Override
@@ -238,9 +229,9 @@ public class FindFragment extends Fragment implements FindContract.View {
     private void doQuery() {
         String keyword = getCurrentKeyword();
         if (keyword.equals(mOldKeyword)) return;
-        mTvFindResult.setText(getString(R.string.total_find_result));
+        mTvFindResult.setText(BeChef.getAppContext().getString(R.string.total_find_result));
+        // clear all result
         mPresenter.cancelTask();
-        // clear all result for discover
         if (mSearchResultAdapter != null) mSearchResultAdapter.clearData();
 
         if (!keyword.isEmpty()) {
@@ -264,16 +255,16 @@ public class FindFragment extends Fragment implements FindContract.View {
 
     @Override
     public String getChosenVideoType() {
-        return getString(R.string.channel).equals(getChosenTabs().get(0).getTabName()) ?
+        return BeChef.getAppContext().getString(R.string.channel).equals(getChosenTabs().get(0).getTabName()) ?
                 Constants.API_TYPE_CHANNEL : Constants.API_TYPE_VIDEO;
     }
 
     @Override
     public String getChosenFilterRange() {
         String chosenFilterRange = getChosenTabs().get(1).getTabName();
-        if (getString(R.string.title).equals(chosenFilterRange))
+        if (BeChef.getAppContext().getString(R.string.title).equals(chosenFilterRange))
             return Constants.VARIABLE_NAME_TITLE;
-        else if (getString(R.string.tags).equals(chosenFilterRange))
+        else if (BeChef.getAppContext().getString(R.string.tags).equals(chosenFilterRange))
             return Constants.VARIABLE_NAME_TAGS;
         else
             return Constants.VARIABLE_NAME_DESCRIPTION;
@@ -298,17 +289,17 @@ public class FindFragment extends Fragment implements FindContract.View {
         ArrayList<FindCondition> findConditions = new ArrayList<>();
 
         if (mPresenter.isFromDiscover()) {
-            FindCondition resourceType = new FindCondition(getString(R.string.search_with_type),
-                    getResources().getStringArray(R.array.resource_type));
+            FindCondition resourceType = new FindCondition(BeChef.getAppContext().getString(R.string.search_with_type),
+                    BeChef.getAppContext().getResources().getStringArray(R.array.resource_type));
             findConditions.add(resourceType);
         } else {
             // Filter from bookmark or recipe
-            FindCondition filterTab = new FindCondition(getString(R.string.filter_with_tab), getString(R.string.all));
+            FindCondition filterTab = new FindCondition(BeChef.getAppContext().getString(R.string.filter_with_tab), getString(R.string.all));
             filterTab.getConditionContents().addAll(baseTabs);
             findConditions.add(filterTab);
 
-            FindCondition filterRange = new FindCondition(getString(R.string.filter_with_range),
-                    getResources().getStringArray(R.array.filter_range));
+            FindCondition filterRange = new FindCondition(BeChef.getAppContext().getString(R.string.filter_with_range),
+                    BeChef.getAppContext().getResources().getStringArray(R.array.filter_range));
             findConditions.add(filterRange);
         }
         mFindConditionAdapter.updateData(findConditions);
@@ -317,14 +308,14 @@ public class FindFragment extends Fragment implements FindContract.View {
     @Override
     public void updateFilterResult(ArrayList<BaseItem> baseItems) {
         mFilterResultAdapter.updateData(baseItems);
-        mTvFindResult.setText(String.format(getString(R.string.total_filter_result),
+        mTvFindResult.setText(String.format(BeChef.getAppContext().getString(R.string.total_filter_result),
                 baseItems.size()));
     }
 
     @Override
     public void updateSearchResult(YouTubeData bean) {
-        mSearchResultAdapter.updateData(bean);
-        mTvFindResult.setText(String.format(getString(R.string.total_search_result),
+        mSearchResultAdapter.updateData(getContext(), bean);
+        mTvFindResult.setText(String.format(BeChef.getAppContext().getString(R.string.total_search_result),
                 mSearchResultAdapter.getBaseItemCounts()));
     }
 }

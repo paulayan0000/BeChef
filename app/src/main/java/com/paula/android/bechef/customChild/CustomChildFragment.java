@@ -1,6 +1,5 @@
 package com.paula.android.bechef.customChild;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -11,6 +10,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,22 +29,24 @@ import java.util.ArrayList;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class CustomChildFragment<I> extends BaseMainFragment implements ChildContract.CustomChildView<I> {
+public class CustomChildFragment<I> extends BaseMainFragment
+        implements ChildContract.CustomChildView<I> {
     private final CustomMainFragment mCustomMainFragment;
     private CustomChildAdapter<I> mCustomChildAdapter;
     private TextView mTvInfoDescription;
     private ImageButton mIbtnFilter;
     protected ChildContract.CustomChildPresenter mCustomChildPresenter;
-    protected Context mContext;
 
     public CustomChildFragment(Fragment fragment) {
         mCustomMainFragment = (CustomMainFragment) fragment;
     }
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_child, container, false);
-        mContext = view.getContext();
         mTvInfoDescription = view.findViewById(R.id.textview_total_description);
         mIbtnFilter = view.findViewById(R.id.imagebutton_filter);
         mIbtnFilter.setOnClickListener(new View.OnClickListener() {
@@ -61,7 +63,7 @@ public class CustomChildFragment<I> extends BaseMainFragment implements ChildCon
         String[] itemString = getResources().getStringArray(R.array.filter_type);
         int currentFilterIndex = mCustomChildPresenter.getDataFilterType();
         itemString[currentFilterIndex] = getString(R.string.star) + itemString[currentFilterIndex];
-        new BeChefAlertDialogBuilder(mContext).setTitle(getString(R.string.filter_with))
+        new BeChefAlertDialogBuilder(getContext()).setTitle(getString(R.string.filter_with))
                 .setItems(itemString, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int index) {
@@ -76,26 +78,27 @@ public class CustomChildFragment<I> extends BaseMainFragment implements ChildCon
 
     private void setRecyclerView(View view) {
         RecyclerView recyclerView = view.findViewById(R.id.recyclerview_child);
-        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         if (recyclerView.getItemDecorationCount() == 0)
             recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
                 @Override
                 public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                     super.getItemOffsets(outRect, view, parent, state);
                     if (outRect.top == 0) {
-                        outRect.top = Utils.convertDpToPixel(Constants.NORMAL_PADDING, mContext);
+                        outRect.top = Utils.convertDpToPixel(Constants.NORMAL_PADDING);
                     }
                     if (parent.getChildAdapterPosition(view) == 0) outRect.top = 0;
                 }
             });
-        mCustomChildAdapter = new CustomChildAdapter<>(mIsSelectable, new ArrayList<I>(), mCustomChildPresenter);
+        mCustomChildAdapter = new CustomChildAdapter<>(mIsSelectable,
+                new ArrayList<I>(), mCustomChildPresenter);
         recyclerView.setAdapter(mCustomChildAdapter);
         recyclerView.setHasFixedSize(true);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         mCustomChildPresenter.start();
     }
 
@@ -106,7 +109,7 @@ public class CustomChildFragment<I> extends BaseMainFragment implements ChildCon
 
     @Override
     public void showDetailUi(Object content, boolean isBottomShown) {
-        ((BeChefActivity) mContext).showDetailUi(content, !mIsSelectable);
+        ((BeChefActivity) getActivity()).showDetailUi(content, !mIsSelectable);
     }
 
     @Override

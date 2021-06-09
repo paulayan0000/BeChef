@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.data.entity.DiscoverItem;
 import com.paula.android.bechef.data.MaterialGroup;
@@ -60,7 +61,8 @@ public class DetailAdapter extends RecyclerView.Adapter {
                         .inflate(R.layout.item_search_no_result, parent, false), mErrorMsg);
             case Constants.VIEW_TYPE_LOADING:
                 return new RecyclerView.ViewHolder(inflater
-                        .inflate(R.layout.item_loading, parent, false)) {};
+                        .inflate(R.layout.item_loading, parent, false)) {
+                };
             case Constants.VIEW_TYPE_INFO:
                 return new InfoViewHolder(inflater
                         .inflate(R.layout.item_detail_info, parent, false));
@@ -89,7 +91,7 @@ public class DetailAdapter extends RecyclerView.Adapter {
                 ((StepsViewHolder) holder).bindView(position - mMaterialSize - 2);
                 return;
             case Constants.VIEW_TYPE_IMAGE:
-                ((ThumbnailImageViewHolder) holder).bindView(mContext, mBaseItem.getImageUrl());
+                ((ThumbnailImageViewHolder) holder).bindView(mBaseItem.getImageUrl());
                 return;
             default:
         }
@@ -162,22 +164,22 @@ public class DetailAdapter extends RecyclerView.Adapter {
             String timeAndCount;
             if (mBaseItem instanceof DiscoverItem) {
                 DiscoverItem discoverItem = (DiscoverItem) mBaseItem;
-                timeAndCount = String.format(mContext.getString(R.string.time_and_count),
+                timeAndCount = String.format(BeChef.getAppContext().getString(R.string.time_and_count),
                         getFormatDate(discoverItem.getPublishedAt()),
                         getFormatCount(discoverItem.getViewCount()));
                 if (!discoverItem.getVideoId().isEmpty()) return timeAndCount;
-                return String.format(mContext.getString(R.string.subscribe_count),
+                return String.format(BeChef.getAppContext().getString(R.string.subscribe_count),
                         getFormatCount(discoverItem.getSubscribeCount())) + "\n" + timeAndCount;
             } else if (mBaseItem instanceof BookmarkItem) {
                 BookmarkItem bookmarkItem = (BookmarkItem) mBaseItem;
-                return String.format(mContext.getString(R.string.time_and_rating),
+                return String.format(BeChef.getAppContext().getString(R.string.time_and_rating),
                         bookmarkItem.getCreatedTime(),
                         bookmarkItem.getRating());
             } else {
                 String duration = "".equals(mRecipeItem.getDuration()) ? "--" : mRecipeItem.getDuration();
                 String durationAndWeight = String.format(
-                        mContext.getString(R.string.duration_and_weight), duration, mRecipeItem.getWeight());
-                return String.format(mContext.getString(R.string.time_and_rating),
+                        BeChef.getAppContext().getString(R.string.duration_and_weight), duration, mRecipeItem.getWeight());
+                return String.format(BeChef.getAppContext().getString(R.string.time_and_rating),
                         mRecipeItem.getCreatedTime(), mRecipeItem.getRating()) + "\n" + durationAndWeight;
             }
         }
@@ -186,7 +188,7 @@ public class DetailAdapter extends RecyclerView.Adapter {
             String dateStr = "";
             if (originalTime.isEmpty()) return dateStr;
             String[] timeArray = originalTime.split(Constants.API_TIME_REGEX);
-            dateStr = String.format(mContext.getString(R.string.date_format_for_discover),
+            dateStr = String.format(BeChef.getAppContext().getString(R.string.date_format_for_discover),
                     timeArray[0], timeArray[1], timeArray[2]);
             return dateStr;
         }
@@ -218,7 +220,7 @@ public class DetailAdapter extends RecyclerView.Adapter {
 
             StringBuilder materialContent = new StringBuilder();
             ArrayList<String> contents = materialGroup.getMaterialContents();
-            String contentFormat = mContext.getString(R.string.material_contents_detail);
+            String contentFormat = BeChef.getAppContext().getString(R.string.material_contents_detail);
             if (materialPos == mMaterialSize - 1) {
                 // Set material content and divider for the last one
                 mVBottomDivider.setVisibility(View.VISIBLE);
@@ -255,12 +257,12 @@ public class DetailAdapter extends RecyclerView.Adapter {
             mRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
                 @Override
                 public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                        super.getItemOffsets(outRect, view, parent, state);
+                    super.getItemOffsets(outRect, view, parent, state);
                     if (outRect.top == 0) {
-                        outRect.top = Utils.convertDpToPixel(Constants.NORMAL_PADDING, mContext);
+                        outRect.top = Utils.convertDpToPixel(Constants.NORMAL_PADDING);
                     }
                     if (outRect.right == 0) {
-                        outRect.right = Utils.convertDpToPixel(Constants.NORMAL_PADDING, mContext);
+                        outRect.right = Utils.convertDpToPixel(Constants.NORMAL_PADDING);
                     }
                 }
             });

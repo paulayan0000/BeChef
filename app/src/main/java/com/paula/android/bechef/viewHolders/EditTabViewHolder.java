@@ -1,10 +1,7 @@
 package com.paula.android.bechef.viewHolders;
 
-import android.content.Context;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -12,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.utils.BeChefTextWatcher;
 
@@ -35,7 +33,7 @@ public class EditTabViewHolder extends RecyclerView.ViewHolder implements View.O
         setBasicView();
         itemView.findViewById(R.id.imagebutton_add).setOnClickListener(this);
         mTextWatcher = textWatcher;
-        mEtTabName.setHint(itemView.getContext().getString(R.string.toast_no_empty_tab_name));
+        mEtTabName.setHint(BeChef.getAppContext().getString(R.string.toast_no_empty_tab_name));
         mEtTabName.addTextChangedListener(mTextWatcher);
         itemView.findViewById(R.id.imagebutton_clear).setOnClickListener(this);
     }
@@ -56,8 +54,8 @@ public class EditTabViewHolder extends RecyclerView.ViewHolder implements View.O
         return isDisable ? R.drawable.ic_remove_gray : R.drawable.ic_remove;
     }
 
-    protected void setImageDrawable(ImageButton imageButton, Context context, int drawableId) {
-        imageButton.setImageDrawable(ContextCompat.getDrawable(context, drawableId));
+    protected void setImageDrawable(ImageButton imageButton, int drawableId) {
+        imageButton.setImageDrawable(ContextCompat.getDrawable(itemView.getContext(), drawableId));
     }
 
     @Override

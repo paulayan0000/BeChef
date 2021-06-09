@@ -1,6 +1,5 @@
 package com.paula.android.bechef;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -20,19 +20,21 @@ import com.paula.android.bechef.data.entity.BaseTab;
 import java.util.ArrayList;
 
 public class BaseMainFragment extends Fragment implements View.OnClickListener {
-    protected Context mContext;
     protected AppBarLayout mAppBarLayout;
     protected ViewPager2 mViewPager;
     protected AppBarLayout.LayoutParams mLayoutParams;
     protected BeChefFragmentStateAdapter mDefaultMainAdapter;
     protected boolean mIsSelectable = false;
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-        mContext = view.getContext();
         mAppBarLayout = view.findViewById(R.id.appbar);
-        mLayoutParams = (AppBarLayout.LayoutParams) view.findViewById(R.id.constraintlayout_toolbar).getLayoutParams();
+        mLayoutParams = (AppBarLayout.LayoutParams) view
+                .findViewById(R.id.constraintlayout_toolbar).getLayoutParams();
         ((TextView) view.findViewById(R.id.textview_toolbar_title)).setText(getTitleText());
         setButtons(view);
         setViewPagerAndTab(view);

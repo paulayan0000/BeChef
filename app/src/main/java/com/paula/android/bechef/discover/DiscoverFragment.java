@@ -1,7 +1,10 @@
 package com.paula.android.bechef.discover;
 
+import android.os.Bundle;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.paula.android.bechef.R;
@@ -13,7 +16,8 @@ import com.paula.android.bechef.discoverChild.DiscoverChildFragment;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class DiscoverFragment extends BaseMainFragment implements BaseContract.BaseView<DiscoverPresenter> {
+public class DiscoverFragment extends BaseMainFragment
+        implements BaseContract.BaseView<DiscoverPresenter> {
     private DiscoverPresenter mPresenter;
 
     public static DiscoverFragment newInstance() {
@@ -26,14 +30,14 @@ public class DiscoverFragment extends BaseMainFragment implements BaseContract.B
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         mPresenter.start();
     }
 
     @Override
     protected void editTab() {
-        new EditTabAlertDialogBuilder(mContext, mPresenter.getTabs()).create().show();
+        new EditTabAlertDialogBuilder(getContext(), mPresenter.getTabs()).create().show();
     }
 
     @Override
@@ -44,7 +48,7 @@ public class DiscoverFragment extends BaseMainFragment implements BaseContract.B
 
     @Override
     protected void find() {
-        ((BeChefActivity) mContext).showSearchUi(mPresenter);
+        ((BeChefActivity) getActivity()).showSearchUi(mPresenter);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.paula.android.bechef.detail;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -23,6 +22,7 @@ import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerFragmentX;
 import com.paula.android.bechef.ApiKey;
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.activities.BeChefActivity;
 import com.paula.android.bechef.adapters.DetailAdapter;
 import com.paula.android.bechef.data.entity.BaseItem;
@@ -40,7 +40,6 @@ import static com.google.android.youtube.player.YouTubePlayer.FULLSCREEN_FLAG_CU
 
 public class DetailFragment extends Fragment implements DetailContract.View {
     private static final int RECOVERY_DIALOG_REQUEST = 1;
-    private Context mContext;
     private DetailContract.Presenter mPresenter;
     private DetailAdapter mDetailAdapter;
     private ImageButton mIbtnMore;
@@ -52,11 +51,7 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     private boolean mIsBottomShown;
     private boolean mIsFullscreen;
 
-    private DetailFragment() {
-    }
-
-    public static DetailFragment newInstance() {
-        return new DetailFragment();
+    public DetailFragment() {
     }
 
     public void setBottomShown(boolean bottomShown) {
@@ -71,14 +66,15 @@ public class DetailFragment extends Fragment implements DetailContract.View {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_detail, container, false);
-        mContext = root.getContext();
         mChildFragmentManager = getChildFragmentManager();
         root.findViewById(R.id.imagebutton_toolbar_back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((BeChefActivity) mContext).onBackPressed();
+                ((BeChefActivity) getActivity()).onBackPressed();
             }
         });
         mIbtnMore = root.findViewById(R.id.imagebutton_toolbar_more);
@@ -89,16 +85,16 @@ public class DetailFragment extends Fragment implements DetailContract.View {
 
     private void setRecyclerView(View root) {
         mRvDetail = root.findViewById(R.id.recyclerview_detail);
-        mRvDetail.setLayoutManager(new LinearLayoutManager(mContext));
+        mRvDetail.setLayoutManager(new LinearLayoutManager(getContext()));
         mDetailAdapter = new DetailAdapter(null);
         mRvDetail.setAdapter(mDetailAdapter);
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         mPresenter.start();
-        ((BeChefActivity) mContext).showBottomNavigationView(false);
+        ((BeChefActivity) getActivity()).showBottomNavigationView(false);
     }
 
     @Override
@@ -107,7 +103,7 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     }
 
     @Override
-        public void showDetailUi(final BaseItem content) {
+    public void showDetailUi(final BaseItem content) {
         // Set ibtnMore onClick method
         mIbtnMore.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,14 +115,14 @@ public class DetailFragment extends Fragment implements DetailContract.View {
                             .show(mChildFragmentManager, baseItem.getClass().getSimpleName());
                 } else if (content.getVideoId().isEmpty()) {
                     // onClick for channel
-                    new BeChefAlertDialogBuilder(mContext).setButtons(new AlertDialogClickCallback() {
+                    new BeChefAlertDialogBuilder(getContext()).setButtons(new AlertDialogClickCallback() {
                         @Override
                         public boolean onPositiveButtonClick() {
                             mPresenter.addToDiscover((DiscoverItem) content);
                             return true;
                         }
-                    }).setMessage(String.format(getString(R.string.msg_follow_channel), content.getTitle()))
-                            .setTitle(getString(R.string.title_follow_channel)).create().show();
+                    }).setMessage(String.format(BeChef.getAppContext().getString(R.string.msg_follow_channel), content.getTitle()))
+                            .setTitle(BeChef.getAppContext().getString(R.string.title_follow_channel)).create().show();
                 } else {
                     // onClick for discoverItem
                     mPresenter.addToBookmark();
@@ -195,17 +191,19 @@ public class DetailFragment extends Fragment implements DetailContract.View {
                     public void onInitializationFailure(YouTubePlayer.Provider provider,
                                                         YouTubeInitializationResult initResult) {
                         if (initResult.isUserRecoverableError()) {
-                            initResult.getErrorDialog((Activity) mContext, RECOVERY_DIALOG_REQUEST).show();
-                        } else {
-                            String errorMessage = getString(R.string.toast_require_youtube_installed);
-                            Toast.makeText(mContext, errorMessage, Toast.LENGTH_LONG).show();
+                            initResult.getErrorDialog((Activity) getActivity(),
+                                    RECOVERY_DIALOG_REQUEST).show();
+                            String errorMessage = BeChef.getAppContext()
+                                    .getString(R.string.toast_require_youtube_installed);
+                            Toast.makeText(getContext(), errorMessage, Toast.LENGTH_LONG).show();
                         }
                     }
                 });
     }
 
     private boolean isCurrentOrientationPortrait() {
-        return mContext.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT;
+        return BeChef.getAppContext().getResources().getConfiguration()
+                .orientation == ORIENTATION_PORTRAIT;
     }
 
     private void setFullscreenUi() {
@@ -219,7 +217,7 @@ public class DetailFragment extends Fragment implements DetailContract.View {
         mYouTubePlayer.setShowFullscreenButton(isCurrentOrientationPortrait());
         if (!mIsFullscreen && isCurrentOrientationPortrait()) {
             setOtherViewVisibility(View.VISIBLE);
-            layoutParams.height = mContext.getResources().getDimensionPixelOffset(R.dimen.detail_image_height);
+            layoutParams.height = BeChef.getAppContext().getResources().getDimensionPixelOffset(R.dimen.detail_image_height);
             mYouTubePlayer.setShowFullscreenButton(true);
         } else {
             setOtherViewVisibility(View.GONE);
@@ -238,14 +236,15 @@ public class DetailFragment extends Fragment implements DetailContract.View {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroyView() {
+        super.onDestroyView();
+
         if (mYouTubePlayer != null) {
             mYouTubePlayer.release();
             mYouTubePlayer = null;
         }
         mPresenter.setAllThreadCanceled();
-        ((BeChefActivity) mContext).showBottomNavigationView(mIsBottomShown);
+        ((BeChefActivity) getActivity()).showBottomNavigationView(mIsBottomShown);
     }
 
     @Override

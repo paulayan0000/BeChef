@@ -1,6 +1,5 @@
 package com.paula.android.bechef.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -29,14 +28,29 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (!UserManager.getInstance().isLoginStatus()) popLogin();
-        init();
+        else init();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Constants.LOGIN_ACTIVITY && resultCode == Constants.LOGIN_EXIT) {
-            finish();
+        if (requestCode == Constants.LOGIN_ACTIVITY && resultCode == Constants.LOGIN_SUCCESS) {
+            init();
         }
     }
 
@@ -70,7 +84,7 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     }
 
     public void popLogin() {
-        startActivityForResult(new Intent(mContext, LoginActivity.class), Constants.LOGIN_ACTIVITY);
+        startActivityForResult(new Intent(this, LoginActivity.class), Constants.LOGIN_ACTIVITY);
     }
 
     private int getStatusBarHeight() {
@@ -84,11 +98,6 @@ public class BeChefActivity extends BaseActivity implements BeChefContract.View 
     @Override
     public void setCustomMainPresenter(BeChefContract.Presenter customMainPresenter) {
         mPresenter = checkNotNull(customMainPresenter);
-    }
-
-    @Override
-    public Context getContext() {
-        return mContext;
     }
 
     public void showDetailUi(Object content, boolean isBottomShown) {

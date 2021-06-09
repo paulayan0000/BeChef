@@ -1,6 +1,5 @@
 package com.paula.android.bechef.viewHolders;
 
-import android.content.Context;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -9,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.data.entity.BaseItem;
 import com.paula.android.bechef.data.entity.DiscoverItem;
@@ -28,11 +28,11 @@ public class DefaultViewHolder extends RecyclerView.ViewHolder implements View.O
         itemView.setOnClickListener(this);
     }
 
-    public void bindView(Context context, BaseItem baseItem) {
+    public void bindView(BaseItem baseItem) {
         if (baseItem instanceof DiscoverItem) {
             mTvTimeRating.setText(baseItem.getCreatedTime());
         } else {
-            mTvTimeRating.setText(String.format(context.getString(R.string.time_and_rating),
+            mTvTimeRating.setText(String.format(BeChef.getAppContext().getString(R.string.time_and_rating),
                     baseItem.getCreatedTime(),
                     baseItem.getRating()));
         }

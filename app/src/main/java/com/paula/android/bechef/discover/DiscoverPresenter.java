@@ -1,6 +1,6 @@
 package com.paula.android.bechef.discover;
 
-import android.content.Context;
+import android.app.Activity;
 
 import androidx.lifecycle.Observer;
 
@@ -29,12 +29,12 @@ public class DiscoverPresenter implements BaseContract.MainPresenter {
     }
 
     @Override
-    public Context getContext() {
-        return mDiscoverView.getContext();
+    public Activity getActivity() {
+        return mDiscoverView.getActivity();
     }
 
     private void loadDiscoverTabs() {
-        TabDatabase.getTabInstance(getContext()).discoverDao().getAllLive()
+        TabDatabase.getTabInstance().discoverDao().getAllLive()
                 .observe(mDiscoverView, new Observer<List<DiscoverTab>>() {
                     @Override
                     public void onChanged(List<DiscoverTab> discoverTabs) {

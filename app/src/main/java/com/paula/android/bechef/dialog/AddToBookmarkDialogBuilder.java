@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.data.database.ItemDatabase;
 import com.paula.android.bechef.data.database.TabDatabase;
 import com.paula.android.bechef.data.entity.BaseItem;
@@ -22,6 +23,8 @@ import com.paula.android.bechef.data.entity.BookmarkItem;
 import com.paula.android.bechef.data.entity.BookmarkTab;
 import com.paula.android.bechef.detail.DetailPresenter;
 import com.paula.android.bechef.R;
+import com.paula.android.bechef.thread.BeChefRunnable;
+import com.paula.android.bechef.thread.BeChefRunnableInterface;
 import com.paula.android.bechef.utils.Constants;
 
 import java.text.SimpleDateFormat;
@@ -42,8 +45,8 @@ public class AddToBookmarkDialogBuilder extends BeChefAlertDialogBuilder {
         initBuilder();
     }
 
-    public AddToBookmarkDialogBuilder(DetailPresenter presenter) {
-        super(presenter.getContext(), R.style.AlertDialogWithRecyclerViewTheme);
+    public AddToBookmarkDialogBuilder(Context context, DetailPresenter presenter) {
+        super(context, R.style.AlertDialogWithRecyclerViewTheme);
         mDetailPresenter = presenter;
         initBuilder();
     }
@@ -55,7 +58,7 @@ public class AddToBookmarkDialogBuilder extends BeChefAlertDialogBuilder {
             public boolean onPositiveButtonClick() {
                 String tabName = mEtTabName.getText().toString();
                 if (isChosenAddNew() && "".equals(tabName)) {
-                    Toast.makeText(mContext, mContext.getString(R.string.toast_no_empty_tab_name), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, BeChef.getAppContext().getString(R.string.toast_no_empty_tab_name), Toast.LENGTH_SHORT).show();
                     return false;
                 }
                 manipulateData(tabName);
@@ -112,12 +115,12 @@ public class AddToBookmarkDialogBuilder extends BeChefAlertDialogBuilder {
     public AddToBookmarkDialogBuilder setTabs(ArrayList<BaseTab> baseTabs) {
         mTabs = new ArrayList<>();
         mTabs.addAll(baseTabs);
-        mTabs.add(0, new BaseTab(mContext.getString(R.string.add_new_tab)));
+        mTabs.add(0, new BaseTab(BeChef.getAppContext().getString(R.string.add_new_tab)));
         return this;
     }
 
     protected CharSequence getTitleText() {
-        return mContext.getString(R.string.add_to_bookmark);
+        return BeChef.getAppContext().getString(R.string.add_to_bookmark);
     }
 
     private void showTabNameEditText(boolean isShown) {
@@ -126,38 +129,43 @@ public class AddToBookmarkDialogBuilder extends BeChefAlertDialogBuilder {
     }
 
     protected void manipulateData(final String tabName) {
-        new Thread(new Runnable() {
+        final BookmarkItem finalBookmarkItem
+                = new BookmarkItem((BaseItem) mDetailPresenter.getDataContent());
+        final long chosenTabUid = mTabs.get(mChosenTabIndex).getUid();
+
+        new Thread(new BeChefRunnable(new BeChefRunnableInterface() {
             @Override
-            public void run() {
-                // Create new bookmarkItem with current dataContent in detail page
-                final BookmarkItem bookmarkItem;
+            public void runTasksOnNewThread() {
+                final BookmarkItem newBookmarkItem;
                 if (isChosenAddNew()) {
-                    long newUid = TabDatabase.getTabInstance(mContext).bookmarkDao()
+                    long newUid = TabDatabase.getTabInstance().bookmarkDao()
                             .insert(new BookmarkTab(tabName));
-                    bookmarkItem = createNewBookmarkItem(newUid);
+                    newBookmarkItem = modifyBookmarkItem(finalBookmarkItem, newUid);
                 } else {
-                    bookmarkItem = createNewBookmarkItem(mTabs.get(mChosenTabIndex).getUid());
+                    newBookmarkItem = modifyBookmarkItem(finalBookmarkItem, chosenTabUid);
                 }
                 // Insert new bookmarkItem into database
-                long uid = ItemDatabase.getItemInstance(mContext).bookmarkDao().insert(bookmarkItem);
-                bookmarkItem.setUid((int) uid);
-                if (mContext != null) {
-                    ((Activity) mContext).runOnUiThread(new Runnable() {
+                long uid = ItemDatabase.getItemInstance().bookmarkDao().insert(newBookmarkItem);
+                newBookmarkItem.setUid((int) uid);
+
+                if (mDetailPresenter == null) return;
+                Activity activity = mDetailPresenter.getActivity();
+                if (activity != null) {
+                    activity.runOnUiThread(new BeChefRunnable(new BeChefRunnableInterface() {
                         @Override
-                        public void run() {
-                            mDetailPresenter.updateData(bookmarkItem);
+                        public void runTasksOnNewThread() {
+                            mDetailPresenter.updateData(newBookmarkItem);
                         }
-                    });
+                    }));
                 }
             }
-        }).start();
+        })).start();
     }
 
-    private BookmarkItem createNewBookmarkItem(long tabUid) {
-        BookmarkItem bookmarkItem = new BookmarkItem((BaseItem) mDetailPresenter.getDataContent());
+    private BookmarkItem modifyBookmarkItem(BookmarkItem bookmarkItem, long tabUid) {
         bookmarkItem.setRating(mRating);
         bookmarkItem.setTabUid(tabUid);
-        bookmarkItem.setCreatedTime(new SimpleDateFormat(mContext.getString(R.string.date_format),
+        bookmarkItem.setCreatedTime(new SimpleDateFormat(BeChef.getAppContext().getString(R.string.date_format),
                 Locale.getDefault()).format(new Date()));
         return bookmarkItem;
     }

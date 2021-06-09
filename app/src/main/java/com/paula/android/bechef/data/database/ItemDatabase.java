@@ -1,11 +1,10 @@
 package com.paula.android.bechef.data.database;
 
-import android.content.Context;
-
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.data.dao.BookmarkItemDao;
 import com.paula.android.bechef.data.dao.RecipeItemDao;
 import com.paula.android.bechef.data.entity.BookmarkItem;
@@ -20,11 +19,11 @@ public abstract class ItemDatabase extends RoomDatabase {
 
     private static volatile ItemDatabase mItemDatabaseInstance;
 
-    public static ItemDatabase getItemInstance(Context context) {
+    public static ItemDatabase getItemInstance() {
         if (mItemDatabaseInstance == null) {
             synchronized (ItemDatabase.class) {
                 if (mItemDatabaseInstance == null) {
-                    mItemDatabaseInstance = Room.databaseBuilder(context,
+                    mItemDatabaseInstance = Room.databaseBuilder(BeChef.getAppContext(),
                             ItemDatabase.class,
                             Constants.ITEM_TABLE)
                             .build();

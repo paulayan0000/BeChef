@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.R;
 
 import static android.util.TypedValue.COMPLEX_UNIT_PX;
@@ -48,11 +49,11 @@ public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
     }
 
     protected String getNegativeWord() {
-        return mContext.getString(R.string.no);
+        return BeChef.getAppContext().getString(R.string.no);
     }
 
     protected String getPositiveWord() {
-        return mContext.getString(R.string.yes);
+        return BeChef.getAppContext().getString(R.string.yes);
     }
 
     @NonNull
@@ -63,14 +64,17 @@ public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
             @Override
             public void onShow(DialogInterface dialog) {
                 Button negativeButton = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-                negativeButton.setTextAppearance(mContext, R.style.MyAlertButtonTextStyle);
+                negativeButton.setTextAppearance(BeChef.getAppContext(),
+                        R.style.MyAlertButtonTextStyle);
 
                 Button positiveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                positiveButton.setTextAppearance(mContext, R.style.MyAlertButtonTextStyle);
+                positiveButton.setTextAppearance(BeChef.getAppContext(),
+                        R.style.MyAlertButtonTextStyle);
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (mAlertDialogClickCallback.onPositiveButtonClick()) alertDialog.dismiss();
+                        if (mAlertDialogClickCallback.onPositiveButtonClick())
+                            alertDialog.dismiss();
                     }
                 });
             }
@@ -81,13 +85,13 @@ public class BeChefAlertDialogBuilder extends AlertDialog.Builder {
 
     @Override
     public AlertDialog.Builder setTitle(@Nullable CharSequence title) {
-        TextView tvTitle = new TextView(mContext);
+        TextView tvTitle = new TextView(BeChef.getAppContext());
         tvTitle.setText(title);
         tvTitle.setGravity(Gravity.CENTER_HORIZONTAL);
-        tvTitle.setTextColor(mContext.getResources().getColor(R.color.black));
-        float textSize = mContext.getResources().getDimension(R.dimen.title_text_size);
+        tvTitle.setTextColor(BeChef.getAppContext().getResources().getColor(R.color.black));
+        float textSize = BeChef.getAppContext().getResources().getDimension(R.dimen.title_text_size);
         tvTitle.setTextSize(COMPLEX_UNIT_PX, textSize);
-        int padding = (int) mContext.getResources().getDimension(R.dimen.dialog_padding);
+        int padding = (int) BeChef.getAppContext().getResources().getDimension(R.dimen.dialog_padding);
         tvTitle.setPadding(0, padding, 0, padding);
         return setCustomTitle(tvTitle);
     }

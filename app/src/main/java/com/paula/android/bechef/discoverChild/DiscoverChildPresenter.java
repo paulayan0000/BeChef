@@ -1,16 +1,17 @@
 package com.paula.android.bechef.discoverChild;
 
-import android.content.Context;
+import android.app.Activity;
 import android.os.AsyncTask;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.api.BeChefApiHelper;
-import com.paula.android.bechef.api.GetYouTubeDataTask;
+import com.paula.android.bechef.thread.GetDataAsyncTask;
 import com.paula.android.bechef.api.beans.YouTubeData;
-import com.paula.android.bechef.api.callbacks.GetYouTubeDataCallback;
+import com.paula.android.bechef.thread.GetDataTaskCallback;
 import com.paula.android.bechef.api.exceptions.NoResourceException;
 import com.paula.android.bechef.ChildContract;
 import com.paula.android.bechef.utils.Constants;
@@ -21,16 +22,16 @@ import java.util.Map;
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class DiscoverChildPresenter implements ChildContract.DiscoverChildPresenter {
-    private final ChildContract.DiscoverChildView mDiscoverChildFragmentView;
+    private final ChildContract.DiscoverChildView mDiscoverChildView;
     private final String mChannelId;
     private int mLastVisibleItemPosition;
     private boolean mLoading = false;
     private String mNextPagingId = "";
-    private GetYouTubeDataTask mGetYouTubeDataTask;
+    private GetDataAsyncTask<YouTubeData> mGetDataAsyncTask;
 
-    DiscoverChildPresenter(ChildContract.DiscoverChildView discoverChildFragmentView, String channelId) {
-        mDiscoverChildFragmentView = checkNotNull(discoverChildFragmentView, "discoverChildView cannot be null!");
-        discoverChildFragmentView.setCustomMainPresenter(this);
+    DiscoverChildPresenter(ChildContract.DiscoverChildView discoverChildView, String channelId) {
+        mDiscoverChildView = checkNotNull(discoverChildView, "discoverChildView cannot be null!");
+        discoverChildView.setCustomMainPresenter(this);
         mChannelId = channelId;
     }
 
@@ -40,13 +41,15 @@ public class DiscoverChildPresenter implements ChildContract.DiscoverChildPresen
     }
 
     @Override
-    public Context getContext() {
-        return mDiscoverChildFragmentView.getContext();
+    public Activity getActivity() {
+        return ((DiscoverChildFragment) mDiscoverChildView).getActivity();
     }
 
     @Override
     public void onScrollStateChanged(int visibleItemCount, int totalItemCount, int newState) {
-        if (newState == RecyclerView.SCROLL_STATE_IDLE && visibleItemCount > 0 && !"".equals(mChannelId)) {
+        if (newState == RecyclerView.SCROLL_STATE_IDLE
+                && visibleItemCount > 0
+                && !"".equals(mChannelId)) {
             if (mLastVisibleItemPosition == totalItemCount - 1 && !mNextPagingId.isEmpty()) {
                 loadDiscoverItems();
             }
@@ -56,16 +59,16 @@ public class DiscoverChildPresenter implements ChildContract.DiscoverChildPresen
     @Override
     public void cancelTask() {
         mNextPagingId = "";
-        if (mGetYouTubeDataTask != null && !mGetYouTubeDataTask.isCancelled() &&
-                mGetYouTubeDataTask.getStatus() == AsyncTask.Status.RUNNING) {
-            mGetYouTubeDataTask.cancel(true);
+        if (mGetDataAsyncTask != null && !mGetDataAsyncTask.isCancelled() &&
+                mGetDataAsyncTask.getStatus() == AsyncTask.Status.RUNNING) {
+            mGetDataAsyncTask.cancel(true);
             mLoading = false;
         }
     }
 
     private void showLoading() {
         mLoading = true;
-        mDiscoverChildFragmentView.showLoadingUi();
+        mDiscoverChildView.showLoadingUi();
     }
 
     private void loadDiscoverItems() {
@@ -77,12 +80,11 @@ public class DiscoverChildPresenter implements ChildContract.DiscoverChildPresen
             queryParameters.put("part", Constants.API_PART_SNIPPET);
             queryParameters.put("maxResults", Constants.API_MAX_RESULTS);
             queryParameters.put("order", Constants.API_DEFAULT_ORDER);
-
-            mGetYouTubeDataTask = new GetYouTubeDataTask(queryParameters, new GetYouTubeDataCallback() {
+            mGetDataAsyncTask = new GetDataAsyncTask<>(new GetDataTaskCallback<YouTubeData>() {
                 Exception error;
 
                 @Override
-                public YouTubeData doInBackground(Map<String, String> queryParameters) {
+                public YouTubeData doInBackground() {
                     YouTubeData bean = null;
                     try {
                         bean = BeChefApiHelper.GetYoutubeData(queryParameters, Constants.API_SEARCH);
@@ -94,8 +96,12 @@ public class DiscoverChildPresenter implements ChildContract.DiscoverChildPresen
 
                 @Override
                 public void onCompleted(YouTubeData bean) {
+                    if (mGetDataAsyncTask.isCancelled()) {
+                        mLoading = false;
+                        return;
+                    }
                     if (bean != null && error == null) {
-                        mDiscoverChildFragmentView.updateSearchItems(bean);
+                        mDiscoverChildView.updateSearchItems(bean);
                         mNextPagingId = bean.getNextPageToken();
                         mLoading = false;
                     } else {
@@ -105,12 +111,12 @@ public class DiscoverChildPresenter implements ChildContract.DiscoverChildPresen
 
                 @Override
                 public void onError(Exception error) {
-                    mDiscoverChildFragmentView.updateSearchItems(setErrorMsg(error));
+                    mDiscoverChildView.updateSearchItems(setErrorMsg(error));
                     mLoading = false;
                 }
             });
-            if (!mGetYouTubeDataTask.isCancelled()) {
-                mGetYouTubeDataTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            if (!mGetDataAsyncTask.isCancelled()) {
+                mGetDataAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
     }
@@ -118,9 +124,9 @@ public class DiscoverChildPresenter implements ChildContract.DiscoverChildPresen
     private YouTubeData setErrorMsg(Exception error) {
         YouTubeData bean = new YouTubeData();
         if (error instanceof NoResourceException) {
-            bean.setErrorMsg(getContext().getResources().getString(R.string.adapter_nothing));
+            bean.setErrorMsg(BeChef.getAppContext().getResources().getString(R.string.adapter_nothing));
         } else {
-            bean.setErrorMsg(getContext().getResources().getString(R.string.adapter_error));
+            bean.setErrorMsg(BeChef.getAppContext().getResources().getString(R.string.adapter_error));
         }
         return bean;
     }
@@ -132,6 +138,6 @@ public class DiscoverChildPresenter implements ChildContract.DiscoverChildPresen
 
     @Override
     public void openDetail(Object content, boolean isBottomShown) {
-        mDiscoverChildFragmentView.showDetailUi(content, isBottomShown);
+        mDiscoverChildView.showDetailUi(content, isBottomShown);
     }
 }

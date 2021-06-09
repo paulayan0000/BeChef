@@ -1,6 +1,5 @@
 package com.paula.android.bechef.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,16 +10,17 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.utils.BeChefTextWatcher;
 import com.paula.android.bechef.utils.EditTextChangeCallback;
 
 import java.util.ArrayList;
 
-public class MaterialContentAdapter extends RecyclerView.Adapter<MaterialContentAdapter.MaterialContentViewHolder> implements EditTextChangeCallback,
-        ItemTouchHelperAdapter {
+public class MaterialContentAdapter
+        extends RecyclerView.Adapter<MaterialContentAdapter.MaterialContentViewHolder>
+        implements EditTextChangeCallback, ItemTouchHelperAdapter {
     private final ArrayList<String> mMaterialContents;
-    private Context mContext;
 
     MaterialContentAdapter(ArrayList<String> materialContents) {
         mMaterialContents = materialContents;
@@ -30,8 +30,7 @@ public class MaterialContentAdapter extends RecyclerView.Adapter<MaterialContent
     @NonNull
     @Override
     public MaterialContentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        mContext = parent.getContext();
-        View view = LayoutInflater.from(mContext)
+        View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_edit_material_contents, parent, false);
         return new MaterialContentViewHolder(view, new BeChefTextWatcher(this));
     }
@@ -77,15 +76,15 @@ public class MaterialContentAdapter extends RecyclerView.Adapter<MaterialContent
             mTextWatcher.bindPosition(position);
             mEtContent.setText(mMaterialContents.get(position));
             int removeDrawableId = getRemoveDrawableId(mMaterialContents.size() == 1);
-            setImageDrawable(mIbtnRemove, mContext, removeDrawableId);
+            setImageDrawable(mIbtnRemove, removeDrawableId);
         }
 
         private int getRemoveDrawableId(boolean isDisable) {
             return isDisable ? R.drawable.ic_remove_gray : R.drawable.ic_remove;
         }
 
-        private void setImageDrawable(ImageButton imageButton, Context context, int drawableId) {
-            imageButton.setImageDrawable(ContextCompat.getDrawable(context, drawableId));
+        private void setImageDrawable(ImageButton imageButton, int drawableId) {
+            imageButton.setImageDrawable(ContextCompat.getDrawable(BeChef.getAppContext(), drawableId));
         }
 
         @Override

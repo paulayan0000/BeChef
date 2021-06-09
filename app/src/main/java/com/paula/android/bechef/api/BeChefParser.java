@@ -11,7 +11,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 class BeChefParser {
-    static YouTubeData parseGetSearchListFromSearch(String jsonString) throws JSONException, YoutubeException, NoResourceException {
+    static YouTubeData parseGetSearchListFromSearch(String jsonString)
+            throws JSONException, YoutubeException, NoResourceException {
         YouTubeData beanYouTubeData = new YouTubeData();
         JSONObject obj = new JSONObject(jsonString);
 
@@ -90,7 +91,8 @@ class BeChefParser {
             try {
                 jsonTags = jsonSnippet.getJSONArray("tags");
                 int jsonTagsLength = jsonTags.length();
-                for (int i = 0; i < jsonTagsLength - 1; i++) tags.append(jsonTags.get(i)).append(";");
+                for (int i = 0; i < jsonTagsLength - 1; i++)
+                    tags.append(jsonTags.get(i)).append(";");
                 tags.append(jsonTags.get(jsonTagsLength - 1));
             } catch (JSONException e) {
 //                e.printStackTrace();

@@ -1,6 +1,5 @@
 package com.paula.android.bechef.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 
 public class FilterResultAdapter extends RecyclerView.Adapter {
     private final FindPresenter mFindPresenter;
-    private Context mContext;
     private ArrayList<BaseItem> mBaseItems;
     private boolean mLoading = false;
 
@@ -42,9 +40,8 @@ public class FilterResultAdapter extends RecyclerView.Adapter {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        mContext = parent.getContext();
         if (viewType == Constants.VIEW_TYPE_NORMAL) {
-            View view = LayoutInflater.from(mContext)
+            View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_custom_child_recycler, parent, false);
             return new FilterResultViewHolder(view);
         }
@@ -54,14 +51,15 @@ public class FilterResultAdapter extends RecyclerView.Adapter {
         } else {
             viewResource = R.layout.item_loading;
         }
-        return new RecyclerView.ViewHolder(LayoutInflater.from(mContext)
-                .inflate(viewResource, parent, false)) {};
+        return new RecyclerView.ViewHolder(LayoutInflater.from(parent.getContext())
+                .inflate(viewResource, parent, false)) {
+        };
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder.getItemViewType() == Constants.VIEW_TYPE_NORMAL) {
-            ((FilterResultViewHolder) holder).bindView(mContext, mBaseItems.get(position));
+            ((FilterResultViewHolder) holder).bindView(mBaseItems.get(position));
         }
     }
 

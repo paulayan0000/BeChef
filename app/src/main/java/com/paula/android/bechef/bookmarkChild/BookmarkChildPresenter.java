@@ -21,19 +21,19 @@ public class BookmarkChildPresenter extends CustomChildPresenter<BookmarkItem> {
         LiveData<List<BookmarkItem>> liveData;
         switch (mDataFilterType) {
             case Constants.FILTER_WITH_TIME_ASC:
-                liveData = ItemDatabase.getItemInstance(getContext()).bookmarkDao()
+                liveData = ItemDatabase.getItemInstance().bookmarkDao()
                         .getAllWithTimeAscLive(mTabUid);
                 break;
             case Constants.FILTER_WITH_TIME_DESC:
-                liveData = ItemDatabase.getItemInstance(getContext()).bookmarkDao()
+                liveData = ItemDatabase.getItemInstance().bookmarkDao()
                         .getAllWithTimeDescLive(mTabUid);
                 break;
             case Constants.FILTER_WITH_RATING_ASC:
-                liveData = ItemDatabase.getItemInstance(getContext()).bookmarkDao()
+                liveData = ItemDatabase.getItemInstance().bookmarkDao()
                         .getAllWithRatingAscLive(mTabUid);
                 break;
             case Constants.FILTER_WITH_RATING_DESC:
-                liveData = ItemDatabase.getItemInstance(getContext()).bookmarkDao()
+                liveData = ItemDatabase.getItemInstance().bookmarkDao()
                         .getAllWithRatingDescLive(mTabUid);
                 break;
             default:

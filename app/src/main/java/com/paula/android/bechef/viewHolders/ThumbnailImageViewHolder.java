@@ -1,6 +1,5 @@
 package com.paula.android.bechef.viewHolders;
 
-import android.content.Context;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -33,8 +32,8 @@ public class ThumbnailImageViewHolder extends RecyclerView.ViewHolder {
         });
     }
 
-    public void bindView(Context context, String imageUrl) {
-        Picasso.with(context)
+    public void bindView(String imageUrl) {
+        Picasso.with(itemView.getContext())
                 .load(imageUrl.isEmpty() ? null : imageUrl)
                 .error(R.drawable.all_picture_placeholder)
                 .placeholder(R.drawable.all_picture_placeholder)

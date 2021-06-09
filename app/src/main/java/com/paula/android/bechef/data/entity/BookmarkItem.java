@@ -1,7 +1,5 @@
 package com.paula.android.bechef.data.entity;
 
-import com.paula.android.bechef.utils.Constants;
-
 import androidx.room.Entity;
 import androidx.room.Ignore;
 

@@ -1,10 +1,12 @@
 package com.paula.android.bechef;
 
-import android.content.Context;
+import android.app.Activity;
 
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.paula.android.bechef.activities.BeChefActivity;
 import com.paula.android.bechef.bookmark.BookmarkFragment;
 import com.paula.android.bechef.bookmark.BookmarkPresenter;
 import com.paula.android.bechef.detail.DetailFragment;
@@ -31,14 +33,10 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     private DiscoverFragment mDiscoverFragment;
     private BookmarkFragment mBookmarkFragment;
     private RecipeFragment mRecipeFragment;
-    private DetailFragment mDetailFragment;
-    private FindFragment mFindFragment;
 
     private DiscoverPresenter mDiscoverPresenter;
     private BookmarkPresenter mBookmarkPresenter;
     private RecipePresenter mRecipePresenter;
-    private DetailPresenter mDetailPresenter;
-    private FindPresenter mFindPresenter;
 
     public BeChefPresenter(BeChefContract.View mainView, FragmentManager fragmentManager) {
         mMainView = checkNotNull(mainView, "mainView cannot be null!");
@@ -50,11 +48,14 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     public void transToDiscover() {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-        if (mFragmentManager.findFragmentByTag(DETAIL) != null) {
+        Fragment mDetailFragment = mFragmentManager.findFragmentByTag(DETAIL);
+        if (mDetailFragment != null) {
             transaction.remove(mDetailFragment);
             mFragmentManager.popBackStack();
         }
-        if (mFragmentManager.findFragmentByTag(SEARCH) != null) {
+
+        Fragment mFindFragment = mFragmentManager.findFragmentByTag(SEARCH);
+        if (mFindFragment != null) {
             transaction.remove(mFindFragment);
             mFragmentManager.popBackStack();
         }
@@ -69,7 +70,8 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         }
         transaction.commit();
 
-        if (mDiscoverPresenter == null) mDiscoverPresenter = new DiscoverPresenter(mDiscoverFragment);
+        if (mDiscoverPresenter == null)
+            mDiscoverPresenter = new DiscoverPresenter(mDiscoverFragment);
         mMainView.setMenuId(R.id.navigation_discover);
     }
 
@@ -77,11 +79,14 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     public void transToBookmark() {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-        if (mFragmentManager.findFragmentByTag(DETAIL) != null) {
+        Fragment mDetailFragment = mFragmentManager.findFragmentByTag(DETAIL);
+        if (mDetailFragment != null) {
             transaction.remove(mDetailFragment);
             mFragmentManager.popBackStack();
         }
-        if (mFragmentManager.findFragmentByTag(SEARCH) != null) {
+
+        Fragment mFindFragment = mFragmentManager.findFragmentByTag(SEARCH);
+        if (mFindFragment != null) {
             transaction.remove(mFindFragment);
             mFragmentManager.popBackStack();
         }
@@ -96,7 +101,8 @@ public class BeChefPresenter implements BeChefContract.Presenter {
         }
         transaction.commit();
 
-        if (mBookmarkPresenter == null) mBookmarkPresenter = new BookmarkPresenter(mBookmarkFragment);
+        if (mBookmarkPresenter == null)
+            mBookmarkPresenter = new BookmarkPresenter(mBookmarkFragment);
         mMainView.setMenuId(R.id.navigation_bookmark);
     }
 
@@ -104,11 +110,14 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     public void transToRecipe() {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-        if (mFragmentManager.findFragmentByTag(DETAIL) != null) {
+        Fragment mDetailFragment = mFragmentManager.findFragmentByTag(DETAIL);
+        if (mDetailFragment != null) {
             transaction.remove(mDetailFragment);
             mFragmentManager.popBackStack();
         }
-        if (mFragmentManager.findFragmentByTag(SEARCH) != null) {
+
+        Fragment mFindFragment = mFragmentManager.findFragmentByTag(SEARCH);
+        if (mFindFragment != null) {
             transaction.remove(mFindFragment);
             mFragmentManager.popBackStack();
         }
@@ -143,17 +152,18 @@ public class BeChefPresenter implements BeChefContract.Presenter {
             transaction.hide(mRecipeFragment);
             transaction.addToBackStack(RECIPE);
         }
+
+        Fragment mFindFragment = mFragmentManager.findFragmentByTag(SEARCH);
         if (mFindFragment != null && !mFindFragment.isHidden()) {
             transaction.hide(mFindFragment);
             transaction.addToBackStack(SEARCH);
         }
 
-        mDetailFragment = DetailFragment.newInstance();
+        DetailFragment mDetailFragment = new DetailFragment();
         mDetailFragment.setBottomShown(isBottomShown);
         transaction.add(R.id.linearlayout_main_container, mDetailFragment, DETAIL);
 
-        if (mDetailPresenter != null) mDetailPresenter.setAllThreadCanceled();
-        mDetailPresenter = new DetailPresenter(mDetailFragment, content);
+        DetailPresenter mDetailPresenter = new DetailPresenter(mDetailFragment, content);
 
         transaction.commit();
     }
@@ -162,7 +172,8 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     public void transToSearch(BaseContract.MainPresenter presenter) {
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
 
-        if (mFragmentManager.findFragmentByTag(DETAIL) != null) {
+        Fragment mDetailFragment = mFragmentManager.findFragmentByTag(DETAIL);
+        if (mDetailFragment != null) {
             transaction.remove(mDetailFragment);
             mFragmentManager.popBackStack();
         }
@@ -180,12 +191,12 @@ public class BeChefPresenter implements BeChefContract.Presenter {
             transaction.addToBackStack(RECIPE);
         }
 
-        mFindFragment = FindFragment.newInstance();
+        FindFragment mFindFragment = new FindFragment();
         transaction.add(R.id.linearlayout_main_container, mFindFragment, SEARCH);
 
-        if (mFindPresenter != null) mFindPresenter.cancelTask();
-        mFindPresenter = new FindPresenter(mFindFragment);
-        if (!(presenter instanceof DiscoverPresenter)) mFindPresenter.setBaseTabs(presenter.getTabs());
+        FindPresenter mFindPresenter = new FindPresenter(mFindFragment);
+        if (!(presenter instanceof DiscoverPresenter))
+            mFindPresenter.setBaseTabs(presenter.getTabs());
 
         transaction.commit();
     }
@@ -196,7 +207,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
             mDiscoverFragment.showToolbar();
         } else if (itemId == R.id.navigation_bookmark) {
             mBookmarkFragment.showToolbar();
-        } else if (itemId == R.id.navigation_recipe){
+        } else if (itemId == R.id.navigation_recipe) {
             mRecipeFragment.showToolbar();
         }
     }
@@ -207,7 +218,7 @@ public class BeChefPresenter implements BeChefContract.Presenter {
     }
 
     @Override
-    public Context getContext() {
-        return mMainView.getContext();
+    public Activity getActivity() {
+        return (BeChefActivity) mMainView;
     }
 }

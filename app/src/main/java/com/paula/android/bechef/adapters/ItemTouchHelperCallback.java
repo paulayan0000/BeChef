@@ -17,7 +17,8 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
     public int getMovementFlags(@NonNull RecyclerView recyclerView,
                                 @NonNull RecyclerView.ViewHolder viewHolder) {
         if (mAdapter.getDataList().size() <= 1) {
-            return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.ACTION_STATE_IDLE);
+            return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE,
+                    ItemTouchHelper.ACTION_STATE_IDLE);
         } else {
             return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
                     ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);

@@ -1,10 +1,13 @@
 package com.paula.android.bechef.customMain;
 
+import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
@@ -32,8 +35,8 @@ public class CustomMainFragment extends BaseMainFragment implements BaseContract
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         mCustomPresenter.start();
     }
 
@@ -58,7 +61,7 @@ public class CustomMainFragment extends BaseMainFragment implements BaseContract
                         return true;
                     }
 
-                    new BeChefAlertDialogBuilder(mContext).setButtons(new AlertDialogClickCallback() {
+                    new BeChefAlertDialogBuilder(getActivity()).setButtons(new AlertDialogClickCallback() {
                         @Override
                         public boolean onPositiveButtonClick() {
                             showSelectable(false);
@@ -98,7 +101,7 @@ public class CustomMainFragment extends BaseMainFragment implements BaseContract
         if (!mIsSelectable && childFragment != null) {
             ((CustomChildFragment) childFragment).showSelectableUi(false);
         }
-        ((BeChefActivity) mContext).showBottomNavigationView(!mIsSelectable);
+        ((BeChefActivity) getActivity()).showBottomNavigationView(!mIsSelectable);
     }
 
     public ArrayList<Long> getChosenItemUids() {
@@ -111,18 +114,20 @@ public class CustomMainFragment extends BaseMainFragment implements BaseContract
 
     @Override
     protected void editTab() {
-        EditTabAlertDialogBuilder builder = new EditTabAlertDialogBuilder(mContext, mCustomPresenter.getTabs());
+        EditTabAlertDialogBuilder builder
+                = new EditTabAlertDialogBuilder(getActivity(), mCustomPresenter.getTabs());
         mEditTabAlertDialog = builder.create();
         mEditTabAlertDialog.show();
         Window window = mEditTabAlertDialog.getWindow();
         if (window == null) return;
-        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
     @Override
     protected void find() {
-        ((BeChefActivity) mContext).showSearchUi(mCustomPresenter);
+        ((BeChefActivity) getActivity()).showSearchUi(mCustomPresenter);
     }
 
     AlertDialog getEditTabAlertDialog() {

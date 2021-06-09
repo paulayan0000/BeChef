@@ -28,7 +28,7 @@ public class LoginActivity extends BaseActivity {
         mSignInButtonGoogle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent signInIntent = UserManager.getInstance().getGoogleSignInClient(mContext);
+                Intent signInIntent = UserManager.getInstance().getGoogleSignInClient();
                 startActivityForResult(signInIntent, Constants.SIGN_IN_REQUSET_CODE);
             }
         });
@@ -37,7 +37,7 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        updateUI(UserManager.getInstance().checkLastSignedInAccount(mContext));
+        updateUI(UserManager.getInstance().checkLastSignedInAccount());
     }
 
     @Override
@@ -45,10 +45,11 @@ public class LoginActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Constants.SIGN_IN_REQUSET_CODE) {
             try {
-                updateUI(UserManager.getInstance().checkSignedInAccountFromIntent(data, mContext));
+                updateUI(UserManager.getInstance().checkSignedInAccountFromIntent(data));
             } catch (ApiException e) {
                 if (e.getStatusCode() == Constants.SIGN_IN_FAILED) {
-                    Toast.makeText(mContext, getString(R.string.login_error_msg) + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, getString(R.string.login_error_msg),
+                            Toast.LENGTH_LONG).show();
                 } else {
                     e.printStackTrace();
                 }
@@ -57,15 +58,9 @@ public class LoginActivity extends BaseActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        setResult(Constants.LOGIN_EXIT);
-        super.onDestroy();
-    }
-
-    @Override
     public void onBackPressed() {
-        setResult(Constants.LOGIN_EXIT);
         super.onBackPressed();
+        setResult(Constants.LOGIN_EXIT);
     }
 
     private void updateUI(GoogleSignInAccount account) {

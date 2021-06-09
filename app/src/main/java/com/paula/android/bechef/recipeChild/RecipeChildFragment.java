@@ -6,7 +6,7 @@ import com.paula.android.bechef.customChild.CustomChildFragment;
 import com.paula.android.bechef.data.entity.RecipeItem;
 
 public class RecipeChildFragment extends CustomChildFragment<RecipeItem> {
-    private RecipeChildFragment(long tabUid, Fragment fragment) {
+    public RecipeChildFragment(long tabUid, Fragment fragment) {
         super(fragment);
         mCustomChildPresenter = new RecipeChildPresenter(this, tabUid);
     }

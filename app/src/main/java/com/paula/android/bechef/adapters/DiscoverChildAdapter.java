@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
+import com.paula.android.bechef.BeChef;
 import com.paula.android.bechef.ChildContract;
 import com.paula.android.bechef.R;
 import com.paula.android.bechef.api.beans.YouTubeData;
@@ -28,21 +29,23 @@ import java.util.ArrayList;
 public class DiscoverChildAdapter extends RecyclerView.Adapter {
     private final ChildContract.ChildPresenter mPresenter;
     private final ArrayList<DiscoverItem> mDiscoverItems;
-    private final Context mContext;
+    private final Transformation mTransformation;
+    private boolean mIsLoading;
+    private Context mContext;
     private String mNextPageToken;
     private String mErrorMsg = "";
-    private boolean mIsLoading;
-    private final Transformation mTransformation = new RoundedCornersTransformation(8, 0);
 
     public DiscoverChildAdapter(YouTubeData bean, ChildContract.ChildPresenter presenter) {
         mDiscoverItems = bean.getDiscoverItems();
         mNextPageToken = bean.getNextPageToken();
         mPresenter = presenter;
-        mContext = mPresenter.getContext();
         mIsLoading = false;
+        int radius = BeChef.getAppContext().getResources()
+                .getDimensionPixelOffset(R.dimen.cardview_radius);
+        mTransformation = new RoundedCornersTransformation(radius, 0);
     }
 
-    public void updateData(YouTubeData newBean) {
+    public void updateData(Context context, YouTubeData newBean) {
         mIsLoading = false;
         mErrorMsg = newBean.getErrorMsg();
         if ("".equals(mErrorMsg)) {
@@ -52,7 +55,7 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
             notifyItemRangeChanged(oldDiscoverItemCount, newBean.getDiscoverItems().size());
         } else if (mDiscoverItems.size() > 0) {
             // Toast error message if there are already some items loaded
-            Toast.makeText(mContext, mContext.getString(R.string.adapter_error), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, BeChef.getAppContext().getString(R.string.adapter_error), Toast.LENGTH_SHORT).show();
         } else {
             notifyDataSetChanged();
         }
@@ -73,6 +76,7 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        mContext = parent.getContext();
         View view;
         switch (viewType) {
             case Constants.VIEW_TYPE_NO_RESULT:
@@ -142,7 +146,7 @@ public class DiscoverChildAdapter extends RecyclerView.Adapter {
 
         void bindView(DiscoverItem discoverItem) {
             mTvVideoTitle.setText(discoverItem.getTitle());
-            mTvVideoTime.setText(Utils.getRelevantTime(mContext, discoverItem.getPublishedAt()));
+            mTvVideoTime.setText(Utils.getRelevantTime(discoverItem.getPublishedAt()));
 
             Picasso.with(mContext)
                     .load(discoverItem.getImageUrl())

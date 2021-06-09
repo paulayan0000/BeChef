@@ -1,6 +1,5 @@
 package com.paula.android.bechef.action;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,13 +20,13 @@ import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
 public class ActionFragment extends Fragment implements ActionContract.View, View.OnClickListener {
     private ActionContract.Presenter mPresenter;
-    private Context mContext;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_action, container, false);
-        mContext = view.getContext();
         view.findViewById(R.id.textview_action_cancel).setOnClickListener(this);
         view.findViewById(R.id.textview_action_move).setOnClickListener(this);
         view.findViewById(R.id.textview_action_delete).setOnClickListener(this);
@@ -42,13 +41,14 @@ public class ActionFragment extends Fragment implements ActionContract.View, Vie
         // Show hint or nothing (CANCEL clicked) if click with nothing chosen.
         if (chosenItemsCount == 0) {
             if (currentViewId == R.id.textview_action_cancel) mPresenter.leaveChooseMode();
-            else Toast.makeText(getContext(), R.string.toast_action_nothing_chosen, Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(getContext(), R.string.toast_action_nothing_chosen, Toast.LENGTH_SHORT).show();
             return;
         }
 
         // Show AlertDialog if click with something chosen.
         if (currentViewId == R.id.textview_action_move) {
-            new MoveToDialogBuilder(mPresenter).setTabs(mPresenter.getOtherTabs())
+            new MoveToDialogBuilder(getContext(), mPresenter).setTabs(mPresenter.getOtherTabs())
                     .create().show();
             return;
         }
@@ -75,11 +75,16 @@ public class ActionFragment extends Fragment implements ActionContract.View, Vie
         } else {
             return;
         }
-        new BeChefAlertDialogBuilder(mContext).setButtons(clickCallback)
+        new BeChefAlertDialogBuilder(getContext()).setButtons(clickCallback)
                 .setMessage(message)
                 .setTitle(title)
                 .create()
                 .show();
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        ((ActionPresenter) mPresenter).setTaskCanceled(hidden);
     }
 
     @Override

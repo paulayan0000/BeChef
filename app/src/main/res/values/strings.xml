@@ -14,7 +14,7 @@
     <string name="toast_action_nothing_chosen">您尚未選擇任何項目</string>
     <string name="msg_action">是否將 %d 個項目%s ? </string>
     <string name="login_success_msg">登入中...</string>
-    <string name="login_error_msg">發生錯誤，請檢查網路連線！錯誤碼 : </string>
+    <string name="login_error_msg">發生錯誤，請檢查網路連線或將「 Google Play 服務 」更新到最新</string>
     <string-array name="filter_type">
         <item>時間由新至舊</item>
         <item>時間由舊至新</item>
@@ -95,6 +95,7 @@
     <string name="material_group_name_hint">材料類別名稱</string>
     <string name="step_description_hint">步驟說明，例如：均勻混合麵粉與水直到濃稠</string>
     <string name="toast_require_youtube_installed">"請確認已安裝新版 YouTube APP ! "</string>
+    <string name="default_tab_name">未命名書籤</string>
 
     <string-array name="resource_type">
         <item>@string/video</item>

@@ -6,7 +6,7 @@ import com.paula.android.bechef.customChild.CustomChildFragment;
 import com.paula.android.bechef.data.entity.BookmarkItem;
 
 public class BookmarkChildFragment extends CustomChildFragment<BookmarkItem> {
-    private BookmarkChildFragment(long tabUid, Fragment fragment) {
+    public BookmarkChildFragment(long tabUid, Fragment fragment) {
         super(fragment);
         mCustomChildPresenter = new BookmarkChildPresenter(this, tabUid);
     }

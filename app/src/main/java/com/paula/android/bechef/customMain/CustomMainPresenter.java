@@ -1,6 +1,6 @@
 package com.paula.android.bechef.customMain;
 
-import android.content.Context;
+import android.app.Activity;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentManager;
@@ -16,7 +16,8 @@ import java.util.ArrayList;
 
 import static com.google.android.gms.common.internal.Preconditions.checkNotNull;
 
-public class CustomMainPresenter implements BaseContract.CustomPresenter, BaseContract.CustomPresenterForAction {
+public class CustomMainPresenter
+        implements BaseContract.CustomPresenter, BaseContract.CustomPresenterForAction {
     private ArrayList<BaseTab> mTabs;
     private ActionFragment mActionFragment;
     private FragmentTransaction mTransaction;
@@ -25,11 +26,6 @@ public class CustomMainPresenter implements BaseContract.CustomPresenter, BaseCo
     public CustomMainPresenter(CustomMainFragment customMainView) {
         mCustomMainView = checkNotNull(customMainView, "customMainView cannot be null!");
         mCustomMainView.setCustomMainPresenter(this);
-    }
-
-    @Override
-    public Context getContext() {
-        return mCustomMainView.getContext();
     }
 
     @Override
@@ -85,6 +81,11 @@ public class CustomMainPresenter implements BaseContract.CustomPresenter, BaseCo
 
     @Override
     public void start() {
+    }
+
+    @Override
+    public Activity getActivity() {
+        return ((CustomMainFragment) mCustomMainView).getActivity();
     }
 
     @Override
